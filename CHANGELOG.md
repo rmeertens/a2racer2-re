@@ -11,6 +11,7 @@ Network races for up to eight players. [docs/multiplayer.md](docs/multiplayer.md
 - `tools/lobby.mjs`, the lobby and relay, served on `/lobby` by `npm start` (`--lan` for other machines), and on its own by `tools/lobby-server.mjs`. Without a lobby, as on a static site, the browsers meet through the public PeerJS broker and connect over WebRTC (dependency `peerjs` 1.5.4).
 - Without a lobby, the multiplayer list shows the servers on the same network: browsers that share a public address meet at a broker id derived from it.
 - `.github/workflows/pages.yml`: the site on GitHub Pages at a2racer.meertens.dev.
+- Vianen, a sketch of a new track, etappe 10: a loop through the old town from OpenStreetMap, with the Lekpoort, the Stadhuis and the Grote Kerk on facades from Wikimedia Commons photos. In the multiplayer screens, or `?race=1&etappe=vianen`. `tools/vianen/`, [docs/vianen.md](docs/vianen.md).
 - `tools/check-multiplayer.mjs` (Node, up to eight races in one process) and `tools/check-multiplayer-browser.mjs` (headless Chromium).
 
 ## 1.1.7 — 2026-11-06

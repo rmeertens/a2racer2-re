@@ -13,6 +13,7 @@ import { SettingsPanel } from './ui/settings-panel.js';
 import { safeAreaInsets } from './ui/safe-area.js';
 import { useTouch, fullscreenElement } from './settings.js';
 import { NetOverlay } from './net/overlay.js';
+import { VIANEN } from './host/vianen.js';
 
 // One pass of the original main loop per tick. docs/original-behavior.md, timing section.
 export const TICK_SECONDS = 1 / 60;
@@ -184,9 +185,11 @@ export class RaceRunner {
     this.barSet = this.barFrames[eight];
     this.showBar(0);
     await this.loadCode();
-    await app.files.prepareRace(etappe, car, (a, b) => this.showBar((a / b) * 90));
+    // Vianen, etappe 10, places Amsterdam's objects: it reads what a race there reads.
+    const lists = etappe === VIANEN.slot ? VIANEN.like : etappe;
+    await app.files.prepareRace(lists, car, (a, b) => this.showBar((a / b) * 90));
     // A network race also draws the other humans' cars.
-    for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app.files.prepareRace(etappe, other);
+    for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app.files.prepareRace(lists, other);
     if (!this.renderer) this.renderer = new D3DRenderer(app.canvasRace, { staticTrack: !app.params.has('nostatic') });
     this.renderer.resetForRace();
     const audio = new GameAudio(app.getAudioContext(), app.getMasterOutput());

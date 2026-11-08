@@ -2,6 +2,7 @@
 // then the room, where the host picks etappe, laps and difficulty and everyone their car.
 // The port's own screens, in Dutch like the rest of the game. docs/multiplayer.md.
 import { NetSession, lobbyChoice, MAX_PLAYERS } from './session.js';
+import { VIANEN } from '../host/vianen.js';
 
 const LIST_MS = 2000;
 const STORE = 'a2racer4.multiplayer';
@@ -79,7 +80,9 @@ export class LobbyUI {
 
   /** Races, not chases: a chase has no opponents (FUN_0042de60), so no slots for others. */
   tracks() {
-    return this.data.static.tracks.filter((t) => !t.isChase && this.data.trackFilesExist(t));
+    const own = this.data.static.tracks.filter((t) => !t.isChase && this.data.trackFilesExist(t));
+    // The port's Vianen sketch races in Amsterdam's slot: source/host/vianen.js.
+    return [...own, { indexInGame: VIANEN.key, name: VIANEN.name, type: 'schets', nrLaps: VIANEN.laps }];
   }
 
   carName(c) {
@@ -269,7 +272,7 @@ export class LobbyUI {
   }
 
   settingsChanged() {
-    const t = this.tracks().find((x) => x.indexInGame === Number(this.trackSel.value));
+    const t = this.tracks().find((x) => String(x.indexInGame) === this.trackSel.value);
     if (!t) return;
     const trackChanged = this.session.room && this.session.room.etappe !== t.indexInGame;
     const laps = trackChanged ? t.nrLaps : Number(this.lapSel.value);

@@ -3,7 +3,7 @@
 // list and join, all say ready, the host starts, and the bot drives every car. Checks that each
 // page runs the race with the others as puppets that follow them, then that all come back to the
 // room with results. Needs `npm start` running and a fresh bundle, like the other browser checks.
-//   node tools/check-multiplayer-browser.mjs [--peer] [--byname] [--players 3] [--seconds 40] [--laps 1] [--url http://127.0.0.1:4180/] [--out evidence/multiplayer]
+//   node tools/check-multiplayer-browser.mjs [--peer] [--byname] [--track vianen] [--players 3] [--seconds 40] [--laps 1] [--url http://127.0.0.1:4180/] [--out evidence/multiplayer]
 import { chromium } from 'playwright';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -82,7 +82,9 @@ for (let k = 1; k < N; k++) {
 await pages[0].waitForFunction((n) => window.__app.lobby.session.room.players.length === n && window.__app.lobby.session.canStart(), N, { timeout: 15000 });
 const roomText = await pages[0].locator('.mp-players').innerText();
 check('host: everyone joined and ready', true, roomText.replace(/\s+/g, ' '));
-await pages[0].evaluate((laps) => window.__app.lobby.session.setTrack(0, laps, 'Amsterdam'), Number(opt('laps', 1)));
+// --track vianen races the port's Vianen sketch (etappe 10) instead of Amsterdam.
+const VIANEN_TRACK = opt('track', '') === 'vianen';
+await pages[0].evaluate(([laps, v]) => window.__app.lobby.session.setTrack(v ? 'vianen' : 0, laps, v ? 'Vianen' : 'Amsterdam'), [Number(opt('laps', 1)), VIANEN_TRACK]);
 await pages[0].click('button:has-text("Start de race")');
 
 // All pages load, wait for each other, and start together.

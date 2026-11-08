@@ -14,6 +14,10 @@ The game's content is in the port, with Davilex's two official updates, track 9 
 
 Up to eight players, each in their own browser: main menu, `Internet`. One player names and hosts a server, and the others join it. `npm start` also runs the lobby the browsers meet through; `npm start -- --lan` opens it to the local network. On a static site such as <https://a2racer.meertens.dev/> (GitHub Pages, `.github/workflows/pages.yml`) the browsers meet through the public PeerJS broker and connect over WebRTC; there the list shows the servers on the same network, and a server elsewhere is joined by typing its name. How it works, how to host the lobby next to a static site, and what was checked: [`docs/multiplayer.md`](docs/multiplayer.md).
 
+## Vianen
+
+A sketch of a new track through the old town of Vianen, with the Lekpoort, the Stadhuis and the Grote Kerk. Choose it in the multiplayer screens, alone or with others, or open `?race=1&etappe=vianen`. How it is made: [`docs/vianen.md`](docs/vianen.md).
+
 ## Downloads
 
 Desktop builds for Linux, Windows and macOS, a static web build, the source and the decompile: [`docs/releases/`](docs/releases/) lists the files of each release and what was checked on each. The Windows package has run under Wine but not on Windows, and the macOS packages have not been started so far.

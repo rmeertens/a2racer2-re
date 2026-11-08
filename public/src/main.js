@@ -33166,6 +33166,56 @@ var NetOverlay = class {
   }
 };
 
+// source/host/vianen.js
+var VIANEN = { key: "vianen", name: "Vianen", type: "Stadsrace", slot: 10, laps: 2, like: 0 };
+var TRACK = ["rmp", "pmp", "dmp", "cmp", "omp", "pth"];
+var TEXTURES = ["vn_weg.tga", "vn_gras.tga", "vn_gevel.tga"];
+var BASE = "assets/vianen/";
+function vianenFiles() {
+  return [...TRACK.map((ext) => `vianen.${ext}`), ...TEXTURES];
+}
+function likeFiles() {
+  return [`etappe${VIANEN.like}.ini`, `e${String(VIANEN.like).padStart(2, "0")}_anim.ini`];
+}
+async function fetchVianen() {
+  const files = /* @__PURE__ */ new Map();
+  const names = [...vianenFiles().map((n) => [n, BASE + n]), ...likeFiles().map((n) => [n, "assets/game/" + n])];
+  await Promise.all(names.map(async ([name, url]) => {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`Vianen: ${name} ${r.status}`);
+    files.set(name, new Uint8Array(await r.arrayBuffer()));
+  }));
+  return files;
+}
+function installVianen(vfs, files) {
+  const { slot, like } = VIANEN;
+  const two3 = String(slot).padStart(2, "0");
+  const write = vfs.onWrite;
+  vfs.onWrite = null;
+  try {
+    for (const ext of TRACK) vfs.add(`etappe${slot}.${ext}`, files.get(`vianen.${ext}`));
+    for (const name of TEXTURES) vfs.add(name, files.get(name));
+    const [ini, anim] = likeFiles();
+    const etappeIni = new IniFile(latin1(files.get(ini) || vfs.read(ini)));
+    for (const key of etappeIni.keys("CamMarkers")) {
+      if (key.toLowerCase() === "count") continue;
+      const v = etappeIni.get("CamMarkers", key).split(",");
+      v[v.length - 1] = " 0";
+      etappeIni.set("CamMarkers", key, v.join(","));
+    }
+    vfs.add(`etappe${slot}.ini`, encodeLatin1(etappeIni.serialize()));
+    vfs.add(`e${two3}_anim.ini`, files.get(anim) || vfs.read(anim));
+    const opp = new IniFile(latin1(vfs.read("opponent.ini")));
+    for (const sec of opp.sections()) {
+      if (/^Racer \d+ Level \d+$/.test(sec) && opp.get(sec, String(slot)) === null) opp.set(sec, String(slot), opp.get(sec, String(like)));
+    }
+    vfs.add("opponent.ini", encodeLatin1(opp.serialize()));
+  } finally {
+    vfs.onWrite = write;
+  }
+  vfs.iniSet("raser.ini", "MAPS", String(slot), `1,etappe${slot},vn_weg,vn_gras,vn_gevel,vn_gevel,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
+}
+
 // source/race-runner.js
 var TICK_SECONDS = 1 / 60;
 var MAX_TICKS_PER_FRAME = 6;
@@ -33315,8 +33365,9 @@ var RaceRunner = class {
     this.barSet = this.barFrames[eight];
     this.showBar(0);
     await this.loadCode();
-    await app2.files.prepareRace(etappe, car, (a, b) => this.showBar(a / b * 90));
-    for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app2.files.prepareRace(etappe, other);
+    const lists = etappe === VIANEN.slot ? VIANEN.like : etappe;
+    await app2.files.prepareRace(lists, car, (a, b) => this.showBar(a / b * 90));
+    for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app2.files.prepareRace(lists, other);
     if (!this.renderer) this.renderer = new D3DRenderer(app2.canvasRace, { staticTrack: !app2.params.has("nostatic") });
     this.renderer.resetForRace();
     const audio = new GameAudio(app2.getAudioContext(), app2.getMasterOutput());
@@ -33728,7 +33779,7 @@ var RaceRunner = class {
 };
 
 // source/host/game-files.js
-var BASE = "assets/game/";
+var BASE2 = "assets/game/";
 var CRT_BUFFER = 4096;
 function syncRange(url, start, length) {
   const x = new XMLHttpRequest();
@@ -33827,14 +33878,14 @@ var GameFiles = class {
   }
   /** Loads the INI files and everything else small and shared. */
   async loadBase(progress) {
-    this.list = await (await fetch(BASE + "files.json")).json();
+    this.list = await (await fetch(BASE2 + "files.json")).json();
     const eager = this.list.filter((f) => !/^etappe\d\./i.test(f.name) && !/^(rcs|rc)\.img$/i.test(f.name));
     let done = 0;
     const queue = [...eager];
     await Promise.all(Array.from({ length: 12 }, async () => {
       while (queue.length) {
         const f = queue.shift();
-        const r = await fetch(BASE + encodeURIComponent(f.name));
+        const r = await fetch(BASE2 + encodeURIComponent(f.name));
         this.vfs.add(f.name, new Uint8Array(await r.arrayBuffer()));
         progress(++done, eager.length);
       }
@@ -33842,7 +33893,7 @@ var GameFiles = class {
     for (const f of this.list) {
       if (/^(rcs|rc)\.img$/i.test(f.name)) {
         const ind = this.vfs.read(f.name.replace(/img$/i, "ind"));
-        const sf = new SparseFile(BASE + encodeURIComponent(f.name), f.size, memberStarts(f.name, ind));
+        const sf = new SparseFile(BASE2 + encodeURIComponent(f.name), f.size, memberStarts(f.name, ind));
         this.sparse.set(f.name.toLowerCase(), sf);
         this.vfs.files.set(f.name.toLowerCase(), {
           name: f.name,
@@ -33853,7 +33904,7 @@ var GameFiles = class {
       }
     }
     try {
-      this.lists = await (await fetch(BASE + "race-files.json")).json();
+      this.lists = await (await fetch(BASE2 + "race-files.json")).json();
     } catch {
       this.lists = null;
     }
@@ -33872,7 +33923,7 @@ var GameFiles = class {
     let done = 0;
     const tick = () => progress && progress(++done, total);
     const jobs = want.map(async (f) => {
-      const r = await fetch(BASE + encodeURIComponent(f.name));
+      const r = await fetch(BASE2 + encodeURIComponent(f.name));
       this.vfs.add(f.name, new Uint8Array(await r.arrayBuffer()));
       tick();
     });
@@ -44771,7 +44822,8 @@ var LobbyUI = class {
   }
   /** Races, not chases: a chase has no opponents (FUN_0042de60), so no slots for others. */
   tracks() {
-    return this.data.static.tracks.filter((t) => !t.isChase && this.data.trackFilesExist(t));
+    const own = this.data.static.tracks.filter((t) => !t.isChase && this.data.trackFilesExist(t));
+    return [...own, { indexInGame: VIANEN.key, name: VIANEN.name, type: "schets", nrLaps: VIANEN.laps }];
   }
   carName(c) {
     return (this.cars().find((x) => x.car === c) || { name: `Auto ${c}` }).name;
@@ -44975,7 +45027,7 @@ var LobbyUI = class {
     this.session.setMine({ car: this.mineCar });
   }
   settingsChanged() {
-    const t = this.tracks().find((x) => x.indexInGame === Number(this.trackSel.value));
+    const t = this.tracks().find((x) => String(x.indexInGame) === this.trackSel.value);
     if (!t) return;
     const trackChanged = this.session.room && this.session.room.etappe !== t.indexInGame;
     const laps = trackChanged ? t.nrLaps : Number(this.lapSel.value);
@@ -45725,13 +45777,15 @@ var App = class {
       return;
     }
     if (this.params.has("race")) {
+      const vianen = this.params.get("etappe") === VIANEN.key;
       pinRace(this.vfs, {
-        etappe: Number(this.params.get("etappe")) || 0,
+        etappe: vianen ? VIANEN.slot : Number(this.params.get("etappe")) || 0,
         car: Number(this.params.get("car")) || 0,
         resolution: this.params.has("resolution") ? Number(this.params.get("resolution")) : null,
         chunks: this.params.has("chunks") ? Number(this.params.get("chunks")) : null
       });
-      await this.startRace();
+      if (vianen) await this.withVianen(() => this.startRace());
+      else await this.startRace();
       return;
     }
     this.showMenu();
@@ -45768,13 +45822,14 @@ var App = class {
     const me = setup.players.find((p) => p.id === session.you);
     if (!me) return;
     const data = this.data;
-    const track = data.static.tracks.find((t) => t.indexInGame === setup.etappe);
+    const vianen = setup.etappe === VIANEN.key;
+    const track = vianen ? null : data.static.tracks.find((t) => t.indexInGame === setup.etappe);
     const mode = data.raceMode;
     data.raceMode = 1;
     data.writeToInis();
     data.raceMode = mode;
     const set = (section, key, value) => this.vfs.iniSet("game.ini", section, key, String(value));
-    set("ETAPPE", "ETAPPE", setup.etappe);
+    set("ETAPPE", "ETAPPE", vianen ? VIANEN.slot : setup.etappe);
     set("ETAPPE", "BRITISH", track && track.british ? 1 : 0);
     set("OPTIONS", "NRLAPS", setup.laps);
     set("LEAGUE", "LEAGUE", setup.difficulty ?? 1);
@@ -45784,7 +45839,9 @@ var App = class {
     const files = prepareRaceFiles(this.vfs, { localCar: me.car, remoteCars: net.remoteCars });
     this.showRace();
     try {
-      await this.runner.run({ net, session, seed: setup.seed, cars: [...new Set(setup.players.map((p) => p.car))] });
+      const run = () => this.runner.run({ net, session, seed: setup.seed, cars: [...new Set(setup.players.map((p) => p.car))] });
+      if (vianen) await this.withVianen(run);
+      else await run();
     } finally {
       files.restore();
       session.raceEnded();
@@ -45793,6 +45850,18 @@ var App = class {
     this.showMenu();
     if (TfrmMainScreen) await this.menu.goTo(TfrmMainScreen);
     this.openMultiplayer();
+  }
+  /** Runs fn with etappe 10 made Vianen: source/host/vianen.js. */
+  async withVianen(fn) {
+    try {
+      if (!this.vianenFiles) this.vianenFiles = await fetchVianen();
+      installVianen(this.vfs, this.vianenFiles);
+    } catch (e) {
+      console.error(e);
+      this.say("Vianen kon niet laden: " + e.message, 1e4);
+      return void 0;
+    }
+    return fn();
   }
   /** The quit path: EXITCODE 255. The launcher would close; here the first screen returns. */
   async exitGame() {

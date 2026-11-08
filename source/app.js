@@ -15,6 +15,7 @@ import * as forms from './menu/forms/index.js';
 import { LobbyUI } from './net/lobby-ui.js';
 import { NetRace } from './net/puppets.js';
 import { prepareRaceFiles } from './net/race-files.js';
+import { VIANEN, fetchVianen, installVianen } from './host/vianen.js';
 
 // Esc for the quit prompt. T, N and W are default turbo chords a browser would take: input.md H8.
 const LOCKED_KEYS = ['Escape', 'KeyT', 'KeyN', 'KeyW'];
@@ -150,13 +151,15 @@ export class App {
       return;
     }
     if (this.params.has('race')) {
+      const vianen = this.params.get('etappe') === VIANEN.key;
       pinRace(this.vfs, {
-        etappe: Number(this.params.get('etappe')) || 0,
+        etappe: vianen ? VIANEN.slot : Number(this.params.get('etappe')) || 0,
         car: Number(this.params.get('car')) || 0,
         resolution: this.params.has('resolution') ? Number(this.params.get('resolution')) : null,
         chunks: this.params.has('chunks') ? Number(this.params.get('chunks')) : null,
       });
-      await this.startRace();
+      if (vianen) await this.withVianen(() => this.startRace());
+      else await this.startRace();
       return;
     }
     this.showMenu();
@@ -199,13 +202,14 @@ export class App {
     const me = setup.players.find((p) => p.id === session.you);
     if (!me) return;
     const data = this.data;
-    const track = data.static.tracks.find((t) => t.indexInGame === setup.etappe);
+    const vianen = setup.etappe === VIANEN.key;
+    const track = vianen ? null : data.static.tracks.find((t) => t.indexInGame === setup.etappe);
     const mode = data.raceMode;
     data.raceMode = 1;
     data.writeToInis();
     data.raceMode = mode;
     const set = (section, key, value) => this.vfs.iniSet('game.ini', section, key, String(value));
-    set('ETAPPE', 'ETAPPE', setup.etappe);
+    set('ETAPPE', 'ETAPPE', vianen ? VIANEN.slot : setup.etappe);
     set('ETAPPE', 'BRITISH', track && track.british ? 1 : 0);
     set('OPTIONS', 'NRLAPS', setup.laps);
     set('LEAGUE', 'LEAGUE', setup.difficulty ?? 1);
@@ -215,7 +219,9 @@ export class App {
     const files = prepareRaceFiles(this.vfs, { localCar: me.car, remoteCars: net.remoteCars });
     this.showRace();
     try {
-      await this.runner.run({ net, session, seed: setup.seed, cars: [...new Set(setup.players.map((p) => p.car))] });
+      const run = () => this.runner.run({ net, session, seed: setup.seed, cars: [...new Set(setup.players.map((p) => p.car))] });
+      if (vianen) await this.withVianen(run);
+      else await run();
     } finally {
       files.restore();
       session.raceEnded();
@@ -224,6 +230,19 @@ export class App {
     this.showMenu();
     if (forms.TfrmMainScreen) await this.menu.goTo(forms.TfrmMainScreen);
     this.openMultiplayer();
+  }
+
+  /** Runs fn with etappe 10 made Vianen: source/host/vianen.js. */
+  async withVianen(fn) {
+    try {
+      if (!this.vianenFiles) this.vianenFiles = await fetchVianen();
+      installVianen(this.vfs, this.vianenFiles);
+    } catch (e) {
+      console.error(e);
+      this.say('Vianen kon niet laden: ' + e.message, 10000);
+      return undefined;
+    }
+    return fn();
   }
 
   /** The quit path: EXITCODE 255. The launcher would close; here the first screen returns. */
