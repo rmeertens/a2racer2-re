@@ -35,6 +35,7 @@ SRC = os.path.join(ROOT, 'source', 'assets', 'vianen')
 OUT = os.path.join(ROOT, 'public', 'assets', 'vianen')
 sys.path.insert(0, HERE)
 from route import load as load_osm  # noqa: E402
+from facades import facade_atlas, TYPES as HOUSE_TYPES  # noqa: E402
 
 UNITS = 10.0          # world units per metre
 CHUNK = 128.0         # chunk length in world units, as on the original tracks
@@ -56,8 +57,10 @@ LEKPOORT = (-8.0, 190.0)
 # along the moat, west along the south moat, back to the Grote Kerk.
 LAP = [(72, -196), (60, -115), (41, -15), (11, 100), (-1, 154), (-12, 196), (-35, 273), (80, 304),
        (211, 322), (245, 300), (237, 231), (226, 115), (223, -54), (224, -180), (205, -205), (180, -200)]
-DIKE_Z = 245.0   # north of this (metres) the road is on the dike
-DIKE_UP = 40.0   # how high, world units
+DIKE_Z = 262.0   # north of this (metres) the road is on the dike
+DIKE_UP = 80.0   # how high, world units
+# Humps where a car leaves the road for a moment: metres east and north, height, world units.
+HUMPS = [((95.0, 306.0), 46.0), ((120.0, -199.0), 24.0)]
 WATER_Y = -25.0  # the moat's water level
 
 
@@ -268,7 +271,50 @@ def railing_sprite(w, h):
     return im
 
 
+def produce_texture(w, h):
+    """A market table seen from above: crates of fruit, vegetables and flowers."""
+    rng = random.Random(77)
+    im = Image.new('RGB', (w, h), (120, 88, 58))
+    d = ImageDraw.Draw(im)
+    colours = [(214, 40, 30), (240, 170, 30), (90, 160, 50), (240, 220, 60), (150, 40, 120), (230, 120, 40), (250, 250, 240)]
+    for cy in range(0, h, 64):
+        for cx in range(0, w, 64):
+            d.rectangle((cx + 3, cy + 3, cx + 61, cy + 61), fill=(160, 120, 80))
+            c = rng.choice(colours)
+            for _ in range(40):
+                x, y = cx + rng.uniform(8, 56), cy + rng.uniform(8, 56)
+                r = rng.uniform(4, 8)
+                d.ellipse((x - r, y - r, x + r, y + r), fill=tuple(max(0, min(255, v + rng.randint(-25, 25))) for v in c))
+    return im
+
+
 def tree_sprite(w, h, seed):
+    """A lime tree in autumn, as along the canal in the owner's photos: branches and small leaf
+    clusters in three shades, on the key colour."""
+    rng = random.Random(seed)
+    im = Image.new('RGB', (w, h), KEY)
+    d = ImageDraw.Draw(im)
+    trunk = (70, 56, 44)
+    d.polygon([(w * 0.46, h), (w * 0.54, h), (w * 0.52, h * 0.45), (w * 0.48, h * 0.45)], fill=trunk)
+    for k in range(9):
+        a = -math.pi / 2 + rng.uniform(-1.1, 1.1)
+        L = rng.uniform(0.18, 0.34) * w
+        x0, y0 = w * 0.5, h * rng.uniform(0.42, 0.6)
+        d.line((x0, y0, x0 + math.cos(a) * L, y0 + math.sin(a) * L), fill=trunk, width=4)
+    shades = [(64, 96, 40), (104, 130, 52), (170, 140, 60), (196, 120, 46)]
+    for _ in range(900):
+        a = rng.uniform(0, 2 * math.pi)
+        dist = rng.uniform(0, 1) ** 0.55
+        cx = w / 2 + math.cos(a) * dist * w * 0.42
+        cy = h * 0.36 + math.sin(a) * dist * h * 0.32
+        r = rng.uniform(3, 7)
+        lit = (cy < h * 0.3) + (cx > w * 0.55)
+        c = shades[min(3, rng.randint(0, 1) + lit)]
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=c)
+    return im
+
+
+def tree_sprite_old(w, h, seed):
     """A lime tree, as the dike and churchyard have: trunk and leaf masses on the key colour."""
     rng = random.Random(seed)
     im = Image.new('RGB', (w, h), KEY)
@@ -306,10 +352,9 @@ def lamp_sprite(w, h):
 # Atlases: name -> pixel box in the layout sizes below. The files are stretched to squares (1024,
 # 512, 512): the race samples non-square textures wrongly. That needs the middle texture memory
 # setting (CTextureDetailManager.cpp is fatal when short), which source/host/vianen.js ensures.
-GEVEL = {'lekpoort': (0, 0, 128, 512), 'stadhuis': (128, 0, 384, 512), 'kerk': (384, 0, 640, 256), 'kerk2': (384, 256, 640, 512)}
+# The house fronts, drawn by facades.py: eight types, 256 x 512 each.
 FACADES = [f'gevel{k}' for k in range(1, 9)]
-for _k, _key in enumerate(FACADES):
-    GEVEL[_key] = (640 + (_k % 2) * 192, (_k // 2) * 128, 640 + (_k % 2) * 192 + 192, (_k // 2) * 128 + 128)
+GEVEL = {key: ((k % 4) * 256, (k // 4) * 512, (k % 4) * 256 + 256, (k // 4) * 512 + 512) for k, key in enumerate(FACADES)}
 # From the repository owner's own photos (source/assets/vianen/own/, location data stripped):
 # quads in fractions of the photo, top-left, top-right, bottom-right, bottom-left, straightened.
 OWN = {
@@ -350,23 +395,23 @@ def own(name, size):
 
 LAND = {'pavement': (0, 0, 256, 256), 'water': (256, 0, 512, 256), 'grass': (0, 256, 256, 512), 'tiles': (256, 256, 384, 384),
         'slate': (384, 256, 512, 384), 'deck': (256, 384, 384, 512), 'awning': (384, 384, 512, 512)}
+# Materials, sprites, and the landmarks from the owner's photos.
 BOUW = {
-    'brick': (0, 0, 128, 128), 'stone': (128, 0, 256, 128), 'railing': (256, 0, 384, 128), 'church': (384, 0, 512, 128),
-    'slate': (0, 128, 128, 256), 'tree': (128, 128, 256, 256), 'lamp': (256, 128, 320, 256), 'tower': (320, 128, 448, 256),
-    'white': (448, 128, 512, 256),
+    'brick': (0, 0, 256, 256), 'stone': (256, 0, 512, 256), 'railing': (512, 0, 768, 256), 'church': (768, 0, 1024, 256),
+    'slate': (0, 256, 256, 512), 'tree': (256, 256, 512, 512), 'lamp': (512, 256, 640, 512), 'tower': (640, 256, 896, 512),
+    'white': (896, 256, 1024, 512),
+    'lekpoort': (0, 512, 192, 1024), 'stadhuis': (192, 512, 512, 1024), 'kerk': (512, 512, 1024, 768),
+    'kerk2': (512, 768, 704, 1024), 'produce': (704, 768, 960, 1024),
 }
-ATLAS_SIZE = {'gevel': (1024, 512), 'land': (512, 512), 'bouw': (512, 256)}
+ATLAS_SIZE = {'gevel': (1024, 1024), 'land': (512, 512), 'bouw': (1024, 1024)}
 ATLASES = {'gevel': GEVEL, 'land': LAND, 'bouw': BOUW}
 
 
 def build_textures():
     # Facades from the photos.
-    gevel = Image.new('RGB', ATLAS_SIZE['gevel'], (120, 90, 70))
-    for name in ['lekpoort', 'stadhuis', 'kerk', 'kerk2', *FACADES]:
-        r = GEVEL[name]
-        gevel.paste(own(name, (r[2] - r[0], r[3] - r[1])), r[:2])
+    gevel = facade_atlas(ATLAS_SIZE['gevel'])
     # Square: the race samples a non-square texture wrongly. Fractions, and so the UVs, stay.
-    save_tga(gevel.resize((1024, 1024), Image.Resampling.LANCZOS), os.path.join(OUT, 'vn_gevel.tga'))
+    save_tga(gevel, os.path.join(OUT, 'vn_gevel.tga'))
     # The road: the herringbone klinkers in front of the houses, tinted to red brick.
     save_tga(own('road', (256, 256)), os.path.join(OUT, 'vn_weg.tga'))
     # Land: pavement, roof tiles, slate, grass.
@@ -384,9 +429,12 @@ def build_textures():
     land.paste(awning, LAND['awning'][:2])
     save_tga(land, os.path.join(OUT, 'vn_land.tga'))
     # Building materials and the sprites on the key colour.
-    # Drawn at twice the size, then halved (nearest, so the key colour stays exact).
-    bouw = Image.new('RGB', (1024, 512), KEY)
-    big = {k: tuple(c * 2 for c in v) for k, v in BOUW.items()}
+    bouw = Image.new('RGB', ATLAS_SIZE['bouw'], KEY)
+    big = BOUW
+    for name in ('lekpoort', 'stadhuis', 'kerk', 'kerk2'):
+        r = BOUW[name]
+        bouw.paste(own(name, (r[2] - r[0], r[3] - r[1])), r[:2])
+    bouw.paste(produce_texture(256, 256), BOUW['produce'][:2])
     bouw.paste(own('brick', (256, 256)), big['brick'][:2])
     bouw.paste(masonry(256, 256, 8, 4, (168, 164, 154), (120, 116, 108), 5, jitter=12), big['stone'][:2])
     bouw.paste(railing_sprite(256, 256), big['railing'][:2])
@@ -403,7 +451,7 @@ def build_textures():
     bouw.paste(tower, big['tower'][:2])
     white = (np.full((256, 128, 3), (238, 236, 228), float) + noise(128, 256, 4, 11)).clip(0, 255).astype(np.uint8)
     bouw.paste(Image.fromarray(white), big['white'][:2])
-    save_tga(bouw.resize((512, 512), Image.Resampling.NEAREST), os.path.join(OUT, 'vn_bouw.tga'))
+    save_tga(bouw, os.path.join(OUT, 'vn_bouw.tga'))
 
 
 def uv(atlas, name, u0=0.0, u1=1.0, v0=0.0, v1=1.0):
@@ -536,11 +584,16 @@ class Town:
                 else:
                     pieces = [(0.0, 0.5), (0.5, 1.0)]
                 for t0, t1 in pieces:
+                    k = rng.randrange(len(HOUSE_TYPES))
+                    spec = HOUSE_TYPES[k]
+                    eave = rng.choice((84, 94, 104, 114))
+                    top = eave / spec['eave']
+                    gable = spec['top'] != 'cornice'
                     row.append({
                         'i': i, 't0': t0, 't1': t1, 's': s, 'depth': depth or DEPTH,
-                        'h': rng.choice((72, 84, 96, 108, 120)), 'roof': rng.choice((38, 48, 58)),
-                        'face': rng.choice(FACADES), 'u': rng.uniform(0.0, 0.62),
-                        'tint': rng.choice(((240, 230, 220), (230, 236, 240), (244, 226, 206), (236, 236, 230))),
+                        'type': k, 'eave': eave, 'top': top, 'gable': gable, 'roof': rng.choice((36, 46)),
+                        'roofs': 'slate' if rng.random() < 0.65 else 'tiles',
+                        'tint': tuple([rng.randint(236, 255)] * 3),
                     })
             rows[s] = row
         for s, row in rows.items():
@@ -549,36 +602,49 @@ class Town:
                 if h:
                     self.house(h, row[(k - 1) % m], row[(k + 1) % m])
 
+    @staticmethod
+    def height(h):
+        return h['top'] if h['gable'] else h['top'] + h['roof']
+
     def house(self, h, prev, nxt):
+        """A town house: its drawn front with the gable's outline, its roof, and side walls where a
+        neighbour is lower. A gable front has its ridge running back from the street; a cornice
+        front has it along the street."""
         i, s, t0, t1 = h['i'], h['s'], h['t0'], h['t1']
-        H, R = h['h'], h['roof']
+        E, T = h['eave'], h['top']
         f0, f1 = WALK, WALK + h['depth']
         mid = (f0 + f1) / 2
+        tm = (t0 + t1) / 2
         inward = tuple(-s * x for x in self.right(i))
         outward = tuple(s * x for x in self.right(i))
         fw = self.fwd(i)
+        back = tuple(-x for x in fw)
         F = lambda t, y: self.p(i, t, s * f0, y)
         B = lambda t, y: self.p(i, t, s * f1, y)
         M = lambda t, y: self.p(i, t, s * mid, y)
-        # The facade: a third of a row of houses from the photos.
-        vs = [F(t0, 0), F(t1, 0), F(t1, H), F(t0, H)]
-        self.chunks.add('extra', i, quad(vs, uv('gevel', h['face'], h['u'], h['u'] + 0.38), h['tint'], inward))
-        # The roof, ridge along the street.
-        up_in = norm((inward[0], 1.6, inward[2]))
-        up_out = norm((outward[0], 1.6, outward[2]))
-        vs = [F(t0, H), F(t1, H), M(t1, H + R), M(t0, H + R)]
-        self.chunks.add('land', i, quad(vs, uv('land', 'tiles'), (236, 226, 220), up_in))
-        vs = [M(t0, H + R), M(t1, H + R), B(t1, H), B(t0, H)]
-        self.chunks.add('land', i, quad(vs, uv('land', 'tiles'), (236, 226, 220), up_out))
-        # End walls and gables where the neighbour is lower or missing.
-        for t, other, facing in ((t0, prev, tuple(-x for x in fw)), (t1, nxt, fw)):
-            lower = other is None or other['h'] + other['roof'] < H + R
-            if not lower:
+        roof = uv('land', h['roofs'])
+        rtint = (225, 225, 230) if h['roofs'] == 'slate' else (236, 226, 220)
+        vs = [F(t0, 0), F(t1, 0), F(t1, T), F(t0, T)]
+        self.chunks.add('extra', i, quad(vs, uv('gevel', FACADES[h['type']]), h['tint'], inward))
+        if h['gable']:
+            # Two slopes from the eaves at the sides up to the ridge behind the gable's top.
+            ridge = T - 6
+            self.chunks.add('land', i, quad([F(t0, E), B(t0, E), B(tm, ridge), F(tm, ridge)], roof, rtint, norm((back[0], 1.2, back[2]))))
+            self.chunks.add('land', i, quad([F(tm, ridge), B(tm, ridge), B(t1, E), F(t1, E)], roof, rtint, norm((fw[0], 1.2, fw[2]))))
+        else:
+            R = h['roof']
+            self.chunks.add('land', i, quad([F(t0, T), F(t1, T), M(t1, T + R), M(t0, T + R)], roof, rtint, norm((inward[0], 1.6, inward[2]))))
+            self.chunks.add('land', i, quad([M(t0, T + R), M(t1, T + R), B(t1, T), B(t0, T)], roof, rtint, norm((outward[0], 1.6, outward[2]))))
+        # Side walls where the neighbour is lower or missing, and the cornice house's gable end.
+        top_wall = E if h['gable'] else T
+        for t, other, facing in ((t0, prev, back), (t1, nxt, fw)):
+            if other is not None and self.height(other) >= self.height(h) and other['eave'] >= top_wall:
                 continue
-            base = 0 if other is None else min(H, other['h'])
-            vs = [F(t, base), B(t, base), B(t, H), F(t, H)]
-            self.chunks.add('rail', i, quad(vs, uv('bouw', 'brick', 0, 1, 0, max(0.1, (H - base) / 130)), (230, 220, 214), facing))
-            self.chunks.add('rail', i, tri(F(t, H), B(t, H), M(t, H + R), uv_tri('bouw', 'brick'), (230, 220, 214), facing))
+            base = 0 if other is None else min(top_wall, other['eave'])
+            vs = [F(t, base), B(t, base), B(t, top_wall), F(t, top_wall)]
+            self.chunks.add('rail', i, quad(vs, uv('bouw', 'brick', 0, 1, 0, max(0.15, (top_wall - base) / 140)), (226, 214, 206), facing))
+            if not h['gable']:
+                self.chunks.add('rail', i, tri(F(t, T), B(t, T), M(t, T + h['roof']), uv_tri('bouw', 'brick'), (226, 214, 206), facing))
 
     # -- the Lekpoort ---------------------------------------------------------------------
 
@@ -599,7 +665,7 @@ class Town:
         for a, facing in ((0.0, back), (L, ahead)):
             for x0, x1, y0, y1 in ((-TW, -GAP, 0, A), (GAP, TW, 0, A), (-TW, TW, A, H)):
                 vs = [P(x0, a, y0), P(x1, a, y0), P(x1, a, y1), P(x0, a, y1)]
-                self.chunks.add('extra', i, quad(vs, uv('gevel', 'lekpoort', U(x0), U(x1), V(y1), V(y0)), (255, 255, 255), facing))
+                self.chunks.add('rail', i, quad(vs, uv('bouw', 'lekpoort', U(x0), U(x1), V(y1), V(y0)), (255, 255, 255), facing))
         for x, facing in ((-TW, tuple(-c for c in r)), (TW, r)):
             vs = [P(x, 0, 0), P(x, L, 0), P(x, L, H), P(x, 0, H)]
             self.chunks.add('rail', i, quad(vs, uv('bouw', 'tower'), (235, 225, 215), facing))
@@ -637,7 +703,7 @@ class Town:
         fw = self.fwd(i)
         F = lambda t, y, d=0.0: self.p(i, t, s * (WALK + d), y)
         vs = [F(0, 0), F(1, 0), F(1, H), F(0, H)]
-        self.chunks.add('extra', i, quad(vs, uv('gevel', 'stadhuis'), (255, 255, 255), inward))
+        self.chunks.add('rail', i, quad(vs, uv('bouw', 'stadhuis'), (255, 255, 255), inward))
         for t, facing in ((0, tuple(-x for x in fw)), (1, fw)):
             vs = [F(t, 0), F(t, 0, D), F(t, H, D), F(t, H)]
             self.chunks.add('rail', i, quad(vs, uv('bouw', 'stone'), (235, 235, 235), facing))
@@ -705,7 +771,8 @@ class Town:
             ([P(t1, o0, 0), P(t1, o1, 0), P(t1, o1, HT), P(t1, o0, HT)], self.fwd(c), 'rail'),
         ]
         for vs, facing, kind in faces:
-            mapping = uv('gevel', 'kerk2') if kind == 'extra' else uv('bouw', 'tower')
+            mapping = uv('bouw', 'kerk2') if kind == 'extra' else uv('bouw', 'tower')
+            kind = 'rail'
             self.chunks.add(kind, c, quad(vs, mapping, (240, 232, 222), facing))
         apex = P((t0 + t1) / 2, (o0 + o1) / 2, HT + 260)
         corners = [P(t0, o0, HT), P(t1, o0, HT), P(t1, o1, HT), P(t0, o1, HT)]
@@ -778,28 +845,30 @@ class Town:
         return sides
 
     def market(self, first, last):
-        """Market stalls along Voorstraat: a counter and a striped awning, against the houses."""
+        """Market stalls along Voorstraat, as in the owner's photos: a table of produce under a
+        striped awning on two white poles, against the houses."""
         rng = random.Random(1452)
         for i in range(first, last + 1):
             for s in (-1, 1):
-                if (i, s) in self.skip or rng.random() < 0.35:
+                if (i, s) in self.skip or rng.random() < 0.3:
                     continue
                 inward = tuple(-s * x for x in self.right(i))
-                fw = self.fwd(i)
-                t0, t1 = 0.12, 0.88
+                t0, t1 = 0.1, 0.9
                 F = lambda t, off, y: self.p(i, t, s * off, y)
-                front, back = WALK - 30, WALK - 2
-                wood = uv('land', 'deck')
-                for vs, facing in (
-                    ([F(t0, front, 2), F(t1, front, 2), F(t1, front, 20), F(t0, front, 20)], inward),
-                    ([F(t0, front, 2), F(t0, back, 2), F(t0, back, 20), F(t0, front, 20)], tuple(-x for x in fw)),
-                    ([F(t1, front, 2), F(t1, back, 2), F(t1, back, 20), F(t1, front, 20)], fw),
-                ):
-                    self.chunks.add('land', i, quad(vs, wood, (230, 220, 205), facing))
-                self.chunks.add('land', i, quad([F(t0, front, 20), F(t1, front, 20), F(t1, back, 20), F(t0, back, 20)], uv('land', 'pavement', 0, 0.3, 0, 0.3), (250, 245, 235), (0, 1, 0)))
-                # The awning, sloping down toward the street.
-                self.chunks.add('land', i, quad([F(t0, front - 6, 40), F(t1, front - 6, 40), F(t1, back, 50), F(t0, back, 50)], uv('land', 'awning'), (255, 255, 255), norm((inward[0], 1.5, inward[2]))))
-                self.chunks.add('land', i, quad([F(t0, front - 6, 40), F(t1, front - 6, 40), F(t1, back, 50), F(t0, back, 50)], uv('land', 'awning'), (180, 170, 170), (0, -1, 0)))
+                front, back = WALK - 28, WALK - 4
+                # The table: its front and its top of crates.
+                self.chunks.add('land', i, quad([F(t0, front + 4, 2), F(t1, front + 4, 2), F(t1, front + 4, 16), F(t0, front + 4, 16)], uv('land', 'deck'), (230, 220, 205), inward))
+                self.chunks.add('rail', i, quad([F(t0, front + 4, 16), F(t1, front + 4, 16), F(t1, back, 18), F(t0, back, 18)], uv('bouw', 'produce'), (255, 255, 255), (0, 1, 0)))
+                # Poles at the front corners.
+                for t in (t0, t1):
+                    c = F(t, front - 2, 0)
+                    fw = self.fwd(i)
+                    pole = [(c[0] - fw[0] * 1.5, c[1], c[2] - fw[2] * 1.5), (c[0] + fw[0] * 1.5, c[1], c[2] + fw[2] * 1.5), (c[0] + fw[0] * 1.5, c[1] + 44, c[2] + fw[2] * 1.5), (c[0] - fw[0] * 1.5, c[1] + 44, c[2] - fw[2] * 1.5)]
+                    self.chunks.add('rail', i, quad(pole, uv('bouw', 'white'), (255, 255, 255), inward))
+                # The awning, sloping down toward the street, seen from above and below.
+                canopy = [F(t0 - 0.03, front - 8, 42), F(t1 + 0.03, front - 8, 42), F(t1 + 0.03, back, 52), F(t0 - 0.03, back, 52)]
+                self.chunks.add('land', i, quad(canopy, uv('land', 'awning'), (255, 255, 255), norm((inward[0], 1.5, inward[2]))))
+                self.chunks.add('land', i, quad(canopy, uv('land', 'awning'), (200, 190, 190), (0, -1, 0)))
 
     def drawbridge(self, i, s):
         """A white drawbridge over the moat, as at the lock: a timber deck from the quay across the
@@ -851,6 +920,12 @@ def build():
     st, kerk, poort = town.near(STADHUIS), town.near(GROTE_KERK), town.near(LEKPOORT)
     print('chunks', n, 'smallest bend', round(radius(centre)), 'stadhuis', st, 'kerk', kerk, 'lekpoort', poort)
     town.lift([DIKE_UP if c[1] > DIKE_Z * UNITS else 0.0 for c in centre])
+    # Humps: a steep rise to a crest and a sharp drop after it, so a fast car takes off.
+    for at, height in HUMPS:
+        k = town.near(at)
+        for d, f in ((-2, 0.35), (-1, 0.75), (0, 1.0), (1, 0.15)):
+            town.ground[(k + d) % n] += height * f
+        print('hump at chunk', k, 'height', height)
     nodes, ways = load_osm(os.path.join(SRC, 'osm.json'))
     water = [[nodes[k] for k in w['nodes'] if k in nodes] for w in ways if w.get('tags', {}).get('natural') == 'water']
     # The gate on the straight just before the bend: the passage is a straight box.

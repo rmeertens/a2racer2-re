@@ -36,6 +36,12 @@ Sources and licences: `public/assets/vianen/ATTRIBUTION.md`, `source/assets/vian
 - `node tools/vianen/shots.mjs`: screenshots at the start, the Stadhuis, the Lekpoort, the dike and the Grote Kerk, in headless Chromium with the bot at 4× speed. `evidence/vianen/`.
 - `node tools/check-multiplayer-browser.mjs --players 2 --seconds 10 --track vianen`: a network race on Vianen, all checks passed.
 
+## Houses (third version)
+
+The house fronts are drawn by `tools/vianen/facades.py`, not cut from photos: eight Dutch town-house types on the key colour, so the gable's outline stands against the sky. There are stepped, bell, neck and spout gables, and cornice fronts. They have white-framed sash windows, shutters (the Stadhuis's red and white, or green), doors and black shop fronts. The palette and details follow the owner's photos: red-brown and dark brick, white and cream plaster, charcoal glazed roofs. A gable front has its ridge running back from the street, a cornice front along it. The market stalls are tables of produce under striped awnings on two white poles. The dike is 8 m up, with a hump bridge on its straight that lifts a fast car off the road, and a lower hump on the south moat road (`HUMPS`).
+
+The owner's photos stay for the Lekpoort, the Stadhuis, the Grote Kerk, the paving, the brick, and the canal's water and grass. They now sit in the building atlas `vn_bouw`, drawn with the walls.
+
 ## Photos
 
 The facades, the Lekpoort, the Stadhuis, the Grote Kerk's tower and nave window, the herringbone road, the cobbled pavement and the brick come from the repository owner's own photos (`source/assets/vianen/own/`). `OWN` in `build-track.py` names a quad in a photo, and `own()` straightens it into its atlas cell with a perspective transform. The atlases are laid out at 1024×512 and 512×256 and saved stretched to squares, because the race samples non-square textures wrongly. Vianen therefore needs the middle texture memory setting, which `installVianen` sets for its race.
