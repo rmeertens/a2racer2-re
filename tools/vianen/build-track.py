@@ -34,7 +34,7 @@ ROOT = os.path.join(HERE, '..', '..')
 SRC = os.path.join(ROOT, 'source', 'assets', 'vianen')
 OUT = os.path.join(ROOT, 'public', 'assets', 'vianen')
 sys.path.insert(0, HERE)
-from route import loop  # noqa: E402
+from route import load as load_osm  # noqa: E402
 
 UNITS = 10.0          # world units per metre
 CHUNK = 128.0         # chunk length in world units, as on the original tracks
@@ -50,8 +50,15 @@ SUN = (0.45, 0.78, -0.43)
 # Landmarks: metres east and north (route.py).
 STADHUIS = (22.0, 70.0)
 GROTE_KERK = (100.0, -185.0)
-LEKPOORT = (-8.0, 165.0)
-DIKE = (-50.0, 185.0)  # the stretch along the Lek, north of the old town
+LEKPOORT = (-8.0, 190.0)
+# The lap, drawn along the streets (metres east and north of route.LAT0, LON0): up Voorstraat past
+# the Stadhuis to the Lekpoort, out onto the dike along the moat's north side, down the east side
+# along the moat, west along the south moat, back to the Grote Kerk.
+LAP = [(72, -196), (60, -115), (41, -15), (11, 100), (-1, 154), (-12, 196), (-35, 273), (80, 304),
+       (211, 322), (245, 300), (237, 231), (226, 115), (223, -54), (224, -180), (205, -205), (180, -200)]
+DIKE_Z = 245.0   # north of this (metres) the road is on the dike
+DIKE_UP = 40.0   # how high, world units
+WATER_Y = -25.0  # the moat's water level
 
 
 # --- the centre line -----------------------------------------------------------------------
@@ -249,6 +256,18 @@ def gothic_window(d, x0, y0, x1, y1):
     d.line(((x0 + x1) / 2, y0 + w / 2, (x0 + x1) / 2, y1 - i), fill=(150, 145, 135), width=2)
 
 
+def railing_sprite(w, h):
+    """The white railings along the canals: posts and two rails on the key colour."""
+    im = Image.new('RGB', (w, h), KEY)
+    d = ImageDraw.Draw(im)
+    white = (236, 238, 236)
+    for y in (h * 0.30, h * 0.62):
+        d.rectangle((0, y, w, y + h * 0.07), fill=white)
+    for x in range(0, w, w // 4):
+        d.rectangle((x + w * 0.02, h * 0.25, x + w * 0.07, h), fill=white)
+    return im
+
+
 def tree_sprite(w, h, seed):
     """A lime tree, as the dike and churchyard have: trunk and leaf masses on the key colour."""
     rng = random.Random(seed)
@@ -300,8 +319,8 @@ OWN = {
     'kerk2': ('1457', ((0.375, 0.19), (0.50, 0.19), (0.50, 0.59), (0.375, 0.59))),
     'gevel1': ('1446', ((0.53, 0.36), (1.0, 0.30), (1.0, 0.64), (0.53, 0.62))),
     'gevel2': ('1446', ((0.0, 0.0), (0.30, 0.33), (0.30, 0.60), (0.0, 0.67))),
-    'gevel3': ('1450', ((0.0, 0.25), (0.35, 0.38), (0.35, 0.58), (0.0, 0.62))),
-    'gevel4': ('1450', ((0.70, 0.38), (1.0, 0.28), (1.0, 0.62), (0.70, 0.58))),
+    'gevel3': ('1439', ((0.47, 0.24), (0.82, 0.24), (0.82, 0.60), (0.47, 0.60))),
+    'gevel4': ('1439', ((0.82, 0.15), (1.0, 0.13), (1.0, 0.62), (0.82, 0.60))),
     'gevel5': ('1454', ((0.70, 0.24), (0.84, 0.20), (0.84, 0.57), (0.70, 0.54))),
     'gevel6': ('1454', ((0.85, 0.17), (1.0, 0.05), (1.0, 0.58), (0.85, 0.56))),
     'gevel7': ('1444', ((0.60, 0.24), (1.0, 0.0), (1.0, 0.66), (0.60, 0.57))),
@@ -311,6 +330,9 @@ OWN = {
     'pavement': ('1446', ((0.2, 0.72), (0.8, 0.72), (1.0, 1.0), (0.0, 1.0))),
     'church': ('1457', ((0.05, 0.30), (0.34, 0.30), (0.34, 0.60), (0.05, 0.60))),
     'brick': ('1443', ((0.0, 0.25), (0.22, 0.25), (0.22, 0.75), (0.0, 0.75))),
+    # The canal: its water and its grass bank, seen from above.
+    'water': ('1466', ((0.02, 0.66), (0.28, 0.66), (0.24, 0.77), (0.0, 0.77))),
+    'grass': ('1466', ((0.35, 0.78), (0.95, 0.78), (1.0, 1.0), (0.25, 1.0))),
 }
 
 
@@ -326,9 +348,10 @@ def own(name, size):
     return im.transform(big, Image.Transform.QUAD, data, Image.Resampling.BICUBIC).resize(size, Image.Resampling.LANCZOS)
 
 
-LAND = {'pavement': (0, 0, 256, 256), 'tiles': (256, 0, 512, 256), 'slate': (0, 256, 256, 512), 'grass': (256, 256, 512, 512)}
+LAND = {'pavement': (0, 0, 256, 256), 'water': (256, 0, 512, 256), 'grass': (0, 256, 256, 512), 'tiles': (256, 256, 384, 384),
+        'slate': (384, 256, 512, 384), 'deck': (256, 384, 384, 512), 'awning': (384, 384, 512, 512)}
 BOUW = {
-    'brick': (0, 0, 128, 128), 'stone': (128, 0, 256, 128), 'plaster': (256, 0, 384, 128), 'church': (384, 0, 512, 128),
+    'brick': (0, 0, 128, 128), 'stone': (128, 0, 256, 128), 'railing': (256, 0, 384, 128), 'church': (384, 0, 512, 128),
     'slate': (0, 128, 128, 256), 'tree': (128, 128, 256, 256), 'lamp': (256, 128, 320, 256), 'tower': (320, 128, 448, 256),
     'white': (448, 128, 512, 256),
 }
@@ -349,10 +372,16 @@ def build_textures():
     # Land: pavement, roof tiles, slate, grass.
     land = Image.new('RGB', (512, 512))
     land.paste(own('pavement', (256, 256)), LAND['pavement'][:2])
-    land.paste(roof_tiles(256, 256, (168, 72, 46), 1), LAND['tiles'][:2])
-    land.paste(masonry(256, 256, 18, 9, (62, 68, 78), (40, 44, 50), 2, jitter=10), LAND['slate'][:2])
-    grass = (np.full((256, 256, 3), (86, 132, 58), float) + noise(256, 256, 14, 3)).clip(0, 255).astype(np.uint8)
-    land.paste(Image.fromarray(grass).filter(ImageFilter.GaussianBlur(0.6)), LAND['grass'][:2])
+    land.paste(roof_tiles(256, 256, (168, 72, 46), 1).resize((128, 128), Image.Resampling.LANCZOS), LAND['tiles'][:2])
+    land.paste(masonry(256, 256, 18, 9, (62, 68, 78), (40, 44, 50), 2, jitter=10).resize((128, 128), Image.Resampling.LANCZOS), LAND['slate'][:2])
+    land.paste(own('water', (256, 256)), LAND['water'][:2])
+    land.paste(own('grass', (256, 256)), LAND['grass'][:2])
+    land.paste(masonry(256, 256, 1, 9, (150, 112, 74), (70, 52, 36), 12, jitter=16, stagger=False).rotate(90).resize((128, 128)), LAND['deck'][:2])
+    awning = Image.new('RGB', (128, 128), (240, 238, 232))
+    ad = ImageDraw.Draw(awning)
+    for k in range(0, 128, 32):
+        ad.rectangle((k, 0, k + 15, 128), fill=(196, 30, 36))
+    land.paste(awning, LAND['awning'][:2])
     save_tga(land, os.path.join(OUT, 'vn_land.tga'))
     # Building materials and the sprites on the key colour.
     # Drawn at twice the size, then halved (nearest, so the key colour stays exact).
@@ -360,8 +389,7 @@ def build_textures():
     big = {k: tuple(c * 2 for c in v) for k, v in BOUW.items()}
     bouw.paste(own('brick', (256, 256)), big['brick'][:2])
     bouw.paste(masonry(256, 256, 8, 4, (168, 164, 154), (120, 116, 108), 5, jitter=12), big['stone'][:2])
-    plaster = (np.full((256, 256, 3), (232, 226, 210), float) + noise(256, 256, 5, 6)).clip(0, 255).astype(np.uint8)
-    bouw.paste(Image.fromarray(plaster), big['plaster'][:2])
+    bouw.paste(railing_sprite(256, 256), big['railing'][:2])
     bouw.paste(own('church', (256, 256)), big['church'][:2])
     bouw.paste(masonry(256, 256, 18, 9, (58, 64, 74), (36, 40, 46), 8, jitter=10), big['slate'][:2])
     bouw.paste(tree_sprite(256, 256, 9), big['tree'][:2])
@@ -426,6 +454,7 @@ class Town:
         self.n = len(centre)
         self.fr = frames(centre)
         self.chunks = Chunks(self.n)
+        self.ground = [0.0] * self.n
         self.skip = set()  # (chunk, side) without houses
         self.spans = []    # (chunk, side, t0, t1): houses on part of a skipped chunk
 
@@ -436,7 +465,16 @@ class Town:
         ra, rb = self.fr[i % n][1], self.fr[(i + 1) % n][1]
         x = a[0] + ra[0] * off + (b[0] + rb[0] * off - a[0] - ra[0] * off) * t
         z = a[1] + ra[1] * off + (b[1] + rb[1] * off - a[1] - ra[1] * off) * t
-        return (x, y, z)
+        g = self.ground[i % n] + (self.ground[(i + 1) % n] - self.ground[i % n]) * t
+        return (x, y + g, z)
+
+    def lift(self, profile, smooth=4):
+        """Ground heights per chunk, eased into ramps."""
+        n = self.n
+        g = list(profile)
+        for _ in range(smooth):
+            g = [(g[i - 1] + 2 * g[i] + g[(i + 1) % n]) / 4 for i in range(n)]
+        self.ground = g
 
     def fwd(self, i):
         f = self.fr[i % self.n][0]
@@ -554,7 +592,7 @@ class Town:
         # The street's houses run up to the tower on both sides.
         for s in (-1, 1):
             self.spans += [(i, s, 0.0, 0.15), (i, s, 0.9, 1.0)]
-        P = lambda x, a, y: (o[0] + r[0] * x + f[0] * a, y, o[2] + r[2] * x + f[2] * a)
+        P = lambda x, a, y: (o[0] + r[0] * x + f[0] * a, o[1] + y, o[2] + r[2] * x + f[2] * a)
         back, ahead = tuple(-x for x in f), f
         U = lambda x: (x + TW) / (2 * TW)
         V = lambda y: 1 - y / H
@@ -683,15 +721,15 @@ class Town:
 
     # -- trees, lamps, the dike ----------------------------------------------------------------
 
-    def sprite(self, i, t, off, w, h, name):
+    def sprite(self, i, t, off, w, h, name, base=0.0):
         """Two crossed upright quads with a sprite on the key colour."""
-        c = self.p(i, t, off)
+        c = self.p(i, t, off, base)
         f, r = self.fwd(i), self.right(i)
         for d in (f, r):
-            a = (c[0] - d[0] * w / 2, 0, c[2] - d[2] * w / 2)
-            b = (c[0] + d[0] * w / 2, 0, c[2] + d[2] * w / 2)
+            a = (c[0] - d[0] * w / 2, c[1], c[2] - d[2] * w / 2)
+            b = (c[0] + d[0] * w / 2, c[1], c[2] + d[2] * w / 2)
             n = (d[2], 0, -d[0])
-            vs = [a, b, (b[0], h, b[2]), (a[0], h, a[2])]
+            vs = [a, b, (b[0], c[1] + h, b[2]), (a[0], c[1] + h, a[2])]
             self.chunks.add('rail', i, quad(vs, uv('bouw', name), (255, 255, 255), n))
             # The other side too, so the sprite shows from both.
             self.chunks.add('rail', i, quad(vs, uv('bouw', name), (255, 255, 255), tuple(-x for x in n)))
@@ -707,27 +745,102 @@ class Town:
                 continue
             self.sprite(i, 0.5, s * (WALK - 5), 12, 70, 'lamp')
 
-    def dike(self, first, last):
-        """Along the Lek: no houses on the river side, grass falling away, a row of lime trees."""
-        for i in range(first, last + 1):
-            i %= self.n
-            s = 1 if self.right(i)[2] * 1 > 0 else -1  # the north side
+    def water_sides(self, water):
+        """Where the moat runs beside the road: a quay edge with white railings, a grass bank down
+        to the water, the water, the far bank and trees, instead of houses."""
+        sides = set()
+        for i in range(self.n):
+            for s in (-1, 1):
+                probe = self.p(i, 0.5, s * (WALK + 200))
+                if any(inside((probe[0] / UNITS, probe[2] / UNITS), poly) for poly in water):
+                    sides.add((i, s))
+        # Fill single-chunk holes, so a side changes rarely.
+        for i in range(self.n):
+            for s in (-1, 1):
+                if (i - 1) % self.n in {c for c, t in sides if t == s} and (i + 1) % self.n in {c for c, t in sides if t == s}:
+                    sides.add((i, s))
+        for i, s in sorted(sides):
             self.skip.add((i, s))
-            vs = [self.p(i, 0, s * WALK, 2), self.p(i, 1, s * WALK, 2), self.p(i, 1, s * (WALK + 300), 2), self.p(i, 0, s * (WALK + 300), 2)]
-            self.chunks.add('land', i, quad(vs, uv('land', 'grass'), (220, 235, 210), (0, 1, 0)))
-            # A low stone edge along the pavement keeps cars on the dike road.
             inward = tuple(-s * x for x in self.right(i))
-            vs = [self.p(i, 0, s * WALK, 0), self.p(i, 1, s * WALK, 0), self.p(i, 1, s * WALK, 22), self.p(i, 0, s * WALK, 22)]
-            self.chunks.add('rail', i, quad(vs, uv('bouw', 'stone', 0, 1, 0, 0.2), (225, 225, 225), inward))
-            vs = [self.p(i, 0, s * WALK, 22), self.p(i, 1, s * WALK, 22), self.p(i, 1, s * (WALK + 8), 22), self.p(i, 0, s * (WALK + 8), 22)]
-            self.chunks.add('rail', i, quad(vs, uv('bouw', 'stone', 0, 1, 0, 0.1), (245, 245, 245), (0, 1, 0)))
-            self.sprite(i, 0.5, s * (WALK + 170), 120, 200, 'tree')
+            g0 = self.p(i, 0, 0)[1]
+            low = WATER_Y - g0
+            P = lambda t, off, y, i=i: self.p(i, t, s * off, y)
+            # Quay edge, railing on it.
+            self.chunks.add('rail', i, quad([P(0, WALK, 0), P(1, WALK, 0), P(1, WALK, 10), P(0, WALK, 10)], uv('bouw', 'brick', 0, 1, 0, 0.12), (220, 210, 200), inward))
+            self.chunks.add('rail', i, quad([P(0, WALK, 10), P(1, WALK, 10), P(1, WALK, 34), P(0, WALK, 34)], uv('bouw', 'railing'), (255, 255, 255), inward))
+            self.chunks.add('rail', i, quad([P(0, WALK, 10), P(1, WALK, 10), P(1, WALK, 34), P(0, WALK, 34)], uv('bouw', 'railing'), (255, 255, 255), tuple(-x for x in inward)))
+            # Bank, water, far bank.
+            self.chunks.add('land', i, quad([P(0, WALK, 2), P(1, WALK, 2), P(1, WALK + 90, low), P(0, WALK + 90, low)], uv('land', 'grass'), (235, 240, 225), norm((-inward[0] * 0.3, 1, -inward[2] * 0.3))))
+            self.chunks.add('land', i, quad([P(0, WALK + 90, low), P(1, WALK + 90, low), P(1, WALK + 420, low), P(0, WALK + 420, low)], uv('land', 'water'), (230, 238, 245), (0, 1, 0)))
+            self.chunks.add('land', i, quad([P(0, WALK + 420, low), P(1, WALK + 420, low), P(1, WALK + 520, -g0 + 4), P(0, WALK + 520, -g0 + 4)], uv('land', 'grass'), (225, 235, 215), norm((inward[0] * 0.3, 1, inward[2] * 0.3))))
+            if i % 2 == 0:
+                self.sprite(i, 0.5, s * (WALK + 600), 130, 210, 'tree', base=-self.ground[i])
+        return sides
+
+    def market(self, first, last):
+        """Market stalls along Voorstraat: a counter and a striped awning, against the houses."""
+        rng = random.Random(1452)
+        for i in range(first, last + 1):
+            for s in (-1, 1):
+                if (i, s) in self.skip or rng.random() < 0.35:
+                    continue
+                inward = tuple(-s * x for x in self.right(i))
+                fw = self.fwd(i)
+                t0, t1 = 0.12, 0.88
+                F = lambda t, off, y: self.p(i, t, s * off, y)
+                front, back = WALK - 30, WALK - 2
+                wood = uv('land', 'deck')
+                for vs, facing in (
+                    ([F(t0, front, 2), F(t1, front, 2), F(t1, front, 20), F(t0, front, 20)], inward),
+                    ([F(t0, front, 2), F(t0, back, 2), F(t0, back, 20), F(t0, front, 20)], tuple(-x for x in fw)),
+                    ([F(t1, front, 2), F(t1, back, 2), F(t1, back, 20), F(t1, front, 20)], fw),
+                ):
+                    self.chunks.add('land', i, quad(vs, wood, (230, 220, 205), facing))
+                self.chunks.add('land', i, quad([F(t0, front, 20), F(t1, front, 20), F(t1, back, 20), F(t0, back, 20)], uv('land', 'pavement', 0, 0.3, 0, 0.3), (250, 245, 235), (0, 1, 0)))
+                # The awning, sloping down toward the street.
+                self.chunks.add('land', i, quad([F(t0, front - 6, 40), F(t1, front - 6, 40), F(t1, back, 50), F(t0, back, 50)], uv('land', 'awning'), (255, 255, 255), norm((inward[0], 1.5, inward[2]))))
+                self.chunks.add('land', i, quad([F(t0, front - 6, 40), F(t1, front - 6, 40), F(t1, back, 50), F(t0, back, 50)], uv('land', 'awning'), (180, 170, 170), (0, -1, 0)))
+
+    def drawbridge(self, i, s):
+        """A white drawbridge over the moat, as at the lock: a timber deck from the quay across the
+        water, two white portals on the near bank and the balance beams above them."""
+        g0 = self.p(i, 0, 0)[1]
+        f = self.fwd(i)
+        r = tuple(s * x for x in self.right(i))
+        o = self.p(i, 0.5, s * WALK)
+        P = lambda a, d, y: (o[0] + f[0] * a + r[0] * d, o[1] + y, o[2] + f[2] * a + r[2] * d)
+        deck_y = WATER_Y - g0 + 18
+        w = 28.0
+        self.chunks.add('land', i, quad([P(-w, 90, deck_y), P(w, 90, deck_y), P(w, 420, deck_y), P(-w, 420, deck_y)], uv('land', 'deck'), (240, 230, 215), (0, 1, 0)))
+        white = uv('bouw', 'white')
+        for a in (-w, w):
+            for d0 in (90, 150):
+                post = [P(a - 3, d0, deck_y), P(a + 3, d0, deck_y), P(a + 3, d0, deck_y + 150), P(a - 3, d0, deck_y + 150)]
+                self.chunks.add('rail', i, quad(post, white, (255, 255, 255), tuple(-x for x in r)))
+                self.chunks.add('rail', i, quad(post, white, (255, 255, 255), r))
+            # The balance beam: from behind the portal out over the water.
+            beam = [P(a - 3, 40, deck_y + 150), P(a + 3, 40, deck_y + 150), P(a + 3, 300, deck_y + 120), P(a - 3, 300, deck_y + 120)]
+            self.chunks.add('rail', i, quad(beam, white, (255, 255, 255), (0, 1, 0)))
+            self.chunks.add('rail', i, quad(beam, white, (230, 230, 230), (0, -1, 0)))
+        for d0 in (90, 150):
+            top = [P(-w, d0, deck_y + 140), P(w, d0, deck_y + 140), P(w, d0, deck_y + 150), P(-w, d0, deck_y + 150)]
+            self.chunks.add('rail', i, quad(top, white, (255, 255, 255), tuple(-x for x in r)))
+            self.chunks.add('rail', i, quad(top, white, (255, 255, 255), r))
+
+
+def inside(pt, poly):
+    """Point in polygon, even-odd."""
+    x, y = pt
+    hit = False
+    for (x0, y0), (x1, y1) in zip(poly, poly[1:] + poly[:1]):
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            hit = not hit
+    return hit
 
 
 def build():
     os.makedirs(OUT, exist_ok=True)
-    route, _, _ = loop(os.path.join(SRC, 'osm.json'))
-    fine = resample_step([(x * UNITS, z * UNITS) for x, z in chaikin(route)], 16.0)
+    fine = resample_step([(x * UNITS, z * UNITS) for x, z in chaikin([tuple(map(float, q)) for q in LAP])], 16.0)
     rounds = 0
     while radius(fine) < MIN_RADIUS and rounds < 4000:
         fine = relax(fine, 20)
@@ -735,8 +848,11 @@ def build():
     centre = resample_step(fine, CHUNK)
     town = Town(centre)
     n = town.n
-    st, kerk, poort, dike = town.near(STADHUIS), town.near(GROTE_KERK), town.near(LEKPOORT), town.near(DIKE)
-    print('chunks', n, 'smallest bend', round(radius(centre)), 'stadhuis', st, 'kerk', kerk, 'lekpoort', poort, 'dike', dike)
+    st, kerk, poort = town.near(STADHUIS), town.near(GROTE_KERK), town.near(LEKPOORT)
+    print('chunks', n, 'smallest bend', round(radius(centre)), 'stadhuis', st, 'kerk', kerk, 'lekpoort', poort)
+    town.lift([DIKE_UP if c[1] > DIKE_Z * UNITS else 0.0 for c in centre])
+    nodes, ways = load_osm(os.path.join(SRC, 'osm.json'))
+    water = [[nodes[k] for k in w['nodes'] if k in nodes] for w in ways if w.get('tags', {}).get('natural') == 'water']
     # The gate on the straight just before the bend: the passage is a straight box.
     turn = lambda i: abs(math.atan2(town.fr[(i + 1) % n][0][1], town.fr[(i + 1) % n][0][0]) - math.atan2(town.fr[i - 1][0][1], town.fr[i - 1][0][0]))
     poort = min(range(poort - 6, poort + 1), key=lambda i: (turn(i % n) > 0.05, -i)) % n
@@ -746,7 +862,13 @@ def build():
     town.stadhuis(st, town.side(st, STADHUIS))
     town.grote_kerk((kerk + 2) % n, town.side(kerk, GROTE_KERK))
     town.lekpoort(poort)
-    town.dike(poort + 2, poort + 9)
+    sides = town.water_sides(water)
+    print('water sides', len(sides), 'chunks', sorted({i for i, s in sides}))
+    east = [i for i, s in sorted(sides) if s == -1 and centre[i][0] > 1800 and abs(centre[i][1]) < 1200]
+    if east:
+        town.drawbridge(east[len(east) // 2], -1)
+    town.market(st - 7, st - 1)
+    town.market(st + 2, poort - 3)
     town.lamps()
     town.houses()
     if town.chunks.dropped:
@@ -758,21 +880,21 @@ def build():
     for c in chunks:
         for lst in c:
             rmp += struct.pack('<i', len(lst)) + b''.join(pack_plane(p) for p in lst)
-    edge = lambda i, off: (town.p(i, 0, off)[0], town.p(i, 0, off)[2])
+    edge = lambda i, off: (town.p(i, 0, off)[0], town.p(i, 0, off)[2], town.p(i, 0, off)[1])
     # .dmp waypoints: [type, trigger, x, y, z, next, alt2, alt1, previous]. Right lane i*2 drives
     # with the race, left lane i*2+1 against it, as the original's lanes do.
     dmp = struct.pack('<i', 2 * n)
     for i in range(n):
         for lane, (off, nxt, prv) in enumerate(((LANE, (i + 1) % n, (i - 1) % n), (-LANE, (i - 1) % n, (i + 1) % n))):
             p = edge(i, off)
-            dmp += struct.pack('<iifffiiii', 4, 0, p[0], 0.0, p[1], nxt * 2 + lane, -1, -1, prv * 2 + lane)
+            dmp += struct.pack('<iifffiiii', 4, 0, p[0], p[2], p[1], nxt * 2 + lane, -1, -1, prv * 2 + lane)
     # .pmp chunks: position, two triggers, rails, left and right waypoints. Chunk 0 marker; start
     # and finish one past the start chunk, finish valid the next, as on Amsterdam (119, 120).
     trig = {0: (9, 0), START + 1: (13, 14), START + 2: (15, 0)}
     pmp = struct.pack('<i', n)
     for i in range(n):
         t = trig.get(i, (0, 0))
-        pmp += struct.pack('<3f2i', centre[i][0], 0.0, centre[i][1], *t)
+        pmp += struct.pack('<3f2i', centre[i][0], town.ground[i], centre[i][1], *t)
         pmp += struct.pack('<i', 0) + struct.pack('<ii', 1, i * 2 + 1) + struct.pack('<ii', 1, i * 2)
     # .omp: the start and finish banner over the line, and pickups.
     def obj(chunk, kind, p, rot_y, name):
@@ -781,11 +903,11 @@ def build():
     s = START + 1
     f = town.fr[s][0]
     heading = math.degrees(math.atan2(f[1], f[0]))
-    objs.append(obj(s, 12, (centre[s][0], 75.0, centre[s][1]), heading, 'a_zepp00_ANIM'))
-    for k, name in ((20, 'pw_turbs_ANIM'), (35, 'pw_reps_ANIM'), (50, 'pw_5pts_ANIM'), (60, 'pw_turbb_ANIM'), (68, 'pw_10pts_ANIM')):
-        if k < n:
-            p = edge(k, LANE * (1 if k % 2 else -1))
-            objs.append(obj(k, 25, (p[0], 5.0, p[1]), heading, name))
+    objs.append(obj(s, 12, (centre[s][0], 75.0 + town.ground[s], centre[s][1]), heading, 'a_zepp00_ANIM'))
+    for frac, name in ((0.2, 'pw_turbs_ANIM'), (0.35, 'pw_reps_ANIM'), (0.5, 'pw_5pts_ANIM'), (0.65, 'pw_turbb_ANIM'), (0.8, 'pw_10pts_ANIM'), (0.92, 'pw_turbs_ANIM')):
+        k = int(n * frac)
+        p = edge(k, LANE * (1 if k % 2 else -1))
+        objs.append(obj(k, 25, (p[0], 5.0 + p[2], p[1]), heading, name))
     omp = struct.pack('<i', len(objs)) + b''.join(objs)
     files = {
         'vianen.rmp': rmp, 'vianen.dmp': dmp, 'vianen.pmp': pmp, 'vianen.omp': omp,

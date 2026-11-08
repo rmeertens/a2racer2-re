@@ -7,4 +7,4 @@ Inputs of `tools/vianen/build-track.py`, downloaded on 2026-11-08.
 
 Only openly licensed photos are used. The textures made from them carry the same licences: `public/assets/vianen/ATTRIBUTION.md`.
 
-- `own/`: photos of Vianen by the repository owner, Roland Meertens, November 2026: the eight that `tools/vianen/build-track.py` uses for the facades, the Lekpoort, the Stadhuis, the Grote Kerk, the paving and the brick. Downscaled to 1600 px, without their metadata (no location). The phone originals stay out of git (`/photos/` in `.gitignore`).
+- `own/`: photos of Vianen by the repository owner, Roland Meertens, November 2026: the ten that `tools/vianen/build-track.py` uses for the facades, the Lekpoort, the Stadhuis, the Grote Kerk, the paving, the brick, and the canal's water and grass. Downscaled to 1600 px, without their metadata (no location). The phone originals stay out of git (`/photos/` in `.gitignore`).

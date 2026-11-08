@@ -33187,7 +33187,9 @@ async function fetchVianen() {
   }));
   return files;
 }
-var VIANEN_VISIBLE_CHUNKS = 16;
+function vianenVisibleChunks(chunks) {
+  return Math.max(8, Math.min(25, Math.floor((chunks - 1) / 4)));
+}
 function installVianen(vfs, files) {
   const { slot, like } = VIANEN;
   const two3 = String(slot).padStart(2, "0");
@@ -33225,10 +33227,12 @@ function installVianen(vfs, files) {
   }
   vfs.iniSet("raser.ini", "MAPS", String(slot), `1,etappe${slot},vn_weg,vn_land,vn_gevel,vn_bouw,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
   const visible = vfs.iniGet("game.ini", "OPTIONS", "VISIBLECHUNKS");
-  if (!(Number(visible) > 0 && Number(visible) <= VIANEN_VISIBLE_CHUNKS)) {
+  const pmp = files.get("vianen.pmp");
+  const most = vianenVisibleChunks(new DataView(pmp.buffer, pmp.byteOffset, 4).getInt32(0, true));
+  if (!(Number(visible) > 0 && Number(visible) <= most)) {
     vfs.onWrite = null;
     try {
-      vfs.iniSet("game.ini", "OPTIONS", "VISIBLECHUNKS", String(VIANEN_VISIBLE_CHUNKS));
+      vfs.iniSet("game.ini", "OPTIONS", "VISIBLECHUNKS", String(most));
     } finally {
       vfs.onWrite = write;
     }

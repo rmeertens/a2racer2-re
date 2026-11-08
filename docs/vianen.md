@@ -4,7 +4,19 @@
 
 A track the original never had, an earlier sketch: a loop through the old town of Vianen, an addition of the port and a first sketch. It is etappe 10, a slot the original reserves (`raser.ini [MAPS]` has rows 10 and 11) but never fills. It is offered in the multiplayer screens (`Vianen (schets)`), alone or with others, and directly with `?race=1&etappe=vianen`. The menu's own Tour and Quick Race do not list it.
 
-## The route
+## The route (second version)
+
+About 1,360 m and 106 chunks, drawn along the streets (`LAP` in `build-track.py`, no longer routed by shortest path):
+
+1. Up Voorstraat from the Grote Kerk past the market stalls and the Stadhuis.
+2. Through the Lekpoort, and up a ramp onto the dike, 4 m above the town (`DIKE_UP`).
+3. East along the moat's north side, then down.
+4. South along the east moat, past a white drawbridge.
+5. West along the south moat, back to the church.
+
+Where the OSM water polygons lie beside the road, the side gets no houses. Instead it has a brick quay edge with white railings, a grass bank down to the water, the far bank and trees (`water_sides`). The market stalls are wooden counters with striped awnings against the houses (`market`). Ground heights per chunk (`Town.lift`) go into every point, the waypoints and the chunk positions.
+
+## The first route
 
 About 920 m and 72 chunks. From the Grote Kerk end of Voorstraat north past the Stadhuis and through the Lekpoort, west along the dike, south down the parallel streets, and back east to the church. The streets come from OpenStreetMap; bends are rounded so that none is tighter than 26 m, so the loop follows the real streets only roughly.
 
@@ -34,7 +46,7 @@ The track's planes now build the town in 3D. Houses have facades from the photos
 
 ## A short lap and the view distance
 
-Each tick the race runs object handlers within 2 × VISIBLECHUNKS chunks of the player (`0x0044cbb9`, `FUN_004a9870`). `FUN_004af5a0` wraps that window around the lap, wrongly when the window reaches past both ends at once. That happens only on a lap shorter than 4 × VISIBLECHUNKS chunks. The original's laps are about 360 chunks; Vianen's 72 are not. With the shipped 25, chunks 22 to 49 left the player's own car outside the window. Its handler (`FUN_0044ea60`) did not run there, so the wheels went, steering stopped, the driven-chunk count and the reset chunk (`0x6fba7c`) froze, and the reset key sent the car back to chunk 21. `installVianen` sets VISIBLECHUNKS to 16 for a Vianen race (`VIANEN_VISIBLE_CHUNKS`), about 200 m of view, and its restore() puts the player's value back, since `game.ini` is saved.
+Each tick the race runs object handlers within 2 × VISIBLECHUNKS chunks of the player (`0x0044cbb9`, `FUN_004a9870`). `FUN_004af5a0` wraps that window around the lap, wrongly when the window reaches past both ends at once. That happens only on a lap shorter than 4 × VISIBLECHUNKS chunks. The original's laps are about 360 chunks; Vianen's first lap had 72. With the shipped 25, chunks 22 to 49 left the player's own car outside the window. Its handler (`FUN_0044ea60`) did not run there, so the wheels went, steering stopped, the driven-chunk count and the reset chunk (`0x6fba7c`) froze, and the reset key sent the car back to chunk 21. `installVianen` caps VISIBLECHUNKS at a quarter of the lap's chunks (`vianenVisibleChunks`; 25 for the 106-chunk lap), and its restore() puts the player's value back, since `game.ini` is saved.
 
 Checked on 2026-11-08 by counting the player handler's calls per second in a headless bot lap: 60 every second of the lap. The driven count rose all lap and the bot lapped without a reset. Against Amsterdam over the same kind of drive, the body's vertical speed averaged 0.084 m/s against 0.22.
 

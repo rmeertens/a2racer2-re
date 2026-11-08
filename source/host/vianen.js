@@ -37,9 +37,11 @@ export async function fetchVianen() {
  * Object handlers run within 2 * VISIBLECHUNKS chunks of the player (0x0044cbb9, FUN_004a9870). On
  * a lap shorter than 4 * VISIBLECHUNKS, FUN_004af5a0 wraps that window wrongly and leaves the
  * player's own car out: its handler stops (no wheels, no steering, no progress, a reset far back).
- * The original's laps are about 360 chunks; Vianen's 72 need VISIBLECHUNKS under 18.
+ * The original's laps are about 360 chunks; Vianen's need VISIBLECHUNKS below a quarter of its chunks.
  */
-export const VIANEN_VISIBLE_CHUNKS = 16;
+export function vianenVisibleChunks(chunks) {
+  return Math.max(8, Math.min(25, Math.floor((chunks - 1) / 4)));
+}
 
 /**
  * Makes etappe 10 Vianen. files: name to bytes. Can be called again: it changes nothing twice.
@@ -87,10 +89,12 @@ export function installVianen(vfs, files) {
   // raser.ini is saved with the player's data, and the race writes it: the row stays, unused elsewhere.
   vfs.iniSet('raser.ini', 'MAPS', String(slot), `1,etappe${slot},vn_weg,vn_land,vn_gevel,vn_bouw,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
   const visible = vfs.iniGet('game.ini', 'OPTIONS', 'VISIBLECHUNKS');
-  if (!(Number(visible) > 0 && Number(visible) <= VIANEN_VISIBLE_CHUNKS)) {
+  const pmp = files.get('vianen.pmp');
+  const most = vianenVisibleChunks(new DataView(pmp.buffer, pmp.byteOffset, 4).getInt32(0, true));
+  if (!(Number(visible) > 0 && Number(visible) <= most)) {
     vfs.onWrite = null;
     try {
-      vfs.iniSet('game.ini', 'OPTIONS', 'VISIBLECHUNKS', String(VIANEN_VISIBLE_CHUNKS));
+      vfs.iniSet('game.ini', 'OPTIONS', 'VISIBLECHUNKS', String(most));
     } finally {
       vfs.onWrite = write;
     }
