@@ -283,6 +283,29 @@ def railing_sprite(w, h, colour=(236, 238, 236)):
     return im
 
 
+def sign_texture(w, h, bg, fg):
+    """A shop sign over a ground floor: the Vianen singer's name in big letters, his hit below.
+    Text only, drawn here, no picture of him."""
+    k = 4
+    im = Image.new('RGB', (w * k, h * k), bg)
+    d = ImageDraw.Draw(im)
+    d.rectangle((6 * k, 6 * k, (w - 6) * k, (h - 6) * k), outline=fg, width=2 * k)
+    def font(name, size):
+        try:
+            return ImageFont.truetype('/System/Library/Fonts/Supplemental/' + name, size)
+        except OSError:
+            return ImageFont.load_default()
+    big, small = font('Arial Black.ttf', 30 * k), font('Arial Bold Italic.ttf', 12 * k)
+    for text, f, y in (('JODY BERNAL', big, 0.42), ('Que si, que no', small, 0.78)):
+        x0, y0, x1, y1 = d.textbbox((0, 0), text, font=f)
+        scale = min(1.0, (w - 20) * k / (x1 - x0))
+        if scale < 1.0:
+            f = font('Arial Black.ttf' if f is big else 'Arial Bold Italic.ttf', int(f.size * scale))
+            x0, y0, x1, y1 = d.textbbox((0, 0), text, font=f)
+        d.text(((w * k - (x1 - x0)) / 2 - x0, y * h * k - (y1 - y0) / 2 - y0), text, font=f, fill=fg)
+    return im.resize((w, h), Image.Resampling.LANCZOS)
+
+
 def produce_texture(w, h):
     """A market table seen from above: crates of fruit, vegetables and flowers."""
     rng = random.Random(77)
@@ -415,7 +438,8 @@ BOUW = {
     'white': (896, 256, 1024, 512),
     'lekpoort': (0, 512, 192, 1024), 'stadhuis': (192, 512, 512, 1024),
     'arches': (512, 512, 1024, 640), 'bracing': (512, 640, 640, 768), 'darkrail': (640, 640, 896, 768), 'steel': (896, 640, 1024, 768),
-    'kerk2': (512, 768, 704, 1024), 'produce': (704, 768, 960, 1024),
+    'kerk2': (512, 768, 704, 1024), 'produce': (704, 768, 832, 1024),
+    'sign_blue': (832, 768, 1024, 832), 'sign_red': (832, 832, 1024, 896),
 }
 ATLAS_SIZE = {'gevel': (1024, 1024), 'land': (512, 512), 'bouw': (1024, 1024)}
 ATLASES = {'gevel': GEVEL, 'land': LAND, 'bouw': BOUW}
@@ -448,7 +472,10 @@ def build_textures():
     for name in ('lekpoort', 'stadhuis', 'kerk2', 'arches'):
         r = BOUW[name]
         bouw.paste(own(name, (r[2] - r[0], r[3] - r[1])), r[:2])
-    bouw.paste(produce_texture(256, 256), BOUW['produce'][:2])
+    bouw.paste(produce_texture(256, 256).resize((128, 256), Image.Resampling.LANCZOS), BOUW['produce'][:2])
+    for name, bg, fg in (('sign_blue', (18, 34, 92), (255, 204, 40)), ('sign_red', (170, 24, 32), (255, 255, 255))):
+        box = BOUW[name]
+        bouw.paste(sign_texture(box[2] - box[0], box[3] - box[1], bg, fg), box[:2])
     bouw.paste(bracing_sprite(128, 128), BOUW['bracing'][:2])
     bouw.paste(railing_sprite(256, 128, colour=(52, 66, 62)), BOUW['darkrail'][:2])
     steel = (np.full((128, 128, 3), (30, 32, 34), float) + noise(128, 128, 5, 21)).clip(0, 255).astype(np.uint8)
@@ -523,6 +550,7 @@ class Town:
         self.ground = [0.0] * self.n
         self.skip = set()  # (chunk, side) without houses
         self.bridges = set()  # chunks over water: a narrower deck
+        self.gaps = set()  # (chunk, side, t): a house's side at a side street's mouth
         self.spans = []    # (chunk, side, t0, t1): houses on part of a skipped chunk
 
     def p(self, i, t, off, y=0.0):
@@ -616,6 +644,14 @@ class Town:
                         'tint': tuple([rng.randint(236, 255)] * 3),
                     })
             rows[s] = row
+        # A few shops advertise Vianen's singer: six houses spread over the lap, both sides.
+        pick = random.Random(1999)
+        chosen = []
+        for h in pick.sample([h for row in rows.values() for h in row if h and h['t1'] - h['t0'] == 0.5], 60):
+            if len(chosen) < 6 and all(min(abs(h['i'] - c['i']), self.n - abs(h['i'] - c['i'])) > 12 for c in chosen):
+                h['sign'] = ('sign_blue', 'sign_red')[len(chosen) % 2]
+                chosen.append(h)
+        self.signs = sorted((h['i'], h['s']) for h in chosen)
         for s, row in rows.items():
             m = len(row)
             for k, h in enumerate(row):
@@ -646,6 +682,11 @@ class Town:
         rtint = (225, 225, 230) if h['roofs'] == 'slate' else (236, 226, 220)
         vs = [F(t0, 0), F(t1, 0), F(t1, T), F(t0, T)]
         self.chunks.add('extra', i, quad(vs, uv('gevel', FACADES[h['type']]), h['tint'], inward))
+        if h.get('sign'):
+            # A board over the ground floor, a little in front of the wall.
+            a, b = t0 + (t1 - t0) * 0.12, t1 - (t1 - t0) * 0.12
+            S = lambda t, y: self.p(i, t, s * (f0 - 1.5), y)
+            self.chunks.add('rail', i, quad([S(a, 34), S(b, 34), S(b, 52), S(a, 52)], uv('bouw', h['sign']), (255, 255, 255), inward))
         if h['gable']:
             # Two slopes from the eaves at the sides up to the ridge behind the gable's top.
             ridge = T - 6
@@ -658,6 +699,13 @@ class Town:
         # Side walls where the neighbour is lower or missing, and the cornice house's gable end.
         top_wall = E if h['gable'] else T
         for t, other, facing in ((t0, prev, back), (t1, nxt, fw)):
+            if (i, s, t) in self.gaps:
+                # A side street's corner: the wall closed down to the ground, and on to where the
+                # street's own fronts begin, so nothing leads behind the row (no ground there).
+                other = None
+                if f1 < WALK + DEPTH:
+                    vs = [B(t, 0), self.p(i, t, s * (WALK + DEPTH), 0), self.p(i, t, s * (WALK + DEPTH), top_wall), B(t, top_wall)]
+                    self.chunks.add('rail', i, quad(vs, uv('bouw', 'brick', 0, 1, 0, 0.6), (226, 214, 206), facing))
             if other is not None and self.height(other) >= self.height(h) and other['eave'] >= top_wall:
                 continue
             base = 0 if other is None else min(top_wall, other['eave'])
@@ -900,7 +948,8 @@ class Town:
         t0, t1 = 0.32, 0.68
         self.skip.add((i, s))
         self.spans += [(i, s, 0.0, t0), (i, s, t1, 1.0)]
-        L = 260.0
+        self.gaps |= {(i, s, t0), (i, s, t1)}
+        L = 200.0
         fw = self.fwd(i)
         inward = tuple(-s * x for x in self.right(i))
         Q = lambda t, off, y: self.p(i, t, s * off, y)
@@ -932,6 +981,16 @@ class Town:
                 low = WATER_Y - g0
                 P = lambda t, off, y, i=i, s=s: self.p(i, t, s * off, y)
                 self.chunks.add('land', i, quad([P(0, DECK, low), P(1, DECK, low), P(1, DECK + 500, low), P(0, DECK + 500, low)], uv('land', 'water'), (230, 238, 245), (0, 1, 0)))
+        # The bridge's ends: the corner from the deck's edge out to the quay or house line, closed,
+        # or a car slips past the parapet's end down to the water and off its far edge.
+        for i, t, facing in ((first % self.n, 0.0, -1), (last % self.n, 1.0, 1)):
+            fw = tuple(facing * x for x in self.fwd(i))
+            for s in (-1, 1):
+                P = lambda off, y, i=i, s=s, t=t: self.p(i, t, s * off, y)
+                g0 = self.p(i, t, 0)[1]
+                vs = [P(DECK, WATER_Y - g0), P(WALK + 2, WATER_Y - g0), P(WALK + 2, 30), P(DECK, 30)]
+                for face in (fw, tuple(-x for x in fw)):
+                    self.chunks.add('rail', i, quad(vs, uv('bouw', 'brick', 0, 0.3, 0, 0.5), (226, 214, 206), face))
 
     def parapets(self, i, rail):
         """Both edges of a bridge deck: a low brick parapet with a stone cap, a railing on it."""
@@ -1165,6 +1224,7 @@ def build():
     town.market(st + 2, poort - 3)
     town.lamps()
     town.houses()
+    print('Jody Bernal signs on', town.signs)
     if town.chunks.dropped:
         print('planes that found no room:', town.chunks.dropped)
 
@@ -1215,6 +1275,9 @@ def build():
     build_textures()
     build_loading()
     write_attribution()
+    if os.environ.get('VIANEN_SIDES'):
+        # For checks: each side street's chunk, side, and points at its mouth and near its end.
+        json.dump([[i, s_, town.p(i, 0.5, s_ * ROAD), town.p(i, 0.5, s_ * (WALK + 170)), town.p(i, 0.5, s_ * (WALK + 45)), town.p(i, 0.1, s_ * (WALK + 45)), town.p(i, 0.9, s_ * (WALK + 45))] for i, s_ in branches], open(os.environ['VIANEN_SIDES'], 'w'))
     json.dump({'chunks': n, 'start': START, 'lengthMetres': round(n * CHUNK / UNITS), 'planes': total}, open(os.path.join(OUT, 'vianen.json'), 'w'))
     full = {k: sum(1 for c in town.chunks.lists if len(c[k]) == LIMITS[k]) for k in LIMITS}
     print('planes', total, 'objects', len(objs), 'length m', round(n * CHUNK / UNITS), 'full lists', full)

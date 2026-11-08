@@ -72,3 +72,13 @@ Checked on 2026-11-08 by counting the player handler's calls per second in a hea
 - The test bot is slow in bends; the AI racers lap at full pace.
 - `tools/vianen/check-walls.py` now reports the side streets as openings, on purpose.
 - Vianen is in the multiplayer screens and at `?race=1&etappe=vianen`, not in the menu's Quick Race list.
+
+## No way off the map
+
+`tools/vianen/check-leaks.py` draws the track from above (ground: every upward plane; walls: every upright plane at least 12 units high), floods from the road between the walls, and reports each place reached with nothing underneath. It found two kinds of holes, now closed:
+- Side streets: the corner houses had no side wall toward the street when the opposite house was taller, and shallow houses in bends left a gap before the street's own fronts. Both led behind the row, where there is no ground. A corner house now always has its side wall, extended to where the fronts begin.
+- Bridge ends: the parapet stands at the deck edge (64), the quay and the houses at 82. A wall now closes that corner, so no one slips down to the water and off its far edge.
+
+## Signs
+
+Six houses carry a shop sign for Vianen's singer Jody Bernal (`sign_blue`, `sign_red` in the bouw atlas). The signs are text only, drawn by `sign_texture` in the build script.
