@@ -189,10 +189,11 @@ export class TfrmMainScreen extends OneWayScreen {
   static dfm = 'TFRMMAINSCREEN';
 
   // FormCreate 0x49db5c and FormShow 0x49d894. btnInternet.Enabled was 0x491024, a browser was found.
-  // Port: always off. DOWNLOADURL no longer leads to an A2 Racer site, so TfrmInternetDlg is not reached.
+  // Port: DOWNLOADURL no longer leads to an A2 Racer site, so TfrmInternetDlg is not reached. The
+  // button opens the network races instead, an addition of the port: source/net/, docs/multiplayer.md.
   async create() {
     await super.create();
-    this.btnInternet.enabled = false;
+    this.btnInternet.enabled = Boolean(this.rt.data.app && this.rt.data.app.openMultiplayer);
     this.showTitle();
     const quick = this.rt.data.raceMode === 1;
     (quick ? this.optQuickRace : this.optTour).setChecked(true);
@@ -227,7 +228,12 @@ export class TfrmMainScreen extends OneWayScreen {
 
   /** Port: a disabled button takes no clicks, so the form explains it. */
   onBackgroundClick(px, py) {
-    if (this.btnInternet.hit(px, py)) this.rt.data.notApplicable(NOTE_INTERNET);
+    if (!this.btnInternet.enabled && this.btnInternet.hit(px, py)) this.rt.data.notApplicable(NOTE_INTERNET);
+  }
+
+  /** Port: network races with up to eight players, source/net/. */
+  btnInternetClick() {
+    return this.rt.data.app.openMultiplayer();
   }
 
   // 0x49da44. The original also reads static.ini again after a visit to the site, for what a

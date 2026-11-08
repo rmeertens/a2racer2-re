@@ -1,7 +1,10 @@
 #!/usr/bin/env node
-// Static file server for the game with byte ranges and the right types.
-//   node tools/serve.mjs [--dist]  (PORT, default 4180)
+// Static file server for the game with byte ranges and the right types, and the lobby for
+// network races on /lobby (tools/lobby.mjs).
+//   node tools/serve.mjs [--dist] [--lan]  (PORT, default 4180; --lan or HOST=0.0.0.0 for other machines)
 import { createServer } from 'node:http';
+import { networkInterfaces } from 'node:os';
+import { attachLobby } from './lobby.mjs';
 import { createReadStream, statSync, existsSync } from 'node:fs';
 import { extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -62,5 +65,16 @@ const server = createServer((req, res) => {
   if (req.method === 'HEAD') res.end();
   else createReadStream(file).pipe(res);
 });
+attachLobby(server, { path: '/lobby' });
 const port = Number(process.env.PORT || 4180);
-server.listen(port, '127.0.0.1', () => console.log(`http://127.0.0.1:${server.address().port}/`));
+const host = process.env.HOST || (process.argv.includes('--lan') ? '0.0.0.0' : '127.0.0.1');
+server.listen(port, host, () => {
+  const p = server.address().port;
+  console.log(`http://127.0.0.1:${p}/`);
+  if (host === '0.0.0.0') {
+    // Other players on the network open one of these. Browsers allow gamepads only on https or localhost.
+    for (const list of Object.values(networkInterfaces())) {
+      for (const a of list || []) if (a.family === 'IPv4' && !a.internal) console.log(`http://${a.address}:${p}/`);
+    }
+  }
+});

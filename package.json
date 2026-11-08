@@ -32,6 +32,7 @@
     "release:archives": "node tools/package-release.mjs"
   },
   "dependencies": {
+    "peerjs": "1.5.4",
     "three": "0.186.0"
   },
   "devDependencies": {

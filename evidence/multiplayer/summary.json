@@ -1,0 +1,46 @@
+{
+ "players": 3,
+ "checks": [
+  {
+   "name": "host: room open",
+   "ok": true,
+   "detail": "Test 74835"
+  },
+  {
+   "name": "host: everyone joined and ready",
+   "ok": true,
+   "detail": "Start Naam Auto Status Ping 1 Host Edgar de Flits Host 2 Speler1 Katharina 'Kat' Klaar - ms Weg 3 Speler2 Tommie 'El Niño' Klaar - ms Weg"
+  },
+  {
+   "name": "all started from one go time",
+   "ok": true,
+   "detail": "9.754 9.754 9.754"
+  },
+  {
+   "name": "every page has the others as puppets",
+   "ok": true,
+   "detail": "2,2,2"
+  },
+  {
+   "name": "samples arrive",
+   "ok": true,
+   "detail": "0.03/0.00 0.10/0.00 0.10/0.04"
+  },
+  {
+   "name": "positions are a permutation",
+   "ok": true,
+   "detail": "3,1,2"
+  },
+  {
+   "name": "all back in the room, host can race again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "no console errors",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "worstGap": 21.806648587501844
+}

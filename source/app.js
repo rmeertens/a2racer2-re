@@ -12,6 +12,9 @@ import { GameData } from './menu/data.js';
 import { Settings, fullscreenElement } from './settings.js';
 import { GamepadInput } from './input/gamepad.js';
 import * as forms from './menu/forms/index.js';
+import { LobbyUI } from './net/lobby-ui.js';
+import { NetRace } from './net/puppets.js';
+import { prepareRaceFiles } from './net/race-files.js';
 
 // Esc for the quit prompt. T, N and W are default turbo chords a browser would take: input.md H8.
 const LOCKED_KEYS = ['Escape', 'KeyT', 'KeyN', 'KeyW'];
@@ -116,6 +119,7 @@ export class App {
     this.say('');
     const loop = () => {
       requestAnimationFrame(loop);
+      if (this.mode === 'mp') this.menu.render();
       if (this.mode === 'menu') {
         this.menu.render();
         this.menuPad.pollMenu((code, down) => {
@@ -167,6 +171,59 @@ export class App {
     this.menu.ignoreRepeat = true;
     this.showMenu();
     if (!this.params.has('race')) await this.data.flow.afterRace(this.menu);
+  }
+
+  /** Port: the network races' screens over the main menu. source/net/, docs/multiplayer.md. */
+  openMultiplayer() {
+    if (!this.lobby) this.lobby = new LobbyUI(this, document.getElementById('mp'));
+    this.mode = 'mp';
+    this.lobby.show();
+    // The menu draws once more behind the screens, then takes no input.
+    this.menu.dirty = true;
+    this.menu.render();
+    this.menu.active = false;
+  }
+
+  closeMultiplayer() {
+    this.mode = 'menu';
+    this.menu.active = true;
+    this.menuPad.resync();
+  }
+
+  /**
+   * One network race: the menu's Quick Race files with the room's etappe, laps and difficulty,
+   * the files for the other humans' cars (source/net/race-files.js), then the race, then the room.
+   */
+  async startNetRace(setup) {
+    const session = this.lobby.session;
+    const me = setup.players.find((p) => p.id === session.you);
+    if (!me) return;
+    const data = this.data;
+    const track = data.static.tracks.find((t) => t.indexInGame === setup.etappe);
+    const mode = data.raceMode;
+    data.raceMode = 1;
+    data.writeToInis();
+    data.raceMode = mode;
+    const set = (section, key, value) => this.vfs.iniSet('game.ini', section, key, String(value));
+    set('ETAPPE', 'ETAPPE', setup.etappe);
+    set('ETAPPE', 'BRITISH', track && track.british ? 1 : 0);
+    set('OPTIONS', 'NRLAPS', setup.laps);
+    set('LEAGUE', 'LEAGUE', setup.difficulty ?? 1);
+    set('PLAYER', 'CAR', me.car);
+    set('PLAYER', 'DAMAGE', 0);
+    const net = new NetRace({ me: me.id, players: setup.players }, session.clock);
+    const files = prepareRaceFiles(this.vfs, { localCar: me.car, remoteCars: net.remoteCars });
+    this.showRace();
+    try {
+      await this.runner.run({ net, session, seed: setup.seed, cars: [...new Set(setup.players.map((p) => p.car))] });
+    } finally {
+      files.restore();
+      session.raceEnded();
+    }
+    this.menu.ignoreRepeat = true;
+    this.showMenu();
+    if (forms.TfrmMainScreen) await this.menu.goTo(forms.TfrmMainScreen);
+    this.openMultiplayer();
   }
 
   /** The quit path: EXITCODE 255. The launcher would close; here the first screen returns. */
@@ -233,7 +290,7 @@ export class App {
     const dpr = window.devicePixelRatio || 1;
     const w = Math.max(1, Math.round(window.innerWidth * dpr));
     const h = Math.max(1, Math.round(window.innerHeight * dpr));
-    if (this.mode === 'menu') {
+    if (this.mode === 'menu' || this.mode === 'mp') {
       this.canvasMenu.width = w;
       this.canvasMenu.height = h;
       this.menu.relayout();

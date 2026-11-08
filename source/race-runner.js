@@ -12,6 +12,7 @@ import { Bot } from './dev/bot.js';
 import { SettingsPanel } from './ui/settings-panel.js';
 import { safeAreaInsets } from './ui/safe-area.js';
 import { useTouch, fullscreenElement } from './settings.js';
+import { NetOverlay } from './net/overlay.js';
 
 // One pass of the original main loop per tick. docs/original-behavior.md, timing section.
 export const TICK_SECONDS = 1 / 60;
@@ -114,14 +115,19 @@ export class RaceRunner {
     if (this.touch) this.touch.relayout();
   }
 
-  /** Resolves when the race has ended and spel.dat would have exited. */
-  async run() {
+  /**
+   * Resolves when the race has ended and spel.dat would have exited. mp: a network race,
+   * { net: NetRace, session: NetSession, seed, cars }, source/net/.
+   */
+  async run(mp = null) {
     const app = this.app;
     app.say('');
     this.endWaitStart = 0;
+    this.mp = mp;
     let race;
     try {
       race = await this.load();
+      if (mp) await this.waitForGo(mp);
     } catch (e) {
       // S:0x4c4150 ends in ExitProcess(1) and the launcher runs menu.exe /Default whatever the
       // result, so a failure comes back to the menu: startup-flow.md section 5. A GameExit has
@@ -138,7 +144,11 @@ export class RaceRunner {
       this.bot = new Bot(race, this.input);
       window.__bot = this.bot;
     }
-    this.speed = Number(app.params.get('speed')) || 1;
+    this.speed = mp ? 1 : Number(app.params.get('speed')) || 1;
+    if (mp) {
+      this.netOverlay = this.netOverlay || new NetOverlay(document.getElementById('net-hud'));
+      this.netOverlay.start(mp, this.renderer);
+    }
     window.__race = race;
     window.__renderer = this.renderer;
     this.acc = 0;
@@ -175,6 +185,8 @@ export class RaceRunner {
     this.showBar(0);
     await this.loadCode();
     await app.files.prepareRace(etappe, car, (a, b) => this.showBar((a / b) * 90));
+    // A network race also draws the other humans' cars.
+    for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app.files.prepareRace(etappe, other);
     if (!this.renderer) this.renderer = new D3DRenderer(app.canvasRace, { staticTrack: !app.params.has('nostatic') });
     this.renderer.resetForRace();
     const audio = new GameAudio(app.getAudioContext(), app.getMasterOutput());
@@ -206,6 +218,11 @@ export class RaceRunner {
       host.fixedDate = 971434016000;
       host.clockStart = 1;
     }
+    // A network race: every browser seeds rand alike, so traffic starts the same everywhere.
+    if (this.mp) {
+      host.fixedDate = 971434016000;
+      host.clockStart = this.mp.seed;
+    }
     this.host = host;
     const race = new Race(this.meta, host);
     await race.instantiate(this.wasmModule);
@@ -213,6 +230,15 @@ export class RaceRunner {
     this.renderer.attach(race.m, host);
     audio.attach(race.m, race.clock);
     host.hudLayout = new HudLayout(race.m);
+    if (this.mp) {
+      this.mp.net.attach(race);
+      const hud = host.hudLayout;
+      const apply = hud.apply.bind(hud);
+      hud.apply = () => {
+        apply();
+        if (this.mp) this.mp.net.beforeHud();
+      };
+    }
     this.input = new GameInput(race.m);
     host.input = this.input;
     this.bind();
@@ -228,10 +254,25 @@ export class RaceRunner {
     // The game loads in one go here: let the browser paint the splash screen first.
     await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
     race.boot();
+    if (this.mp) this.mp.net.boot();
     // The mode is known now, and the 8-bit modes size their view by it.
     if (this.renderer.indexed) this.layout();
-    document.getElementById('loading').hidden = true;
+    if (!this.mp) document.getElementById('loading').hidden = true;
     return race;
+  }
+
+  /** A network race starts when every browser has loaded it, at the same moment in all. */
+  async waitForGo(mp) {
+    const note = document.getElementById('loading-note');
+    note.textContent = 'Wachten op de andere spelers...';
+    note.hidden = false;
+    this.showBar(100);
+    try {
+      await mp.session.loaded(mp.net);
+    } finally {
+      note.hidden = true;
+      document.getElementById('loading').hidden = true;
+    }
   }
 
   /** The wait screen's bar, as 0x004976d0 selects its frame: ftol(11 * pct * 0.01). */
@@ -299,7 +340,15 @@ export class RaceRunner {
     });
     app.settings.listeners.add((key) => this.settingChanged(key));
     document.addEventListener('visibilitychange', () => this.visibility());
-    window.addEventListener('blur', () => this.setFocus(false));
+    window.addEventListener('blur', () => {
+      // A network race runs on while the page is visible: the others are still driving.
+      if (this.mp && !document.hidden) {
+        if (this.touch) this.touch.releaseAll();
+        if (this.input) this.input.clear();
+        return;
+      }
+      this.setFocus(false);
+    });
     window.addEventListener('focus', () => this.setFocus(true));
   }
 
@@ -310,6 +359,8 @@ export class RaceRunner {
     if (this.touch) this.touch.setVisible(false);
     if (this.panel) this.panel.close();
     for (const id of ['loading', 'dialog-keys', 'race-settings', 'race-stop', 'fps']) document.getElementById(id).hidden = true;
+    if (this.netOverlay) this.netOverlay.stop();
+    this.mp = null;
     page.classList.remove('race-portrait', 'race-touch', 'race-results', 'actions-lifted');
     this.app.canvasRace.classList.remove('no-pointer');
     clearTimeout(this.pointerTimer);
@@ -375,6 +426,11 @@ export class RaceRunner {
       // Falling behind: the original slows game time at a dt of 0.1 s, and so does this.
       const steps = Math.min(MAX_TICKS_PER_FRAME * speed, Math.floor(this.acc / TICK_SECONDS));
       if (this.gamepad) this.gamepad.pollRace(this.input, race.pause ? race.pause.kind : 0, this.resultScreen);
+      // A network race has no pause: the others drive on. Esc and its quit prompt stay.
+      if (this.mp) {
+        this.input.vk[0x50] = 0;
+        this.input.dik[0x19] = 0;
+      }
       // A pause or quit dialog stays on the frame of its key's tick, so that one must be kept.
       const dialogKey = this.input.vk[0x50] || this.input.vk[0x1B];
       for (let k = 0; k < steps; k++) {
@@ -400,6 +456,7 @@ export class RaceRunner {
           break;
         }
         if (this.repeatable) this.traceTick(race);
+        if (this.mp) this.mp.session.afterTick();
         if (bench) bench.tick.push(performance.now() - t0);
         this.input.endTick();
       }
@@ -408,6 +465,7 @@ export class RaceRunner {
     const t1 = bench ? performance.now() : 0;
     // Under a dialog the picture stays on its key's tick: 0x0044ca80 waits and draws nothing.
     this.renderer.present(race.pause || race.ended ? 1 : Math.min(1, this.acc / TICK_SECONDS));
+    if (this.mp && this.netOverlay) this.netOverlay.frame(now);
     if (bench) bench.present.push(performance.now() - t1);
   }
 

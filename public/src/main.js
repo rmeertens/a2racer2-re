@@ -1,8 +1,647 @@
+var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+
+// node_modules/sdp/sdp.js
+var require_sdp = __commonJS({
+  "node_modules/sdp/sdp.js"(exports, module) {
+    "use strict";
+    var SDPUtils2 = {};
+    SDPUtils2.generateIdentifier = function() {
+      return Math.random().toString(36).substring(2, 12);
+    };
+    SDPUtils2.localCName = SDPUtils2.generateIdentifier();
+    SDPUtils2.splitLines = function(blob) {
+      return blob.trim().split("\n").map((line) => line.trim());
+    };
+    SDPUtils2.splitSections = function(blob) {
+      const parts = blob.split("\nm=");
+      return parts.map((part, index) => (index > 0 ? "m=" + part : part).trim() + "\r\n");
+    };
+    SDPUtils2.getDescription = function(blob) {
+      const sections = SDPUtils2.splitSections(blob);
+      return sections && sections[0];
+    };
+    SDPUtils2.getMediaSections = function(blob) {
+      const sections = SDPUtils2.splitSections(blob);
+      sections.shift();
+      return sections;
+    };
+    SDPUtils2.matchPrefix = function(blob, prefix) {
+      return SDPUtils2.splitLines(blob).filter((line) => line.indexOf(prefix) === 0);
+    };
+    SDPUtils2.parseCandidate = function(line) {
+      let parts;
+      if (line.indexOf("a=candidate:") === 0) {
+        parts = line.substring(12).split(" ");
+      } else {
+        parts = line.substring(10).split(" ");
+      }
+      const candidate = {
+        foundation: parts[0],
+        component: { 1: "rtp", 2: "rtcp" }[parts[1]] || parts[1],
+        protocol: parts[2].toLowerCase(),
+        priority: parseInt(parts[3], 10),
+        ip: parts[4],
+        address: parts[4],
+        // address is an alias for ip.
+        port: parseInt(parts[5], 10),
+        // skip parts[6] == 'typ'
+        type: parts[7]
+      };
+      for (let i = 8; i < parts.length; i += 2) {
+        switch (parts[i]) {
+          case "raddr":
+            candidate.relatedAddress = parts[i + 1];
+            break;
+          case "rport":
+            candidate.relatedPort = parseInt(parts[i + 1], 10);
+            break;
+          case "tcptype":
+            candidate.tcpType = parts[i + 1];
+            break;
+          case "ufrag":
+            candidate.ufrag = parts[i + 1];
+            candidate.usernameFragment = parts[i + 1];
+            break;
+          default:
+            if (candidate[parts[i]] === void 0) {
+              candidate[parts[i]] = parts[i + 1];
+            }
+            break;
+        }
+      }
+      return candidate;
+    };
+    SDPUtils2.writeCandidate = function(candidate) {
+      const sdp2 = [];
+      sdp2.push(candidate.foundation);
+      const component = candidate.component;
+      if (component === "rtp") {
+        sdp2.push(1);
+      } else if (component === "rtcp") {
+        sdp2.push(2);
+      } else {
+        sdp2.push(component);
+      }
+      sdp2.push(candidate.protocol.toUpperCase());
+      sdp2.push(candidate.priority);
+      sdp2.push(candidate.address || candidate.ip);
+      sdp2.push(candidate.port);
+      const type = candidate.type;
+      sdp2.push("typ");
+      sdp2.push(type);
+      if (type !== "host" && candidate.relatedAddress && candidate.relatedPort !== void 0) {
+        sdp2.push("raddr");
+        sdp2.push(candidate.relatedAddress);
+        sdp2.push("rport");
+        sdp2.push(candidate.relatedPort);
+      }
+      if (candidate.tcpType && candidate.protocol.toLowerCase() === "tcp") {
+        sdp2.push("tcptype");
+        sdp2.push(candidate.tcpType);
+      }
+      if (candidate.usernameFragment || candidate.ufrag) {
+        sdp2.push("ufrag");
+        sdp2.push(candidate.usernameFragment || candidate.ufrag);
+      }
+      return "candidate:" + sdp2.join(" ");
+    };
+    SDPUtils2.parseIceOptions = function(line) {
+      return line.substring(14).split(" ");
+    };
+    SDPUtils2.parseRtpMap = function(line) {
+      let parts = line.substring(9).split(" ");
+      const parsed = {
+        payloadType: parseInt(parts.shift(), 10)
+        // was: id
+      };
+      parts = parts[0].split("/");
+      parsed.name = parts[0];
+      parsed.clockRate = parseInt(parts[1], 10);
+      parsed.channels = parts.length === 3 ? parseInt(parts[2], 10) : 1;
+      parsed.numChannels = parsed.channels;
+      return parsed;
+    };
+    SDPUtils2.writeRtpMap = function(codec) {
+      let pt = codec.payloadType;
+      if (codec.preferredPayloadType !== void 0) {
+        pt = codec.preferredPayloadType;
+      }
+      const channels = codec.channels || codec.numChannels || 1;
+      return "a=rtpmap:" + pt + " " + codec.name + "/" + codec.clockRate + (channels !== 1 ? "/" + channels : "") + "\r\n";
+    };
+    SDPUtils2.parseExtmap = function(line) {
+      const parts = line.substring(9).split(" ");
+      return {
+        id: parseInt(parts[0], 10),
+        direction: parts[0].indexOf("/") > 0 ? parts[0].split("/")[1] : "sendrecv",
+        uri: parts[1],
+        attributes: parts.slice(2).join(" ")
+      };
+    };
+    SDPUtils2.writeExtmap = function(headerExtension) {
+      return "a=extmap:" + (headerExtension.id || headerExtension.preferredId) + (headerExtension.direction && headerExtension.direction !== "sendrecv" ? "/" + headerExtension.direction : "") + " " + headerExtension.uri + (headerExtension.attributes ? " " + headerExtension.attributes : "") + "\r\n";
+    };
+    SDPUtils2.parseFmtp = function(line) {
+      const parsed = {};
+      const parts = line.substring(line.indexOf(" ") + 1).split(";");
+      for (let j = 0; j < parts.length; j++) {
+        const [key, ...rest] = parts[j].trim().split("=");
+        parsed[key.trim()] = rest.length ? rest.join("=") : void 0;
+      }
+      return parsed;
+    };
+    SDPUtils2.writeFmtp = function(codec) {
+      let line = "";
+      let pt = codec.payloadType;
+      if (codec.preferredPayloadType !== void 0) {
+        pt = codec.preferredPayloadType;
+      }
+      if (codec.parameters && Object.keys(codec.parameters).length) {
+        const params = [];
+        Object.keys(codec.parameters).forEach((param) => {
+          if (codec.parameters[param] !== void 0) {
+            params.push(param + "=" + codec.parameters[param]);
+          } else {
+            params.push(param);
+          }
+        });
+        line += "a=fmtp:" + pt + " " + params.join(";") + "\r\n";
+      }
+      return line;
+    };
+    SDPUtils2.parseRtcpFb = function(line) {
+      const parts = line.substring(line.indexOf(" ") + 1).split(" ");
+      return {
+        type: parts.shift(),
+        parameter: parts.join(" ")
+      };
+    };
+    SDPUtils2.writeRtcpFb = function(codec) {
+      let lines = "";
+      let pt = codec.payloadType;
+      if (codec.preferredPayloadType !== void 0) {
+        pt = codec.preferredPayloadType;
+      }
+      if (codec.rtcpFeedback && codec.rtcpFeedback.length) {
+        codec.rtcpFeedback.forEach((fb) => {
+          lines += "a=rtcp-fb:" + pt + " " + fb.type + (fb.parameter && fb.parameter.length ? " " + fb.parameter : "") + "\r\n";
+        });
+      }
+      return lines;
+    };
+    SDPUtils2.parseSsrcMedia = function(line) {
+      const sp = line.indexOf(" ");
+      const parts = {
+        ssrc: parseInt(line.substring(7, sp), 10)
+      };
+      const colon = line.indexOf(":", sp);
+      if (colon > -1) {
+        parts.attribute = line.substring(sp + 1, colon);
+        parts.value = line.substring(colon + 1);
+      } else {
+        parts.attribute = line.substring(sp + 1);
+      }
+      return parts;
+    };
+    SDPUtils2.parseSsrcGroup = function(line) {
+      const parts = line.substring(13).split(" ");
+      return {
+        semantics: parts.shift(),
+        ssrcs: parts.map((ssrc) => parseInt(ssrc, 10))
+      };
+    };
+    SDPUtils2.getMid = function(mediaSection) {
+      const mid = SDPUtils2.matchPrefix(mediaSection, "a=mid:")[0];
+      if (mid) {
+        return mid.substring(6);
+      }
+    };
+    SDPUtils2.parseFingerprint = function(line) {
+      const parts = line.substring(14).split(" ");
+      return {
+        algorithm: parts[0].toLowerCase(),
+        // algorithm is case-sensitive in Edge.
+        value: parts[1].toUpperCase()
+        // the definition is upper-case in RFC 4572.
+      };
+    };
+    SDPUtils2.getDtlsParameters = function(mediaSection, sessionpart) {
+      const lines = SDPUtils2.matchPrefix(
+        mediaSection + sessionpart,
+        "a=fingerprint:"
+      );
+      return {
+        role: "auto",
+        fingerprints: lines.map(SDPUtils2.parseFingerprint)
+      };
+    };
+    SDPUtils2.writeDtlsParameters = function(params, setupType) {
+      let sdp2 = "a=setup:" + setupType + "\r\n";
+      params.fingerprints.forEach((fp) => {
+        sdp2 += "a=fingerprint:" + fp.algorithm + " " + fp.value + "\r\n";
+      });
+      return sdp2;
+    };
+    SDPUtils2.parseCryptoLine = function(line) {
+      const parts = line.substring(9).split(" ");
+      return {
+        tag: parseInt(parts[0], 10),
+        cryptoSuite: parts[1],
+        keyParams: parts[2],
+        sessionParams: parts.slice(3)
+      };
+    };
+    SDPUtils2.writeCryptoLine = function(parameters) {
+      return "a=crypto:" + parameters.tag + " " + parameters.cryptoSuite + " " + (typeof parameters.keyParams === "object" ? SDPUtils2.writeCryptoKeyParams(parameters.keyParams) : parameters.keyParams) + (parameters.sessionParams ? " " + parameters.sessionParams.join(" ") : "") + "\r\n";
+    };
+    SDPUtils2.parseCryptoKeyParams = function(keyParams) {
+      if (keyParams.indexOf("inline:") !== 0) {
+        return null;
+      }
+      const parts = keyParams.substring(7).split("|");
+      return {
+        keyMethod: "inline",
+        keySalt: parts[0],
+        lifeTime: parts[1],
+        mkiValue: parts[2] ? parts[2].split(":")[0] : void 0,
+        mkiLength: parts[2] ? parts[2].split(":")[1] : void 0
+      };
+    };
+    SDPUtils2.writeCryptoKeyParams = function(keyParams) {
+      return keyParams.keyMethod + ":" + keyParams.keySalt + (keyParams.lifeTime ? "|" + keyParams.lifeTime : "") + (keyParams.mkiValue && keyParams.mkiLength ? "|" + keyParams.mkiValue + ":" + keyParams.mkiLength : "");
+    };
+    SDPUtils2.getCryptoParameters = function(mediaSection, sessionpart) {
+      const lines = SDPUtils2.matchPrefix(
+        mediaSection + sessionpart,
+        "a=crypto:"
+      );
+      return lines.map(SDPUtils2.parseCryptoLine);
+    };
+    SDPUtils2.getIceParameters = function(mediaSection, sessionpart) {
+      const ufrag = SDPUtils2.matchPrefix(
+        mediaSection + sessionpart,
+        "a=ice-ufrag:"
+      )[0];
+      const pwd = SDPUtils2.matchPrefix(
+        mediaSection + sessionpart,
+        "a=ice-pwd:"
+      )[0];
+      if (!(ufrag && pwd)) {
+        return null;
+      }
+      return {
+        usernameFragment: ufrag.substring(12),
+        password: pwd.substring(10)
+      };
+    };
+    SDPUtils2.writeIceParameters = function(params) {
+      let sdp2 = "a=ice-ufrag:" + params.usernameFragment + "\r\na=ice-pwd:" + params.password + "\r\n";
+      if (params.iceLite) {
+        sdp2 += "a=ice-lite\r\n";
+      }
+      return sdp2;
+    };
+    SDPUtils2.parseRtpParameters = function(mediaSection) {
+      const description = {
+        codecs: [],
+        headerExtensions: [],
+        fecMechanisms: [],
+        rtcp: []
+      };
+      const lines = SDPUtils2.splitLines(mediaSection);
+      const mline = lines[0].split(" ");
+      description.profile = mline[2];
+      for (let i = 3; i < mline.length; i++) {
+        const pt = mline[i];
+        const rtpmapline = SDPUtils2.matchPrefix(
+          mediaSection,
+          "a=rtpmap:" + pt + " "
+        )[0];
+        if (rtpmapline) {
+          const codec = SDPUtils2.parseRtpMap(rtpmapline);
+          const fmtps = SDPUtils2.matchPrefix(
+            mediaSection,
+            "a=fmtp:" + pt + " "
+          );
+          codec.parameters = fmtps.length ? SDPUtils2.parseFmtp(fmtps[0]) : {};
+          codec.rtcpFeedback = SDPUtils2.matchPrefix(
+            mediaSection,
+            "a=rtcp-fb:" + pt + " "
+          ).map(SDPUtils2.parseRtcpFb);
+          description.codecs.push(codec);
+          switch (codec.name.toUpperCase()) {
+            case "RED":
+            case "ULPFEC":
+              description.fecMechanisms.push(codec.name.toUpperCase());
+              break;
+            default:
+              break;
+          }
+        }
+      }
+      SDPUtils2.matchPrefix(mediaSection, "a=extmap:").forEach((line) => {
+        description.headerExtensions.push(SDPUtils2.parseExtmap(line));
+      });
+      const wildcardRtcpFb = SDPUtils2.matchPrefix(mediaSection, "a=rtcp-fb:* ").map(SDPUtils2.parseRtcpFb);
+      description.codecs.forEach((codec) => {
+        wildcardRtcpFb.forEach((fb) => {
+          const duplicate = codec.rtcpFeedback.find((existingFeedback) => {
+            return existingFeedback.type === fb.type && existingFeedback.parameter === fb.parameter;
+          });
+          if (!duplicate) {
+            codec.rtcpFeedback.push(fb);
+          }
+        });
+      });
+      return description;
+    };
+    SDPUtils2.writeRtpDescription = function(kind, caps) {
+      let sdp2 = "";
+      sdp2 += "m=" + kind + " ";
+      sdp2 += caps.codecs.length > 0 ? "9" : "0";
+      sdp2 += " " + (caps.profile || "UDP/TLS/RTP/SAVPF") + " ";
+      sdp2 += caps.codecs.map((codec) => {
+        if (codec.preferredPayloadType !== void 0) {
+          return codec.preferredPayloadType;
+        }
+        return codec.payloadType;
+      }).join(" ") + "\r\n";
+      sdp2 += "c=IN IP4 0.0.0.0\r\n";
+      sdp2 += "a=rtcp:9 IN IP4 0.0.0.0\r\n";
+      caps.codecs.forEach((codec) => {
+        sdp2 += SDPUtils2.writeRtpMap(codec);
+        sdp2 += SDPUtils2.writeFmtp(codec);
+        sdp2 += SDPUtils2.writeRtcpFb(codec);
+      });
+      let maxptime = 0;
+      caps.codecs.forEach((codec) => {
+        if (codec.maxptime > maxptime) {
+          maxptime = codec.maxptime;
+        }
+      });
+      if (maxptime > 0) {
+        sdp2 += "a=maxptime:" + maxptime + "\r\n";
+      }
+      if (caps.headerExtensions) {
+        caps.headerExtensions.forEach((extension) => {
+          sdp2 += SDPUtils2.writeExtmap(extension);
+        });
+      }
+      return sdp2;
+    };
+    SDPUtils2.parseRtpEncodingParameters = function(mediaSection) {
+      const encodingParameters = [];
+      const description = SDPUtils2.parseRtpParameters(mediaSection);
+      const hasRed = description.fecMechanisms.indexOf("RED") !== -1;
+      const hasUlpfec = description.fecMechanisms.indexOf("ULPFEC") !== -1;
+      const ssrcs = SDPUtils2.matchPrefix(mediaSection, "a=ssrc:").map((line) => SDPUtils2.parseSsrcMedia(line)).filter((parts) => parts.attribute === "cname");
+      const primarySsrc = ssrcs.length > 0 && ssrcs[0].ssrc;
+      let secondarySsrc;
+      const flows = SDPUtils2.matchPrefix(mediaSection, "a=ssrc-group:FID").map((line) => {
+        const parts = line.substring(17).split(" ");
+        return parts.map((part) => parseInt(part, 10));
+      });
+      if (flows.length > 0 && flows[0].length > 1 && flows[0][0] === primarySsrc) {
+        secondarySsrc = flows[0][1];
+      }
+      description.codecs.forEach((codec) => {
+        if (codec.name.toUpperCase() === "RTX" && codec.parameters.apt) {
+          let encParam = {
+            ssrc: primarySsrc,
+            codecPayloadType: parseInt(codec.parameters.apt, 10)
+          };
+          if (primarySsrc && secondarySsrc) {
+            encParam.rtx = { ssrc: secondarySsrc };
+          }
+          encodingParameters.push(encParam);
+          if (hasRed) {
+            encParam = JSON.parse(JSON.stringify(encParam));
+            encParam.fec = {
+              ssrc: primarySsrc,
+              mechanism: hasUlpfec ? "red+ulpfec" : "red"
+            };
+            encodingParameters.push(encParam);
+          }
+        }
+      });
+      if (encodingParameters.length === 0 && primarySsrc) {
+        encodingParameters.push({
+          ssrc: primarySsrc
+        });
+      }
+      let bandwidth = SDPUtils2.matchPrefix(mediaSection, "b=");
+      if (bandwidth.length) {
+        if (bandwidth[0].indexOf("b=TIAS:") === 0) {
+          bandwidth = parseInt(bandwidth[0].substring(7), 10);
+        } else if (bandwidth[0].indexOf("b=AS:") === 0) {
+          bandwidth = parseInt(bandwidth[0].substring(5), 10) * 1e3 * 0.95 - 50 * 40 * 8;
+        } else {
+          bandwidth = void 0;
+        }
+        encodingParameters.forEach((params) => {
+          params.maxBitrate = bandwidth;
+        });
+      }
+      return encodingParameters;
+    };
+    SDPUtils2.parseRtcpParameters = function(mediaSection) {
+      const rtcpParameters = {};
+      const remoteSsrc = SDPUtils2.matchPrefix(mediaSection, "a=ssrc:").map((line) => SDPUtils2.parseSsrcMedia(line)).filter((obj) => obj.attribute === "cname")[0];
+      if (remoteSsrc) {
+        rtcpParameters.cname = remoteSsrc.value;
+        rtcpParameters.ssrc = remoteSsrc.ssrc;
+      }
+      const rsize = SDPUtils2.matchPrefix(mediaSection, "a=rtcp-rsize");
+      rtcpParameters.reducedSize = rsize.length > 0;
+      rtcpParameters.compound = rsize.length === 0;
+      const mux = SDPUtils2.matchPrefix(mediaSection, "a=rtcp-mux");
+      rtcpParameters.mux = mux.length > 0;
+      return rtcpParameters;
+    };
+    SDPUtils2.writeRtcpParameters = function(rtcpParameters) {
+      let sdp2 = "";
+      if (rtcpParameters.reducedSize) {
+        sdp2 += "a=rtcp-rsize\r\n";
+      }
+      if (rtcpParameters.mux) {
+        sdp2 += "a=rtcp-mux\r\n";
+      }
+      if (rtcpParameters.ssrc !== void 0 && rtcpParameters.cname) {
+        sdp2 += "a=ssrc:" + rtcpParameters.ssrc + " cname:" + rtcpParameters.cname + "\r\n";
+      }
+      return sdp2;
+    };
+    SDPUtils2.parseMsid = function(mediaSection) {
+      let parts;
+      const spec = SDPUtils2.matchPrefix(mediaSection, "a=msid:");
+      if (spec.length === 1) {
+        parts = spec[0].substring(7).split(" ");
+        return { stream: parts[0], track: parts[1] };
+      }
+      const planB = SDPUtils2.matchPrefix(mediaSection, "a=ssrc:").map((line) => SDPUtils2.parseSsrcMedia(line)).filter((msidParts) => msidParts.attribute === "msid");
+      if (planB.length > 0) {
+        parts = planB[0].value.split(" ");
+        return { stream: parts[0], track: parts[1] };
+      }
+    };
+    SDPUtils2.parseSctpDescription = function(mediaSection) {
+      const mline = SDPUtils2.parseMLine(mediaSection);
+      const maxSizeLine = SDPUtils2.matchPrefix(mediaSection, "a=max-message-size:");
+      let maxMessageSize;
+      if (maxSizeLine.length > 0) {
+        maxMessageSize = parseInt(maxSizeLine[0].substring(19), 10);
+      }
+      if (isNaN(maxMessageSize)) {
+        maxMessageSize = 65536;
+      }
+      const sctpPort = SDPUtils2.matchPrefix(mediaSection, "a=sctp-port:");
+      if (sctpPort.length > 0) {
+        return {
+          port: parseInt(sctpPort[0].substring(12), 10),
+          protocol: mline.fmt,
+          maxMessageSize
+        };
+      }
+      const sctpMapLines = SDPUtils2.matchPrefix(mediaSection, "a=sctpmap:");
+      if (sctpMapLines.length > 0) {
+        const parts = sctpMapLines[0].substring(10).split(" ");
+        return {
+          port: parseInt(parts[0], 10),
+          protocol: parts[1],
+          maxMessageSize
+        };
+      }
+    };
+    SDPUtils2.writeSctpDescription = function(media, sctp) {
+      let output = [];
+      if (media.protocol !== "DTLS/SCTP") {
+        output = [
+          "m=" + media.kind + " 9 " + media.protocol + " " + sctp.protocol + "\r\n",
+          "c=IN IP4 0.0.0.0\r\n",
+          "a=sctp-port:" + sctp.port + "\r\n"
+        ];
+      } else {
+        output = [
+          "m=" + media.kind + " 9 " + media.protocol + " " + sctp.port + "\r\n",
+          "c=IN IP4 0.0.0.0\r\n",
+          "a=sctpmap:" + sctp.port + " " + sctp.protocol + " 65535\r\n"
+        ];
+      }
+      if (sctp.maxMessageSize !== void 0) {
+        output.push("a=max-message-size:" + sctp.maxMessageSize + "\r\n");
+      }
+      return output.join("");
+    };
+    SDPUtils2.generateSessionId = function() {
+      return Math.random().toString().substr(2, 22);
+    };
+    SDPUtils2.writeSessionBoilerplate = function(sessId, sessVer, sessUser) {
+      let sessionId;
+      const version = sessVer !== void 0 ? sessVer : 2;
+      if (sessId) {
+        sessionId = sessId;
+      } else {
+        sessionId = SDPUtils2.generateSessionId();
+      }
+      const user = sessUser || "thisisadapterortc";
+      return "v=0\r\no=" + user + " " + sessionId + " " + version + " IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\n";
+    };
+    SDPUtils2.getDirection = function(mediaSection, sessionpart) {
+      const lines = SDPUtils2.splitLines(mediaSection);
+      for (let i = 0; i < lines.length; i++) {
+        switch (lines[i]) {
+          case "a=sendrecv":
+          case "a=sendonly":
+          case "a=recvonly":
+          case "a=inactive":
+            return lines[i].substring(2);
+          default:
+        }
+      }
+      if (sessionpart) {
+        return SDPUtils2.getDirection(sessionpart);
+      }
+      return "sendrecv";
+    };
+    SDPUtils2.getKind = function(mediaSection) {
+      const lines = SDPUtils2.splitLines(mediaSection);
+      const mline = lines[0].split(" ");
+      return mline[0].substring(2);
+    };
+    SDPUtils2.isRejected = function(mediaSection) {
+      return mediaSection.split(" ", 2)[1] === "0";
+    };
+    SDPUtils2.parseMLine = function(mediaSection) {
+      const lines = SDPUtils2.splitLines(mediaSection);
+      const parts = lines[0].substring(2).split(" ");
+      return {
+        kind: parts[0],
+        port: parseInt(parts[1], 10),
+        protocol: parts[2],
+        fmt: parts.slice(3).join(" ")
+      };
+    };
+    SDPUtils2.parseOLine = function(mediaSection) {
+      const line = SDPUtils2.matchPrefix(mediaSection, "o=")[0];
+      const parts = line.substring(2).split(" ");
+      return {
+        username: parts[0],
+        sessionId: parts[1],
+        sessionVersion: parseInt(parts[2], 10),
+        netType: parts[3],
+        addressType: parts[4],
+        address: parts[5]
+      };
+    };
+    SDPUtils2.isValidSDP = function(blob) {
+      if (typeof blob !== "string" || blob.length === 0) {
+        return false;
+      }
+      const lines = SDPUtils2.splitLines(blob);
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].length < 2 || lines[i].charAt(1) !== "=") {
+          return false;
+        }
+      }
+      return true;
+    };
+    if (typeof module === "object") {
+      module.exports = SDPUtils2;
+    }
+  }
+});
 
 // source/host/vfs.js
 function normalizePath(path) {
@@ -107,8 +746,8 @@ function encodeLatin1(s) {
   return out;
 }
 var IniFile = class {
-  constructor(text2) {
-    this.lines = text2.split(/\r?\n/);
+  constructor(text3) {
+    this.lines = text3.split(/\r?\n/);
     this.index = /* @__PURE__ */ new Map();
     let section = null;
     this.lines.forEach((raw, n) => {
@@ -1089,8 +1728,8 @@ function installWin32(m, host) {
   m.api(U + "GetUpdateRect", 3, () => 0);
   m.api(U + "KillTimer", 2, () => 1);
   m.api(U + "MessageBeep", 1, () => 1);
-  m.api(U + "MessageBoxExA", 5, (h, text2, caption) => {
-    host.onMessageBox(m.cstr(caption), m.cstr(text2));
+  m.api(U + "MessageBoxExA", 5, (h, text3, caption) => {
+    host.onMessageBox(m.cstr(caption), m.cstr(text3));
     return 1;
   });
   m.bindRaw(U + "wsprintfA", 0, (esp) => {
@@ -2372,12 +3011,12 @@ var EventDispatcher = class {
    */
   addEventListener(type, listener) {
     if (this._listeners === void 0) this._listeners = {};
-    const listeners = this._listeners;
-    if (listeners[type] === void 0) {
-      listeners[type] = [];
+    const listeners2 = this._listeners;
+    if (listeners2[type] === void 0) {
+      listeners2[type] = [];
     }
-    if (listeners[type].indexOf(listener) === -1) {
-      listeners[type].push(listener);
+    if (listeners2[type].indexOf(listener) === -1) {
+      listeners2[type].push(listener);
     }
   }
   /**
@@ -2388,9 +3027,9 @@ var EventDispatcher = class {
    * @return {boolean} Whether the given event listener has been added to the given event type.
    */
   hasEventListener(type, listener) {
-    const listeners = this._listeners;
-    if (listeners === void 0) return false;
-    return listeners[type] !== void 0 && listeners[type].indexOf(listener) !== -1;
+    const listeners2 = this._listeners;
+    if (listeners2 === void 0) return false;
+    return listeners2[type] !== void 0 && listeners2[type].indexOf(listener) !== -1;
   }
   /**
    * Removes the given event listener from the given event type.
@@ -2399,9 +3038,9 @@ var EventDispatcher = class {
    * @param {Function} listener - The listener to remove.
    */
   removeEventListener(type, listener) {
-    const listeners = this._listeners;
-    if (listeners === void 0) return;
-    const listenerArray = listeners[type];
+    const listeners2 = this._listeners;
+    if (listeners2 === void 0) return;
+    const listenerArray = listeners2[type];
     if (listenerArray !== void 0) {
       const index = listenerArray.indexOf(listener);
       if (index !== -1) {
@@ -2415,9 +3054,9 @@ var EventDispatcher = class {
    * @param {Object} event - The event that gets fired.
    */
   dispatchEvent(event) {
-    const listeners = this._listeners;
-    if (listeners === void 0) return;
-    const listenerArray = listeners[event.type];
+    const listeners2 = this._listeners;
+    if (listeners2 === void 0) return;
+    const listenerArray = listeners2[event.type];
     if (listenerArray !== void 0) {
       event.target = this;
       const array = listenerArray.slice(0);
@@ -30490,10 +31129,10 @@ var D3DRenderer = class {
   }
   // --- the 8-bit path --------------------------------------------------------------------------
   /** The device was created. Called once per race, after the mode is known. */
-  setIndexed(on) {
-    this.indexed = on;
-    if (on && !this.colors) this.setupIndexed();
-    if (!on) this.releaseIndexed();
+  setIndexed(on2) {
+    this.indexed = on2;
+    if (on2 && !this.colors) this.setupIndexed();
+    if (!on2) this.releaseIndexed();
   }
   /** A race with the 3D card after an 8-bit one: its page and targets are no use. */
   releaseIndexed() {
@@ -31001,12 +31640,12 @@ var D3DRenderer = class {
    */
   drawScreenFill() {
     const fill = this.screenFill;
-    const now = performance.now();
-    if (fill.shownAt && (fill.flips > 1 || now - fill.shownAt >= TICK_MS)) {
+    const now2 = performance.now();
+    if (fill.shownAt && (fill.flips > 1 || now2 - fill.shownAt >= TICK_MS)) {
       this.screenFill = null;
       return;
     }
-    if (!fill.shownAt) fill.shownAt = now;
+    if (!fill.shownAt) fill.shownAt = now2;
     const { three, area } = this;
     three.setScissor(area.x, this.viewH - area.y - area.h, area.w, area.h);
     three.setScissorTest(true);
@@ -31885,20 +32524,20 @@ function touchWheelInput(clientX, clientY, { left, top, width, height }) {
   const drive = factor(1 - (clientY - top) / height * 2, 0.65);
   return { steer, throttle: Math.max(0, drive), brake: Math.max(0, -drive) };
 }
-function onRelease(el, handler) {
+function onRelease(el2, handler) {
   let fired = 0;
-  const once = (e) => {
+  const once2 = (e) => {
     if (e.timeStamp - fired < 400) return;
     fired = e.timeStamp;
     handler(e);
   };
-  el.addEventListener("click", once);
-  el.addEventListener("pointerup", (e) => {
+  el2.addEventListener("click", once2);
+  el2.addEventListener("pointerup", (e) => {
     if (e.pointerType !== "touch" || e.isPrimary) return;
-    const box = el.getBoundingClientRect();
+    const box = el2.getBoundingClientRect();
     if (e.clientX >= box.left && e.clientX <= box.right && e.clientY >= box.top && e.clientY <= box.bottom) {
       e.preventDefault();
-      once(e);
+      once2(e);
     }
   });
 }
@@ -31915,21 +32554,21 @@ var TouchControls = class {
     for (const b of root.querySelectorAll("button[data-button]")) this.bindHold(b, Number(b.dataset.button));
     for (const b of root.querySelectorAll("button[data-vk]")) this.bindKey(b, Number(b.dataset.vk), b.dataset.dik ? Number(b.dataset.dik) : 0);
     const cam = root.querySelector("#touch-camera");
-    this.bindPress(cam, (on) => {
+    this.bindPress(cam, (on2) => {
       const input = this.getInput();
-      if (on && input) input.pulseVk(input.nextCameraKey());
+      if (on2 && input) input.pulseVk(input.nextCameraKey());
     });
     this.more = root.querySelector("#touch-more");
-    this.bindPress(this.more, (on) => {
-      if (on) this.showMore(!root.classList.contains("more"));
+    this.bindPress(this.more, (on2) => {
+      if (on2) this.showMore(!root.classList.contains("more"));
     });
     this.wheel.addEventListener("contextmenu", (e) => e.preventDefault());
   }
   /** Calls change(true) at the first pointer on el and change(false) when the last one ends. */
-  bindPress(el, change) {
+  bindPress(el2, change) {
     const held = /* @__PURE__ */ new Map();
-    this.pressed.set(el, held);
-    el.addEventListener("pointerdown", (e) => {
+    this.pressed.set(el2, held);
+    el2.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
       e.preventDefault();
       const id = e.pointerId;
@@ -31939,22 +32578,22 @@ var TouchControls = class {
       const release = () => {
         if (!held.delete(id)) return;
         this.releases.delete(id);
-        el.classList.toggle("held", held.size > 0);
+        el2.classList.toggle("held", held.size > 0);
         if (!held.size) change(false);
-        if (el.hasPointerCapture(id)) el.releasePointerCapture(id);
+        if (el2.hasPointerCapture(id)) el2.releasePointerCapture(id);
       };
       held.set(id, release);
       this.releases.set(id, release);
-      el.setPointerCapture(id);
-      el.classList.add("held");
+      el2.setPointerCapture(id);
+      el2.classList.add("held");
       if (held.size === 1) change(true);
     });
     const end = (e) => {
       const release = held.get(e.pointerId);
       if (release) release();
     };
-    for (const event of ["pointerup", "pointercancel", "lostpointercapture"]) el.addEventListener(event, end);
-    el.addEventListener("contextmenu", (e) => e.preventDefault());
+    for (const event of ["pointerup", "pointercancel", "lostpointercapture"]) el2.addEventListener(event, end);
+    el2.addEventListener("contextmenu", (e) => e.preventDefault());
   }
   bindWheel(element) {
     let pointer = null;
@@ -32006,18 +32645,18 @@ var TouchControls = class {
     }
     visual();
   }
-  bindHold(el, button) {
-    this.bindPress(el, (on) => {
-      if (on) this.buttons |= 1 << button;
+  bindHold(el2, button) {
+    this.bindPress(el2, (on2) => {
+      if (on2) this.buttons |= 1 << button;
       else this.buttons &= ~(1 << button);
       this.push();
     });
   }
-  bindKey(el, vk, dik) {
-    this.bindPress(el, (on) => {
+  bindKey(el2, vk, dik) {
+    this.bindPress(el2, (on2) => {
       const input = this.getInput();
       if (!input) return;
-      if (on) input.pressHost(vk, dik);
+      if (on2) input.pressHost(vk, dik);
       else input.releaseHost(vk, dik);
     });
   }
@@ -32037,8 +32676,8 @@ var TouchControls = class {
     this.push();
   }
   /** One control goes away: its presses end, and the fingers on the others stay. */
-  releaseControl(el) {
-    const held = this.pressed.get(el);
+  releaseControl(el2) {
+    const held = this.pressed.get(el2);
     if (held) for (const release of [...held.values()]) release();
   }
   /**
@@ -32415,6 +33054,118 @@ function safeAreaInsets() {
   };
 }
 
+// source/net/overlay.js
+var STANDINGS_MS = 150;
+var TAG_FAR = 2500;
+function formatTime(s) {
+  if (typeof s !== "number" || !isFinite(s)) return "";
+  const m = Math.floor(s / 60);
+  const sec = s - m * 60;
+  return `${m}:${sec.toFixed(2).padStart(5, "0")}`;
+}
+var NetOverlay = class {
+  constructor(el2) {
+    this.el = el2;
+    this.list = document.createElement("ol");
+    this.list.className = "net-standings";
+    this.tagBox = document.createElement("div");
+    this.tagBox.className = "net-tags";
+    el2.append(this.list, this.tagBox);
+    this.tags = /* @__PURE__ */ new Map();
+  }
+  start(mp, renderer) {
+    this.mp = mp;
+    this.renderer = renderer;
+    this.last = 0;
+    this.el.hidden = false;
+    this.list.textContent = "";
+    this.tagBox.textContent = "";
+    this.tags.clear();
+    for (const p of mp.net.setup.players) {
+      if (p.id === mp.net.setup.me) continue;
+      const tag = document.createElement("span");
+      tag.className = "net-tag";
+      tag.textContent = p.nick;
+      tag.hidden = true;
+      this.tagBox.append(tag);
+      this.tags.set(p.id, tag);
+    }
+  }
+  stop() {
+    this.mp = null;
+    this.el.hidden = true;
+    this.list.textContent = "";
+    this.tagBox.textContent = "";
+    this.tags.clear();
+  }
+  /** Finished first by time, then by chunks driven, then by grid. */
+  standings() {
+    const { net, session } = this.mp;
+    const room = session.room;
+    const info = new Map((room ? room.players : []).map((p) => [p.id, p]));
+    const rows = net.setup.players.map((p) => {
+      const mine = p.id === net.setup.me;
+      const puppet = net.puppets.get(p.id);
+      const r = info.get(p.id);
+      const progress = mine ? net.progress : puppet && puppet.sample ? puppet.sample.d : net.nrOpp - p.grid;
+      const gone = !mine && (!r || puppet && puppet.gone);
+      return { id: p.id, nick: p.nick, mine, progress, grid: p.grid, finished: Boolean(r && r.finished), time: r ? r.time : null, gone };
+    });
+    rows.sort((a, b) => {
+      if (a.finished !== b.finished) return a.finished ? -1 : 1;
+      if (a.finished) return a.time - b.time;
+      if (a.gone !== b.gone) return a.gone ? 1 : -1;
+      return b.progress - a.progress || a.grid - b.grid;
+    });
+    return rows;
+  }
+  frame(now2) {
+    if (!this.mp) return;
+    if (now2 - this.last > STANDINGS_MS) {
+      this.last = now2;
+      const rows = this.standings();
+      const items = rows.map((r, k) => {
+        const li = document.createElement("li");
+        li.className = (r.mine ? "mine " : "") + (r.gone ? "gone" : "");
+        const pos = document.createElement("b");
+        pos.textContent = String(k + 1);
+        const name = document.createElement("span");
+        name.textContent = r.nick;
+        li.append(pos, name);
+        if (r.finished) {
+          const t = document.createElement("i");
+          t.textContent = formatTime(r.time);
+          li.append(t);
+        }
+        return li;
+      });
+      this.list.replaceChildren(...items);
+    }
+    this.placeTags();
+  }
+  placeTags() {
+    const { net } = this.mp;
+    const r = this.renderer;
+    if (!r || !r.area || !r.xr) return;
+    const dpr = window.devicePixelRatio || 1;
+    const seen = /* @__PURE__ */ new Set();
+    for (const t of net.tags()) {
+      const tag = this.tags.get(t.id);
+      if (!tag) continue;
+      const nx = t.x / r.xr;
+      const ny = t.y / r.yr;
+      if (nx < -1.1 || nx > 1.1 || ny < -1.1 || ny > 1.1 || t.dist > TAG_FAR) continue;
+      seen.add(t.id);
+      const x = (r.area.x + (nx + 1) / 2 * r.area.w) / dpr;
+      const y = (r.area.y + (1 - ny) / 2 * r.area.h) / dpr;
+      tag.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
+      tag.style.opacity = String(Math.max(0.35, 1 - t.dist / TAG_FAR));
+      tag.hidden = false;
+    }
+    for (const [id, tag] of this.tags) if (!seen.has(id)) tag.hidden = true;
+  }
+};
+
 // source/race-runner.js
 var TICK_SECONDS = 1 / 60;
 var MAX_TICKS_PER_FRAME = 6;
@@ -32501,14 +33252,19 @@ var RaceRunner = class {
     page.style.setProperty("--hud-unit", `${unit}px`);
     if (this.touch) this.touch.relayout();
   }
-  /** Resolves when the race has ended and spel.dat would have exited. */
-  async run() {
+  /**
+   * Resolves when the race has ended and spel.dat would have exited. mp: a network race,
+   * { net: NetRace, session: NetSession, seed, cars }, source/net/.
+   */
+  async run(mp = null) {
     const app2 = this.app;
     app2.say("");
     this.endWaitStart = 0;
+    this.mp = mp;
     let race;
     try {
       race = await this.load();
+      if (mp) await this.waitForGo(mp);
     } catch (e) {
       console.error("Race not started:", e);
       if (!(e instanceof GameExit)) app2.say("De race kon niet starten: " + e.message, NOTE_MS);
@@ -32521,7 +33277,11 @@ var RaceRunner = class {
       this.bot = new Bot(race, this.input);
       window.__bot = this.bot;
     }
-    this.speed = Number(app2.params.get("speed")) || 1;
+    this.speed = mp ? 1 : Number(app2.params.get("speed")) || 1;
+    if (mp) {
+      this.netOverlay = this.netOverlay || new NetOverlay(document.getElementById("net-hud"));
+      this.netOverlay.start(mp, this.renderer);
+    }
     window.__race = race;
     window.__renderer = this.renderer;
     this.acc = 0;
@@ -32556,6 +33316,7 @@ var RaceRunner = class {
     this.showBar(0);
     await this.loadCode();
     await app2.files.prepareRace(etappe, car, (a, b) => this.showBar(a / b * 90));
+    for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app2.files.prepareRace(etappe, other);
     if (!this.renderer) this.renderer = new D3DRenderer(app2.canvasRace, { staticTrack: !app2.params.has("nostatic") });
     this.renderer.resetForRace();
     const audio = new GameAudio(app2.getAudioContext(), app2.getMasterOutput());
@@ -32587,6 +33348,10 @@ var RaceRunner = class {
       host.fixedDate = 971434016e3;
       host.clockStart = 1;
     }
+    if (this.mp) {
+      host.fixedDate = 971434016e3;
+      host.clockStart = this.mp.seed;
+    }
     this.host = host;
     const race = new Race(this.meta, host);
     await race.instantiate(this.wasmModule);
@@ -32594,6 +33359,15 @@ var RaceRunner = class {
     this.renderer.attach(race.m, host);
     audio.attach(race.m, race.clock);
     host.hudLayout = new HudLayout(race.m);
+    if (this.mp) {
+      this.mp.net.attach(race);
+      const hud = host.hudLayout;
+      const apply = hud.apply.bind(hud);
+      hud.apply = () => {
+        apply();
+        if (this.mp) this.mp.net.beforeHud();
+      };
+    }
     this.input = new GameInput(race.m);
     host.input = this.input;
     this.bind();
@@ -32608,9 +33382,23 @@ var RaceRunner = class {
     this.showBar(95);
     await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
     race.boot();
+    if (this.mp) this.mp.net.boot();
     if (this.renderer.indexed) this.layout();
-    document.getElementById("loading").hidden = true;
+    if (!this.mp) document.getElementById("loading").hidden = true;
     return race;
+  }
+  /** A network race starts when every browser has loaded it, at the same moment in all. */
+  async waitForGo(mp) {
+    const note = document.getElementById("loading-note");
+    note.textContent = "Wachten op de andere spelers...";
+    note.hidden = false;
+    this.showBar(100);
+    try {
+      await mp.session.loaded(mp.net);
+    } finally {
+      note.hidden = true;
+      document.getElementById("loading").hidden = true;
+    }
   }
   /** The wait screen's bar, as 0x004976d0 selects its frame: ftol(11 * pct * 0.01). */
   showBar(percent) {
@@ -32674,7 +33462,14 @@ var RaceRunner = class {
     });
     app2.settings.listeners.add((key) => this.settingChanged(key));
     document.addEventListener("visibilitychange", () => this.visibility());
-    window.addEventListener("blur", () => this.setFocus(false));
+    window.addEventListener("blur", () => {
+      if (this.mp && !document.hidden) {
+        if (this.touch) this.touch.releaseAll();
+        if (this.input) this.input.clear();
+        return;
+      }
+      this.setFocus(false);
+    });
     window.addEventListener("focus", () => this.setFocus(true));
   }
   /** What is left after a race or a failed start. */
@@ -32684,6 +33479,8 @@ var RaceRunner = class {
     if (this.touch) this.touch.setVisible(false);
     if (this.panel) this.panel.close();
     for (const id of ["loading", "dialog-keys", "race-settings", "race-stop", "fps"]) document.getElementById(id).hidden = true;
+    if (this.netOverlay) this.netOverlay.stop();
+    this.mp = null;
     page.classList.remove("race-portrait", "race-touch", "race-results", "actions-lifted");
     this.app.canvasRace.classList.remove("no-pointer");
     clearTimeout(this.pointerTimer);
@@ -32725,24 +33522,28 @@ var RaceRunner = class {
     document.documentElement.classList.toggle("race-touch", this.useTouch);
     if (this.touch) this.touch.setVisible(this.useTouch);
   }
-  frame(now) {
+  frame(now2) {
     const race = this.race;
     if (!race) return;
     if (race.ended) {
-      this.endWait(now);
+      this.endWait(now2);
       return;
     }
     requestAnimationFrame((t) => this.frame(t));
     const bench = window.__bench && window.__bench.recording ? window.__bench : null;
     const speed = this.speed || 1;
-    const elapsed = Math.min(0.25, Math.max(0, (now - this.lastFrame) / 1e3)) * speed;
-    this.lastFrame = now;
-    this.countFps(now);
+    const elapsed = Math.min(0.25, Math.max(0, (now2 - this.lastFrame) / 1e3)) * speed;
+    this.lastFrame = now2;
+    this.countFps(now2);
     this.updateResults();
     if (!this.suspended && !this.panelOpen) {
       this.acc += elapsed;
       const steps = Math.min(MAX_TICKS_PER_FRAME * speed, Math.floor(this.acc / TICK_SECONDS));
       if (this.gamepad) this.gamepad.pollRace(this.input, race.pause ? race.pause.kind : 0, this.resultScreen);
+      if (this.mp) {
+        this.input.vk[80] = 0;
+        this.input.dik[25] = 0;
+      }
       const dialogKey = this.input.vk[80] || this.input.vk[27];
       for (let k = 0; k < steps; k++) {
         this.renderer.captureLevel = dialogKey || k === steps - 1 ? 2 : k === steps - 2 ? 1 : 0;
@@ -32764,6 +33565,7 @@ var RaceRunner = class {
           break;
         }
         if (this.repeatable) this.traceTick(race);
+        if (this.mp) this.mp.session.afterTick();
         if (bench) bench.tick.push(performance.now() - t0);
         this.input.endTick();
       }
@@ -32771,17 +33573,18 @@ var RaceRunner = class {
     }
     const t1 = bench ? performance.now() : 0;
     this.renderer.present(race.pause || race.ended ? 1 : Math.min(1, this.acc / TICK_SECONDS));
+    if (this.mp && this.netOverlay) this.netOverlay.frame(now2);
     if (bench) bench.present.push(performance.now() - t1);
   }
   /**
    * 0x0043ac80 leaves only when Esc, Enter and Space are all up, so none of them reaches the menu
    * held. A spin here would hang the page: GameInput.keyDown lets it through, and this waits.
    */
-  endWait(now) {
+  endWait(now2) {
     const { input } = this;
     input.endTick();
-    this.endWaitStart = this.endWaitStart || now;
-    if ((input.vk[27] || input.vk[13] || input.vk[32]) && now - this.endWaitStart < RELEASE_WAIT_MS) {
+    this.endWaitStart = this.endWaitStart || now2;
+    if ((input.vk[27] || input.vk[13] || input.vk[32]) && now2 - this.endWaitStart < RELEASE_WAIT_MS) {
       requestAnimationFrame((t) => this.frame(t));
       this.renderer.present(1);
       return;
@@ -32839,14 +33642,14 @@ var RaceRunner = class {
     if (this.panel.isOpen) this.panel.refresh(this.effectiveSize);
   }
   touchSettingChanged() {
-    const on = useTouch(this.app.settings);
-    if (on && this.input.device === 1) {
+    const on2 = useTouch(this.app.settings);
+    if (on2 && this.input.device === 1) {
       this.app.say("Aanraakbediening werkt vanaf de volgende race", 4e3);
       return;
     }
-    this.useTouch = on;
-    document.documentElement.classList.toggle("race-touch", on);
-    this.touch.setVisible(on);
+    this.useTouch = on2;
+    document.documentElement.classList.toggle("race-touch", on2);
+    this.touch.setVisible(on2);
     this.updateDialogKeys();
     this.updateStop();
     this.layout();
@@ -32887,12 +33690,12 @@ var RaceRunner = class {
     const trace = window.__trace || (window.__trace = []);
     trace.push({ tick: this.tickCount, cars: (h >>> 0).toString(16), bodies, chunk: s && s.chunk, pos: s && s.pos, speed: s && s.speed });
   }
-  countFps(now) {
+  countFps(now2) {
     this.fpsFrames = (this.fpsFrames || 0) + 1;
-    if (now - (this.fpsStart || 0) >= 500) {
-      const fps = this.fpsFrames * 1e3 / (now - (this.fpsStart || now - 500));
+    if (now2 - (this.fpsStart || 0) >= 500) {
+      const fps = this.fpsFrames * 1e3 / (now2 - (this.fpsStart || now2 - 500));
       this.fpsFrames = 0;
-      this.fpsStart = now;
+      this.fpsStart = now2;
       if (this.app.settings.get("showFps")) {
         const r = this.renderer.stats;
         const e = this.effectiveSize;
@@ -33300,9 +34103,9 @@ var ImageBox = class extends Component {
 };
 var FONT_DEFAULT = { name: "Arial, Helvetica, sans-serif", size: 16, color: "#F1D240", bold: true };
 var Label = class extends Component {
-  constructor(x, y, w, h, text2 = "", font = {}, options = {}) {
+  constructor(x, y, w, h, text3 = "", font = {}, options = {}) {
     super(x, y, w, h);
-    this.text = text2;
+    this.text = text3;
     this.font = { ...FONT_DEFAULT, ...font };
     this.wordWrap = options.wordWrap ?? false;
     this.align = options.align || "left";
@@ -33345,9 +34148,9 @@ var Label = class extends Component {
     g.textAlign = "left";
   }
 };
-function wrapLines(g, text2, width) {
+function wrapLines(g, text3, width) {
   const out = [];
-  for (const para of text2.split(/\r?\n/)) {
+  for (const para of text3.split(/\r?\n/)) {
     let line = "";
     for (const word of para.split(/\s+/)) {
       const t = line ? line + " " + word : word;
@@ -33653,18 +34456,18 @@ var EditBox = class extends Component {
   }
   attach(rt) {
     if (this.element) return;
-    const el = document.createElement("input");
-    el.type = "text";
-    el.maxLength = this.maxLength;
-    el.value = this.text;
-    el.autocomplete = "off";
-    el.spellcheck = false;
-    el.className = "menu-edit";
-    el.addEventListener("input", () => {
-      this.text = el.value;
+    const el2 = document.createElement("input");
+    el2.type = "text";
+    el2.maxLength = this.maxLength;
+    el2.value = this.text;
+    el2.autocomplete = "off";
+    el2.spellcheck = false;
+    el2.className = "menu-edit";
+    el2.addEventListener("input", () => {
+      this.text = el2.value;
       if (this.onChange) this.onChange(this.text);
     });
-    el.addEventListener("keydown", (e) => {
+    el2.addEventListener("keydown", (e) => {
       e.stopPropagation();
       rt.lastInputPad = false;
       if (rt.staleRepeat(e)) {
@@ -33678,22 +34481,22 @@ var EditBox = class extends Component {
         rt.key("Escape", true);
       }
     });
-    el.addEventListener("keyup", (e) => e.stopPropagation());
-    rt.overlay.appendChild(el);
-    this.element = el;
+    el2.addEventListener("keyup", (e) => e.stopPropagation());
+    rt.overlay.appendChild(el2);
+    this.element = el2;
     this.place(rt);
   }
   place(rt) {
-    const el = this.element;
-    if (!el) return;
+    const el2 = this.element;
+    if (!el2) return;
     const r = rt.toScreenRect(this.parent, this.x, this.y, this.w, this.h);
-    el.style.left = r.x + "px";
-    el.style.top = r.y + "px";
-    el.style.width = r.w + "px";
-    el.style.height = r.h + "px";
-    el.style.fontSize = Math.max(14, this.font.size * r.scale) + "px";
-    el.style.color = this.font.color;
-    el.style.background = this.background;
+    el2.style.left = r.x + "px";
+    el2.style.top = r.y + "px";
+    el2.style.width = r.w + "px";
+    el2.style.height = r.h + "px";
+    el2.style.fontSize = Math.max(14, this.font.size * r.scale) + "px";
+    el2.style.color = this.font.color;
+    el2.style.background = this.background;
   }
   detach() {
     if (this.element) this.element.remove();
@@ -34213,19 +35016,19 @@ var MenuRuntime = class {
   }
   placeVideo() {
     if (!this.video) return;
-    const { el, form, x, y, w, h } = this.video;
+    const { el: el2, form, x, y, w, h } = this.video;
     const r = this.toScreenRect(form, x, y, w, h);
-    el.style.left = r.x + "px";
-    el.style.top = r.y + "px";
-    el.style.width = r.w + "px";
-    el.style.height = r.h + "px";
+    el2.style.left = r.x + "px";
+    el2.style.top = r.y + "px";
+    el2.style.width = r.w + "px";
+    el2.style.height = r.h + "px";
   }
   stopVideo() {
     if (!this.video) return;
-    const { el, resolve } = this.video;
+    const { el: el2, resolve } = this.video;
     this.video = null;
-    el.pause();
-    el.remove();
+    el2.pause();
+    el2.remove();
     if (resolve) resolve();
   }
 };
@@ -34808,10 +35611,11 @@ var TfrmMainScreen = class extends OneWayScreen {
   static className = "TfrmMainScreen";
   static dfm = "TFRMMAINSCREEN";
   // FormCreate 0x49db5c and FormShow 0x49d894. btnInternet.Enabled was 0x491024, a browser was found.
-  // Port: always off. DOWNLOADURL no longer leads to an A2 Racer site, so TfrmInternetDlg is not reached.
+  // Port: DOWNLOADURL no longer leads to an A2 Racer site, so TfrmInternetDlg is not reached. The
+  // button opens the network races instead, an addition of the port: source/net/, docs/multiplayer.md.
   async create() {
     await super.create();
-    this.btnInternet.enabled = false;
+    this.btnInternet.enabled = Boolean(this.rt.data.app && this.rt.data.app.openMultiplayer);
     this.showTitle();
     const quick = this.rt.data.raceMode === 1;
     (quick ? this.optQuickRace : this.optTour).setChecked(true);
@@ -34840,7 +35644,11 @@ var TfrmMainScreen = class extends OneWayScreen {
   }
   /** Port: a disabled button takes no clicks, so the form explains it. */
   onBackgroundClick(px, py) {
-    if (this.btnInternet.hit(px, py)) this.rt.data.notApplicable(NOTE_INTERNET);
+    if (!this.btnInternet.enabled && this.btnInternet.hit(px, py)) this.rt.data.notApplicable(NOTE_INTERNET);
+  }
+  /** Port: network races with up to eight players, source/net/. */
+  btnInternetClick() {
+    return this.rt.data.app.openMultiplayer();
   }
   // 0x49da44. The original also reads static.ini again after a visit to the site, for what a
   // download may have added. Nothing can change that file here.
@@ -35086,9 +35894,9 @@ var TfrmCharacter = class extends TwoWayScreen {
   }
   // OnDblClick 0x49b1b4. The strip's double click, two clicks within the Windows default of 500 ms.
   async imgCarClick() {
-    const now = performance.now();
-    const double = now - (this.lastCarClick ?? -Infinity) <= 500;
-    this.lastCarClick = now;
+    const now2 = performance.now();
+    const double = now2 - (this.lastCarClick ?? -Infinity) <= 500;
+    this.lastCarClick = now2;
     if (double && this.rt.data.player.name[0] === "f") this.imgItem.setImage(await this.rt.assets.image("m018.bmp"));
   }
   portraitZones() {
@@ -35397,9 +36205,9 @@ var TfrmResults = class extends OutcomeScreen {
   timeLabel(r, y) {
     const { data } = this.rt;
     const { rankList } = data;
-    const text2 = r === 0 ? data.formatTime(rankList[0].time) : " + " + data.formatTime(rankList[r].time - rankList[0].time);
+    const text3 = r === 0 ? data.formatTime(rankList[0].time) : " + " + data.formatTime(rankList[r].time - rankList[0].time);
     const { size, color } = this.lblTime.font;
-    return new Label(this.lblTime.x, y, 0, 0, text2, { name: "'MS Sans Serif', Arial, Helvetica, sans-serif", size, color, bold: false });
+    return new Label(this.lblTime.x, y, 0, 0, text3, { name: "'MS Sans Serif', Arial, Helvetica, sans-serif", size, color, bold: false });
   }
   // FormShow 0x4a0624
   onShow() {
@@ -35774,8 +36582,8 @@ var TfrmPlayer = class extends CoolDialog {
   portraitDef(char) {
     return buttonDef(this.rt, "pch" + String(char.indexInGame).padStart(2, "0"));
   }
-  setCaption(btn, text2) {
-    btn.caption = text2;
+  setCaption(btn, text3) {
+    btn.caption = text3;
     btn.captionRect = PORTRAIT_CAPTION.rect;
     btn.captionFont = PORTRAIT_CAPTION.font;
   }
@@ -36144,9 +36952,9 @@ var HelpWindow = class extends Form {
     this.body.style.cssText = "flex:1;overflow-y:auto;padding:0 14px;touch-action:pan-y";
     const buttons = document.createElement("div");
     buttons.style.cssText = "display:flex;justify-content:flex-end;padding:0 14px";
-    const button = (text2, onClick) => {
+    const button = (text3, onClick) => {
       const b = document.createElement("button");
-      b.textContent = text2;
+      b.textContent = text3;
       b.style.cssText = HELP_BUTTON;
       b.addEventListener("click", onClick);
       buttons.appendChild(b);
@@ -36247,8 +37055,8 @@ async function showHelpTopic(rt, topic) {
 }
 function errorString(rt, key, fallback) {
   const d = rt.data;
-  const text2 = d.vfs.parsedIni("menu.ini").get("ERRORSTRINGS", key) ?? fallback;
-  return text2.replaceAll("%s", d.menuString(5)).replaceAll("&", "").split("@");
+  const text3 = d.vfs.parsedIni("menu.ini").get("ERRORSTRINGS", key) ?? fallback;
+  return text3.replaceAll("%s", d.menuString(5)).replaceAll("&", "").split("@");
 }
 var TfrmException2 = class extends Form {
   static className = "TfrmException2";
@@ -36268,11 +37076,11 @@ var TfrmException2 = class extends Form {
     icon.src = this.rt.assets.base + "error_icon.png";
     icon.alt = "";
     icon.style.cssText = "width:39px;height:41px;flex:none";
-    const text2 = document.createElement("div");
-    text2.style.whiteSpace = "pre-wrap";
+    const text3 = document.createElement("div");
+    text3.style.whiteSpace = "pre-wrap";
     const message = errorString(this.rt, "errormessage", "Er is een onverwachte fout opgetreden.");
-    text2.textContent = message.filter((line) => !line.includes("Davi-Service")).join("\n");
-    top.append(icon, text2);
+    text3.textContent = message.filter((line) => !line.includes("Davi-Service")).join("\n");
+    top.append(icon, text3);
     const radio = (key, fallback, checked) => {
       const label = document.createElement("label");
       label.style.cssText = "display:block;padding:5px 8px 5px 56px;text-indent:-20px";
@@ -37256,11 +38064,11 @@ var TfrmKeySettings = class extends CoolDialog {
     this.setCapturing(true);
   }
   // FUN_00491c7c. A cancelled capture leaves the caption empty and the Tag as it was, as the code does.
-  setCapturing(on) {
-    this.capturing = on;
+  setCapturing(on2) {
+    this.capturing = on2;
     const cap = this.current;
     const caret = this.txtKey;
-    if (on) {
+    if (on2) {
       caret.x = cap.x + Math.trunc((cap.w - caret.w) / 2);
       caret.y = cap.y + Math.trunc((cap.h - caret.h) / 2);
       caret.visible = true;
@@ -37479,8 +38287,8 @@ var TfrmDisplaySettings = class extends PlainDialog {
       order += 100;
       return this.add(c);
     };
-    const label = (y, h, text2, font = FONT_BLACK) => {
-      const c = new Label(left, top + y, 420, h, text2, font, { layout: "center", wordWrap: true });
+    const label = (y, h, text3, font = FONT_BLACK) => {
+      const c = new Label(left, top + y, 420, h, text3, font, { layout: "center", wordWrap: true });
       c.page = page;
       return this.add(c);
     };
@@ -37646,8 +38454,8 @@ var NoteDialog = class extends CoolDialog {
     while (label.font.size > 14 && lines() * Math.round(label.font.size * 1.2) > label.h) label.font.size--;
   }
 };
-function showNote(rt, text2) {
-  return rt.showModal(NoteDialog, { text: text2 });
+function showNote(rt, text3) {
+  return rt.showModal(NoteDialog, { text: text3 });
 }
 function showIntro(rt) {
   return rt.showModal(TfrmIntro);
@@ -38867,13 +39675,5726 @@ var GameData = class {
     this.sound?.setVolumes({ music: soundPercent(v) });
   }
   /** For options that cannot apply in a browser. */
-  notApplicable(text2) {
+  notApplicable(text3) {
     const rt = this.app?.menu;
     if (!rt) {
-      console.info(text2);
+      console.info(text3);
       return Promise.resolve();
     }
-    return showNote(rt, text2);
+    return showNote(rt, text3);
+  }
+};
+
+// node_modules/peerjs-js-binarypack/dist/binarypack.mjs
+var $e8379818650e2442$export$93654d4f2d6cd524 = class {
+  constructor() {
+    this.encoder = new TextEncoder();
+    this._pieces = [];
+    this._parts = [];
+  }
+  append_buffer(data) {
+    this.flush();
+    this._parts.push(data);
+  }
+  append(data) {
+    this._pieces.push(data);
+  }
+  flush() {
+    if (this._pieces.length > 0) {
+      const buf = new Uint8Array(this._pieces);
+      this._parts.push(buf);
+      this._pieces = [];
+    }
+  }
+  toArrayBuffer() {
+    const buffer = [];
+    for (const part of this._parts) buffer.push(part);
+    return $e8379818650e2442$var$concatArrayBuffers(buffer).buffer;
+  }
+};
+function $e8379818650e2442$var$concatArrayBuffers(bufs) {
+  let size = 0;
+  for (const buf of bufs) size += buf.byteLength;
+  const result = new Uint8Array(size);
+  let offset = 0;
+  for (const buf of bufs) {
+    const view = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+    result.set(view, offset);
+    offset += buf.byteLength;
+  }
+  return result;
+}
+function $0cfd7828ad59115f$export$417857010dc9287f(data) {
+  const unpacker = new $0cfd7828ad59115f$var$Unpacker(data);
+  return unpacker.unpack();
+}
+function $0cfd7828ad59115f$export$2a703dbb0cb35339(data) {
+  const packer = new $0cfd7828ad59115f$export$b9ec4b114aa40074();
+  const res = packer.pack(data);
+  if (res instanceof Promise) return res.then(() => packer.getBuffer());
+  return packer.getBuffer();
+}
+var $0cfd7828ad59115f$var$Unpacker = class {
+  constructor(data) {
+    this.index = 0;
+    this.dataBuffer = data;
+    this.dataView = new Uint8Array(this.dataBuffer);
+    this.length = this.dataBuffer.byteLength;
+  }
+  unpack() {
+    const type = this.unpack_uint8();
+    if (type < 128) return type;
+    else if ((type ^ 224) < 32) return (type ^ 224) - 32;
+    let size;
+    if ((size = type ^ 160) <= 15) return this.unpack_raw(size);
+    else if ((size = type ^ 176) <= 15) return this.unpack_string(size);
+    else if ((size = type ^ 144) <= 15) return this.unpack_array(size);
+    else if ((size = type ^ 128) <= 15) return this.unpack_map(size);
+    switch (type) {
+      case 192:
+        return null;
+      case 193:
+        return void 0;
+      case 194:
+        return false;
+      case 195:
+        return true;
+      case 202:
+        return this.unpack_float();
+      case 203:
+        return this.unpack_double();
+      case 204:
+        return this.unpack_uint8();
+      case 205:
+        return this.unpack_uint16();
+      case 206:
+        return this.unpack_uint32();
+      case 207:
+        return this.unpack_uint64();
+      case 208:
+        return this.unpack_int8();
+      case 209:
+        return this.unpack_int16();
+      case 210:
+        return this.unpack_int32();
+      case 211:
+        return this.unpack_int64();
+      case 212:
+        return void 0;
+      case 213:
+        return void 0;
+      case 214:
+        return void 0;
+      case 215:
+        return void 0;
+      case 216:
+        size = this.unpack_uint16();
+        return this.unpack_string(size);
+      case 217:
+        size = this.unpack_uint32();
+        return this.unpack_string(size);
+      case 218:
+        size = this.unpack_uint16();
+        return this.unpack_raw(size);
+      case 219:
+        size = this.unpack_uint32();
+        return this.unpack_raw(size);
+      case 220:
+        size = this.unpack_uint16();
+        return this.unpack_array(size);
+      case 221:
+        size = this.unpack_uint32();
+        return this.unpack_array(size);
+      case 222:
+        size = this.unpack_uint16();
+        return this.unpack_map(size);
+      case 223:
+        size = this.unpack_uint32();
+        return this.unpack_map(size);
+    }
+  }
+  unpack_uint8() {
+    const byte = this.dataView[this.index] & 255;
+    this.index++;
+    return byte;
+  }
+  unpack_uint16() {
+    const bytes = this.read(2);
+    const uint16 = (bytes[0] & 255) * 256 + (bytes[1] & 255);
+    this.index += 2;
+    return uint16;
+  }
+  unpack_uint32() {
+    const bytes = this.read(4);
+    const uint32 = ((bytes[0] * 256 + bytes[1]) * 256 + bytes[2]) * 256 + bytes[3];
+    this.index += 4;
+    return uint32;
+  }
+  unpack_uint64() {
+    const bytes = this.read(8);
+    const uint64 = ((((((bytes[0] * 256 + bytes[1]) * 256 + bytes[2]) * 256 + bytes[3]) * 256 + bytes[4]) * 256 + bytes[5]) * 256 + bytes[6]) * 256 + bytes[7];
+    this.index += 8;
+    return uint64;
+  }
+  unpack_int8() {
+    const uint8 = this.unpack_uint8();
+    return uint8 < 128 ? uint8 : uint8 - 256;
+  }
+  unpack_int16() {
+    const uint16 = this.unpack_uint16();
+    return uint16 < 32768 ? uint16 : uint16 - 65536;
+  }
+  unpack_int32() {
+    const uint32 = this.unpack_uint32();
+    return uint32 < 2 ** 31 ? uint32 : uint32 - 2 ** 32;
+  }
+  unpack_int64() {
+    const uint64 = this.unpack_uint64();
+    return uint64 < 2 ** 63 ? uint64 : uint64 - 2 ** 64;
+  }
+  unpack_raw(size) {
+    if (this.length < this.index + size) throw new Error(`BinaryPackFailure: index is out of range ${this.index} ${size} ${this.length}`);
+    const buf = this.dataBuffer.slice(this.index, this.index + size);
+    this.index += size;
+    return buf;
+  }
+  unpack_string(size) {
+    const bytes = this.read(size);
+    let i = 0;
+    let str = "";
+    let c;
+    let code;
+    while (i < size) {
+      c = bytes[i];
+      if (c < 160) {
+        code = c;
+        i++;
+      } else if ((c ^ 192) < 32) {
+        code = (c & 31) << 6 | bytes[i + 1] & 63;
+        i += 2;
+      } else if ((c ^ 224) < 16) {
+        code = (c & 15) << 12 | (bytes[i + 1] & 63) << 6 | bytes[i + 2] & 63;
+        i += 3;
+      } else {
+        code = (c & 7) << 18 | (bytes[i + 1] & 63) << 12 | (bytes[i + 2] & 63) << 6 | bytes[i + 3] & 63;
+        i += 4;
+      }
+      str += String.fromCodePoint(code);
+    }
+    this.index += size;
+    return str;
+  }
+  unpack_array(size) {
+    const objects = new Array(size);
+    for (let i = 0; i < size; i++) objects[i] = this.unpack();
+    return objects;
+  }
+  unpack_map(size) {
+    const map = {};
+    for (let i = 0; i < size; i++) {
+      const key = this.unpack();
+      map[key] = this.unpack();
+    }
+    return map;
+  }
+  unpack_float() {
+    const uint32 = this.unpack_uint32();
+    const sign = uint32 >> 31;
+    const exp = (uint32 >> 23 & 255) - 127;
+    const fraction = uint32 & 8388607 | 8388608;
+    return (sign === 0 ? 1 : -1) * fraction * 2 ** (exp - 23);
+  }
+  unpack_double() {
+    const h32 = this.unpack_uint32();
+    const l32 = this.unpack_uint32();
+    const sign = h32 >> 31;
+    const exp = (h32 >> 20 & 2047) - 1023;
+    const hfrac = h32 & 1048575 | 1048576;
+    const frac = hfrac * 2 ** (exp - 20) + l32 * 2 ** (exp - 52);
+    return (sign === 0 ? 1 : -1) * frac;
+  }
+  read(length) {
+    const j = this.index;
+    if (j + length <= this.length) return this.dataView.subarray(j, j + length);
+    else throw new Error("BinaryPackFailure: read index out of range");
+  }
+};
+var $0cfd7828ad59115f$export$b9ec4b114aa40074 = class {
+  getBuffer() {
+    return this._bufferBuilder.toArrayBuffer();
+  }
+  pack(value) {
+    if (typeof value === "string") this.pack_string(value);
+    else if (typeof value === "number") {
+      if (Math.floor(value) === value) this.pack_integer(value);
+      else this.pack_double(value);
+    } else if (typeof value === "boolean") {
+      if (value === true) this._bufferBuilder.append(195);
+      else if (value === false) this._bufferBuilder.append(194);
+    } else if (value === void 0) this._bufferBuilder.append(192);
+    else if (typeof value === "object") {
+      if (value === null) this._bufferBuilder.append(192);
+      else {
+        const constructor = value.constructor;
+        if (value instanceof Array) {
+          const res = this.pack_array(value);
+          if (res instanceof Promise) return res.then(() => this._bufferBuilder.flush());
+        } else if (value instanceof ArrayBuffer) this.pack_bin(new Uint8Array(value));
+        else if ("BYTES_PER_ELEMENT" in value) {
+          const v = value;
+          this.pack_bin(new Uint8Array(v.buffer, v.byteOffset, v.byteLength));
+        } else if (value instanceof Date) this.pack_string(value.toString());
+        else if (value instanceof Blob) return value.arrayBuffer().then((buffer) => {
+          this.pack_bin(new Uint8Array(buffer));
+          this._bufferBuilder.flush();
+        });
+        else if (constructor == Object || constructor.toString().startsWith("class")) {
+          const res = this.pack_object(value);
+          if (res instanceof Promise) return res.then(() => this._bufferBuilder.flush());
+        } else throw new Error(`Type "${constructor.toString()}" not yet supported`);
+      }
+    } else throw new Error(`Type "${typeof value}" not yet supported`);
+    this._bufferBuilder.flush();
+  }
+  pack_bin(blob) {
+    const length = blob.length;
+    if (length <= 15) this.pack_uint8(160 + length);
+    else if (length <= 65535) {
+      this._bufferBuilder.append(218);
+      this.pack_uint16(length);
+    } else if (length <= 4294967295) {
+      this._bufferBuilder.append(219);
+      this.pack_uint32(length);
+    } else throw new Error("Invalid length");
+    this._bufferBuilder.append_buffer(blob);
+  }
+  pack_string(str) {
+    const encoded = this._textEncoder.encode(str);
+    const length = encoded.length;
+    if (length <= 15) this.pack_uint8(176 + length);
+    else if (length <= 65535) {
+      this._bufferBuilder.append(216);
+      this.pack_uint16(length);
+    } else if (length <= 4294967295) {
+      this._bufferBuilder.append(217);
+      this.pack_uint32(length);
+    } else throw new Error("Invalid length");
+    this._bufferBuilder.append_buffer(encoded);
+  }
+  pack_array(ary) {
+    const length = ary.length;
+    if (length <= 15) this.pack_uint8(144 + length);
+    else if (length <= 65535) {
+      this._bufferBuilder.append(220);
+      this.pack_uint16(length);
+    } else if (length <= 4294967295) {
+      this._bufferBuilder.append(221);
+      this.pack_uint32(length);
+    } else throw new Error("Invalid length");
+    const packNext = (index) => {
+      if (index < length) {
+        const res = this.pack(ary[index]);
+        if (res instanceof Promise) return res.then(() => packNext(index + 1));
+        return packNext(index + 1);
+      }
+    };
+    return packNext(0);
+  }
+  pack_integer(num) {
+    if (num >= -32 && num <= 127) this._bufferBuilder.append(num & 255);
+    else if (num >= 0 && num <= 255) {
+      this._bufferBuilder.append(204);
+      this.pack_uint8(num);
+    } else if (num >= -128 && num <= 127) {
+      this._bufferBuilder.append(208);
+      this.pack_int8(num);
+    } else if (num >= 0 && num <= 65535) {
+      this._bufferBuilder.append(205);
+      this.pack_uint16(num);
+    } else if (num >= -32768 && num <= 32767) {
+      this._bufferBuilder.append(209);
+      this.pack_int16(num);
+    } else if (num >= 0 && num <= 4294967295) {
+      this._bufferBuilder.append(206);
+      this.pack_uint32(num);
+    } else if (num >= -2147483648 && num <= 2147483647) {
+      this._bufferBuilder.append(210);
+      this.pack_int32(num);
+    } else if (num >= -9223372036854776e3 && num <= 9223372036854776e3) {
+      this._bufferBuilder.append(211);
+      this.pack_int64(num);
+    } else if (num >= 0 && num <= 18446744073709552e3) {
+      this._bufferBuilder.append(207);
+      this.pack_uint64(num);
+    } else throw new Error("Invalid integer");
+  }
+  pack_double(num) {
+    let sign = 0;
+    if (num < 0) {
+      sign = 1;
+      num = -num;
+    }
+    const exp = Math.floor(Math.log(num) / Math.LN2);
+    const frac0 = num / 2 ** exp - 1;
+    const frac1 = Math.floor(frac0 * 2 ** 52);
+    const b32 = 2 ** 32;
+    const h32 = sign << 31 | exp + 1023 << 20 | frac1 / b32 & 1048575;
+    const l32 = frac1 % b32;
+    this._bufferBuilder.append(203);
+    this.pack_int32(h32);
+    this.pack_int32(l32);
+  }
+  pack_object(obj) {
+    const keys = Object.keys(obj);
+    const length = keys.length;
+    if (length <= 15) this.pack_uint8(128 + length);
+    else if (length <= 65535) {
+      this._bufferBuilder.append(222);
+      this.pack_uint16(length);
+    } else if (length <= 4294967295) {
+      this._bufferBuilder.append(223);
+      this.pack_uint32(length);
+    } else throw new Error("Invalid length");
+    const packNext = (index) => {
+      if (index < keys.length) {
+        const prop = keys[index];
+        if (obj.hasOwnProperty(prop)) {
+          this.pack(prop);
+          const res = this.pack(obj[prop]);
+          if (res instanceof Promise) return res.then(() => packNext(index + 1));
+        }
+        return packNext(index + 1);
+      }
+    };
+    return packNext(0);
+  }
+  pack_uint8(num) {
+    this._bufferBuilder.append(num);
+  }
+  pack_uint16(num) {
+    this._bufferBuilder.append(num >> 8);
+    this._bufferBuilder.append(num & 255);
+  }
+  pack_uint32(num) {
+    const n = num & 4294967295;
+    this._bufferBuilder.append((n & 4278190080) >>> 24);
+    this._bufferBuilder.append((n & 16711680) >>> 16);
+    this._bufferBuilder.append((n & 65280) >>> 8);
+    this._bufferBuilder.append(n & 255);
+  }
+  pack_uint64(num) {
+    const high = num / 2 ** 32;
+    const low = num % 2 ** 32;
+    this._bufferBuilder.append((high & 4278190080) >>> 24);
+    this._bufferBuilder.append((high & 16711680) >>> 16);
+    this._bufferBuilder.append((high & 65280) >>> 8);
+    this._bufferBuilder.append(high & 255);
+    this._bufferBuilder.append((low & 4278190080) >>> 24);
+    this._bufferBuilder.append((low & 16711680) >>> 16);
+    this._bufferBuilder.append((low & 65280) >>> 8);
+    this._bufferBuilder.append(low & 255);
+  }
+  pack_int8(num) {
+    this._bufferBuilder.append(num & 255);
+  }
+  pack_int16(num) {
+    this._bufferBuilder.append((num & 65280) >> 8);
+    this._bufferBuilder.append(num & 255);
+  }
+  pack_int32(num) {
+    this._bufferBuilder.append(num >>> 24 & 255);
+    this._bufferBuilder.append((num & 16711680) >>> 16);
+    this._bufferBuilder.append((num & 65280) >>> 8);
+    this._bufferBuilder.append(num & 255);
+  }
+  pack_int64(num) {
+    const high = Math.floor(num / 2 ** 32);
+    const low = num % 2 ** 32;
+    this._bufferBuilder.append((high & 4278190080) >>> 24);
+    this._bufferBuilder.append((high & 16711680) >>> 16);
+    this._bufferBuilder.append((high & 65280) >>> 8);
+    this._bufferBuilder.append(high & 255);
+    this._bufferBuilder.append((low & 4278190080) >>> 24);
+    this._bufferBuilder.append((low & 16711680) >>> 16);
+    this._bufferBuilder.append((low & 65280) >>> 8);
+    this._bufferBuilder.append(low & 255);
+  }
+  constructor() {
+    this._bufferBuilder = new (0, $e8379818650e2442$export$93654d4f2d6cd524)();
+    this._textEncoder = new TextEncoder();
+  }
+};
+
+// node_modules/webrtc-adapter/src/js/utils.js
+var logDisabled_ = true;
+var deprecationWarnings_ = true;
+function extractVersion(uastring, expr, pos) {
+  const match = uastring.match(expr);
+  return match && match.length >= pos && parseFloat(match[pos], 10);
+}
+function wrapPeerConnectionEvent(window2, eventNameToWrap, wrapper) {
+  if (!window2.RTCPeerConnection) {
+    return;
+  }
+  const addEventListener = Object.getOwnPropertyDescriptor(
+    EventTarget.prototype,
+    "addEventListener"
+  );
+  if (!addEventListener.writable) {
+    log2("Unable to polyfill events");
+    return;
+  }
+  const proto = window2.RTCPeerConnection.prototype;
+  const nativeAddEventListener = proto.addEventListener;
+  proto.addEventListener = function(nativeEventName, cb) {
+    if (nativeEventName !== eventNameToWrap) {
+      return nativeAddEventListener.apply(this, arguments);
+    }
+    const wrappedCallback = (e) => {
+      const modifiedEvent = wrapper(e);
+      if (modifiedEvent) {
+        if (cb.handleEvent) {
+          cb.handleEvent(modifiedEvent);
+        } else {
+          cb(modifiedEvent);
+        }
+      }
+    };
+    this._eventMap = this._eventMap || {};
+    if (!this._eventMap[eventNameToWrap]) {
+      this._eventMap[eventNameToWrap] = /* @__PURE__ */ new Map();
+    }
+    this._eventMap[eventNameToWrap].set(cb, wrappedCallback);
+    return nativeAddEventListener.apply(this, [
+      nativeEventName,
+      wrappedCallback
+    ]);
+  };
+  const nativeRemoveEventListener = proto.removeEventListener;
+  proto.removeEventListener = function(nativeEventName, cb) {
+    if (nativeEventName !== eventNameToWrap || !this._eventMap || !this._eventMap[eventNameToWrap]) {
+      return nativeRemoveEventListener.apply(this, arguments);
+    }
+    if (!this._eventMap[eventNameToWrap].has(cb)) {
+      return nativeRemoveEventListener.apply(this, arguments);
+    }
+    const unwrappedCb = this._eventMap[eventNameToWrap].get(cb);
+    this._eventMap[eventNameToWrap].delete(cb);
+    if (this._eventMap[eventNameToWrap].size === 0) {
+      delete this._eventMap[eventNameToWrap];
+    }
+    if (Object.keys(this._eventMap).length === 0) {
+      delete this._eventMap;
+    }
+    return nativeRemoveEventListener.apply(this, [
+      nativeEventName,
+      unwrappedCb
+    ]);
+  };
+  Object.defineProperty(proto, "on" + eventNameToWrap, {
+    get() {
+      return this["_on" + eventNameToWrap];
+    },
+    set(cb) {
+      if (this["_on" + eventNameToWrap]) {
+        this.removeEventListener(
+          eventNameToWrap,
+          this["_on" + eventNameToWrap]
+        );
+        delete this["_on" + eventNameToWrap];
+      }
+      if (cb) {
+        this.addEventListener(
+          eventNameToWrap,
+          this["_on" + eventNameToWrap] = cb
+        );
+      }
+    },
+    enumerable: true,
+    configurable: true
+  });
+}
+function disableLog(bool) {
+  if (typeof bool !== "boolean") {
+    return new Error("Argument type: " + typeof bool + ". Please use a boolean.");
+  }
+  logDisabled_ = bool;
+  return bool ? "adapter.js logging disabled" : "adapter.js logging enabled";
+}
+function disableWarnings(bool) {
+  if (typeof bool !== "boolean") {
+    return new Error("Argument type: " + typeof bool + ". Please use a boolean.");
+  }
+  deprecationWarnings_ = !bool;
+  return "adapter.js deprecation warnings " + (bool ? "disabled" : "enabled");
+}
+function log2() {
+  if (typeof window === "object") {
+    if (logDisabled_) {
+      return;
+    }
+    if (typeof console !== "undefined" && typeof console.log === "function") {
+      console.log.apply(console, arguments);
+    }
+  }
+}
+function deprecated(oldMethod, newMethod) {
+  if (!deprecationWarnings_) {
+    return;
+  }
+  console.warn(oldMethod + " is deprecated, please use " + newMethod + " instead.");
+}
+function detectBrowser(window2) {
+  const result = { browser: null, version: null };
+  if (typeof window2 === "undefined" || !window2.navigator || !window2.navigator.userAgent) {
+    result.browser = "Not a browser.";
+    return result;
+  }
+  const { navigator: navigator2 } = window2;
+  if (navigator2.userAgentData && navigator2.userAgentData.brands) {
+    const chromium = navigator2.userAgentData.brands.find((brand) => {
+      return brand.brand === "Chromium";
+    });
+    if (chromium) {
+      const version = parseInt(chromium.version, 10);
+      if (version >= 90) {
+        return { browser: "chrome", version };
+      }
+    }
+  }
+  if (navigator2.mozGetUserMedia) {
+    result.browser = "firefox";
+    result.version = parseInt(extractVersion(
+      navigator2.userAgent,
+      /Firefox\/(\d+)\./,
+      1
+    ));
+  } else if (navigator2.webkitGetUserMedia || window2.isSecureContext === false && window2.webkitRTCPeerConnection) {
+    result.browser = "chrome";
+    result.version = parseInt(extractVersion(
+      navigator2.userAgent,
+      /Chrom(e|ium)\/(\d+)\./,
+      2
+    )) || null;
+  } else if (window2.RTCPeerConnection && navigator2.userAgent.match(/AppleWebKit\/(\d+)\./)) {
+    result.browser = "safari";
+    result.version = parseInt(extractVersion(
+      navigator2.userAgent,
+      /AppleWebKit\/(\d+)\./,
+      1
+    ));
+    result.supportsUnifiedPlan = window2.RTCRtpTransceiver && "currentDirection" in window2.RTCRtpTransceiver.prototype;
+    result._safariVersion = extractVersion(
+      navigator2.userAgent,
+      /Version\/(\d+(\.?\d+))/,
+      1
+    );
+  } else {
+    result.browser = "Not a supported browser.";
+    return result;
+  }
+  return result;
+}
+function isObject(val) {
+  return Object.prototype.toString.call(val) === "[object Object]";
+}
+function compactObject(data) {
+  if (!isObject(data)) {
+    return data;
+  }
+  return Object.keys(data).reduce(function(accumulator, key) {
+    const isObj = isObject(data[key]);
+    const value = isObj ? compactObject(data[key]) : data[key];
+    const isEmptyObject = isObj && !Object.keys(value).length;
+    if (value === void 0 || isEmptyObject) {
+      return accumulator;
+    }
+    return Object.assign(accumulator, { [key]: value });
+  }, {});
+}
+function walkStats(stats, base, resultSet) {
+  if (!base || resultSet.has(base.id)) {
+    return;
+  }
+  resultSet.set(base.id, base);
+  Object.keys(base).forEach((name) => {
+    if (name.endsWith("Id")) {
+      walkStats(stats, stats.get(base[name]), resultSet);
+    } else if (name.endsWith("Ids")) {
+      base[name].forEach((id) => {
+        walkStats(stats, stats.get(id), resultSet);
+      });
+    }
+  });
+}
+function filterStats(result, track, outbound) {
+  const streamStatsType = outbound ? "outbound-rtp" : "inbound-rtp";
+  const filteredResult = /* @__PURE__ */ new Map();
+  if (track === null) {
+    return filteredResult;
+  }
+  const trackStats = [];
+  result.forEach((value) => {
+    if (value.type === "track" && value.trackIdentifier === track.id) {
+      trackStats.push(value);
+    }
+  });
+  trackStats.forEach((trackStat) => {
+    result.forEach((stats) => {
+      if (stats.type === streamStatsType && stats.trackId === trackStat.id) {
+        walkStats(result, stats, filteredResult);
+      }
+    });
+  });
+  return filteredResult;
+}
+
+// node_modules/webrtc-adapter/src/js/chrome/chrome_shim.js
+var chrome_shim_exports = {};
+__export(chrome_shim_exports, {
+  fixNegotiationNeeded: () => fixNegotiationNeeded,
+  shimAddTrackRemoveTrack: () => shimAddTrackRemoveTrack,
+  shimAddTrackRemoveTrackWithNative: () => shimAddTrackRemoveTrackWithNative,
+  shimGetSendersWithDtmf: () => shimGetSendersWithDtmf,
+  shimGetUserMedia: () => shimGetUserMedia,
+  shimMediaStream: () => shimMediaStream,
+  shimOnTrack: () => shimOnTrack,
+  shimPeerConnection: () => shimPeerConnection,
+  shimSenderReceiverGetStats: () => shimSenderReceiverGetStats
+});
+
+// node_modules/webrtc-adapter/src/js/chrome/getusermedia.js
+var logging = log2;
+function shimGetUserMedia(window2, browserDetails) {
+  if (browserDetails.version >= 64) {
+    return;
+  }
+  const navigator2 = window2 && window2.navigator;
+  if (!navigator2.mediaDevices) {
+    return;
+  }
+  const constraintsToChrome_ = function(c) {
+    if (typeof c !== "object" || c.mandatory || c.optional) {
+      return c;
+    }
+    const cc = {};
+    Object.keys(c).forEach((key) => {
+      if (key === "require" || key === "advanced" || key === "mediaSource") {
+        return;
+      }
+      const r = typeof c[key] === "object" ? c[key] : { ideal: c[key] };
+      if (r.exact !== void 0 && typeof r.exact === "number") {
+        r.min = r.max = r.exact;
+      }
+      const oldname_ = function(prefix, name) {
+        if (prefix) {
+          return prefix + name.charAt(0).toUpperCase() + name.slice(1);
+        }
+        return name === "deviceId" ? "sourceId" : name;
+      };
+      if (r.ideal !== void 0) {
+        cc.optional = cc.optional || [];
+        let oc = {};
+        if (typeof r.ideal === "number") {
+          oc[oldname_("min", key)] = r.ideal;
+          cc.optional.push(oc);
+          oc = {};
+          oc[oldname_("max", key)] = r.ideal;
+          cc.optional.push(oc);
+        } else {
+          oc[oldname_("", key)] = r.ideal;
+          cc.optional.push(oc);
+        }
+      }
+      if (r.exact !== void 0 && typeof r.exact !== "number") {
+        cc.mandatory = cc.mandatory || {};
+        cc.mandatory[oldname_("", key)] = r.exact;
+      } else {
+        ["min", "max"].forEach((mix) => {
+          if (r[mix] !== void 0) {
+            cc.mandatory = cc.mandatory || {};
+            cc.mandatory[oldname_(mix, key)] = r[mix];
+          }
+        });
+      }
+    });
+    if (c.advanced) {
+      cc.optional = (cc.optional || []).concat(c.advanced);
+    }
+    return cc;
+  };
+  const shimConstraints_ = function(constraints, func) {
+    if (browserDetails.version >= 61) {
+      return func(constraints);
+    }
+    constraints = JSON.parse(JSON.stringify(constraints));
+    if (constraints && typeof constraints.audio === "object") {
+      const remap = function(obj, a, b) {
+        if (a in obj && !(b in obj)) {
+          obj[b] = obj[a];
+          delete obj[a];
+        }
+      };
+      constraints = JSON.parse(JSON.stringify(constraints));
+      remap(constraints.audio, "autoGainControl", "googAutoGainControl");
+      remap(constraints.audio, "noiseSuppression", "googNoiseSuppression");
+      constraints.audio = constraintsToChrome_(constraints.audio);
+    }
+    if (constraints && typeof constraints.video === "object") {
+      let face = constraints.video.facingMode;
+      face = face && (typeof face === "object" ? face : { ideal: face });
+      const getSupportedFacingModeLies = browserDetails.version < 66;
+      if (face && (face.exact === "user" || face.exact === "environment" || face.ideal === "user" || face.ideal === "environment") && !(navigator2.mediaDevices.getSupportedConstraints && navigator2.mediaDevices.getSupportedConstraints().facingMode && !getSupportedFacingModeLies)) {
+        delete constraints.video.facingMode;
+        let matches;
+        if (face.exact === "environment" || face.ideal === "environment") {
+          matches = ["back", "rear"];
+        } else if (face.exact === "user" || face.ideal === "user") {
+          matches = ["front"];
+        }
+        if (matches) {
+          return navigator2.mediaDevices.enumerateDevices().then((devices) => {
+            devices = devices.filter((d) => d.kind === "videoinput");
+            let dev = devices.find((d) => matches.some((match) => d.label.toLowerCase().includes(match)));
+            if (!dev && devices.length && matches.includes("back")) {
+              dev = devices[devices.length - 1];
+            }
+            if (dev) {
+              constraints.video.deviceId = face.exact ? { exact: dev.deviceId } : { ideal: dev.deviceId };
+            }
+            constraints.video = constraintsToChrome_(constraints.video);
+            logging("chrome: " + JSON.stringify(constraints));
+            return func(constraints);
+          });
+        }
+      }
+      constraints.video = constraintsToChrome_(constraints.video);
+    }
+    logging("chrome: " + JSON.stringify(constraints));
+    return func(constraints);
+  };
+  const shimError_ = function(e) {
+    if (browserDetails.version >= 64) {
+      return e;
+    }
+    return {
+      name: {
+        PermissionDeniedError: "NotAllowedError",
+        PermissionDismissedError: "NotAllowedError",
+        InvalidStateError: "NotAllowedError",
+        DevicesNotFoundError: "NotFoundError",
+        ConstraintNotSatisfiedError: "OverconstrainedError",
+        TrackStartError: "NotReadableError",
+        MediaDeviceFailedDueToShutdown: "NotAllowedError",
+        MediaDeviceKillSwitchOn: "NotAllowedError",
+        TabCaptureError: "AbortError",
+        ScreenCaptureError: "AbortError",
+        DeviceCaptureError: "AbortError"
+      }[e.name] || e.name,
+      message: e.message,
+      constraint: e.constraint || e.constraintName,
+      toString() {
+        return this.name + (this.message && ": ") + this.message;
+      }
+    };
+  };
+  const getUserMedia_ = function(constraints, onSuccess, onError) {
+    shimConstraints_(constraints, (c) => {
+      navigator2.webkitGetUserMedia(c, onSuccess, (e) => {
+        if (onError) {
+          onError(shimError_(e));
+        }
+      });
+    });
+  };
+  navigator2.getUserMedia = getUserMedia_.bind(navigator2);
+  if (navigator2.mediaDevices.getUserMedia) {
+    const origGetUserMedia = navigator2.mediaDevices.getUserMedia.bind(navigator2.mediaDevices);
+    navigator2.mediaDevices.getUserMedia = function(cs) {
+      return shimConstraints_(cs, (c) => origGetUserMedia(c).then((stream) => {
+        if (c.audio && !stream.getAudioTracks().length || c.video && !stream.getVideoTracks().length) {
+          stream.getTracks().forEach((track) => {
+            track.stop();
+          });
+          throw new DOMException("", "NotFoundError");
+        }
+        return stream;
+      }, (e) => Promise.reject(shimError_(e))));
+    };
+  }
+}
+
+// node_modules/webrtc-adapter/src/js/chrome/chrome_shim.js
+function shimMediaStream(window2) {
+  window2.MediaStream = window2.MediaStream || window2.webkitMediaStream;
+}
+function shimOnTrack(window2, browserDetails) {
+  if (browserDetails.version > 102) {
+    return;
+  }
+  if (typeof window2 === "object" && window2.RTCPeerConnection && !("ontrack" in window2.RTCPeerConnection.prototype)) {
+    Object.defineProperty(window2.RTCPeerConnection.prototype, "ontrack", {
+      get() {
+        return this._ontrack;
+      },
+      set(f) {
+        if (this._ontrack) {
+          this.removeEventListener("track", this._ontrack);
+        }
+        this.addEventListener("track", this._ontrack = f);
+      },
+      enumerable: true,
+      configurable: true
+    });
+    const origSetRemoteDescription = window2.RTCPeerConnection.prototype.setRemoteDescription;
+    window2.RTCPeerConnection.prototype.setRemoteDescription = function setRemoteDescription() {
+      if (!this._ontrackpoly) {
+        this._ontrackpoly = (e) => {
+          e.stream.addEventListener("addtrack", (te) => {
+            let receiver;
+            if (window2.RTCPeerConnection.prototype.getReceivers) {
+              receiver = this.getReceivers().find((r) => r.track && r.track.id === te.track.id);
+            } else {
+              receiver = { track: te.track };
+            }
+            const event = new Event("track");
+            event.track = te.track;
+            event.receiver = receiver;
+            event.transceiver = { receiver };
+            event.streams = [e.stream];
+            this.dispatchEvent(event);
+          });
+          e.stream.getTracks().forEach((track) => {
+            let receiver;
+            if (window2.RTCPeerConnection.prototype.getReceivers) {
+              receiver = this.getReceivers().find((r) => r.track && r.track.id === track.id);
+            } else {
+              receiver = { track };
+            }
+            const event = new Event("track");
+            event.track = track;
+            event.receiver = receiver;
+            event.transceiver = { receiver };
+            event.streams = [e.stream];
+            this.dispatchEvent(event);
+          });
+        };
+        this.addEventListener("addstream", this._ontrackpoly);
+      }
+      return origSetRemoteDescription.apply(this, arguments);
+    };
+  } else {
+    wrapPeerConnectionEvent(window2, "track", (e) => {
+      if (!e.transceiver) {
+        Object.defineProperty(
+          e,
+          "transceiver",
+          { value: { receiver: e.receiver } }
+        );
+      }
+      return e;
+    });
+  }
+}
+function shimGetSendersWithDtmf(window2) {
+  if (typeof window2 === "object" && window2.RTCPeerConnection && !("getSenders" in window2.RTCPeerConnection.prototype) && "createDTMFSender" in window2.RTCPeerConnection.prototype) {
+    const shimSenderWithDtmf = function(pc, track) {
+      return {
+        track,
+        get dtmf() {
+          if (this._dtmf === void 0) {
+            if (track.kind === "audio") {
+              this._dtmf = pc.createDTMFSender(track);
+            } else {
+              this._dtmf = null;
+            }
+          }
+          return this._dtmf;
+        },
+        _pc: pc
+      };
+    };
+    if (!window2.RTCPeerConnection.prototype.getSenders) {
+      window2.RTCPeerConnection.prototype.getSenders = function getSenders() {
+        this._senders = this._senders || [];
+        return this._senders.slice();
+      };
+      const origAddTrack = window2.RTCPeerConnection.prototype.addTrack;
+      window2.RTCPeerConnection.prototype.addTrack = function addTrack(track, stream) {
+        let sender = origAddTrack.apply(this, arguments);
+        if (!sender) {
+          sender = shimSenderWithDtmf(this, track);
+          this._senders.push(sender);
+        }
+        return sender;
+      };
+      const origRemoveTrack = window2.RTCPeerConnection.prototype.removeTrack;
+      window2.RTCPeerConnection.prototype.removeTrack = function removeTrack(sender) {
+        origRemoveTrack.apply(this, arguments);
+        const idx = this._senders.indexOf(sender);
+        if (idx !== -1) {
+          this._senders.splice(idx, 1);
+        }
+      };
+    }
+    const origAddStream = window2.RTCPeerConnection.prototype.addStream;
+    window2.RTCPeerConnection.prototype.addStream = function addStream(stream) {
+      this._senders = this._senders || [];
+      origAddStream.apply(this, [stream]);
+      stream.getTracks().forEach((track) => {
+        this._senders.push(shimSenderWithDtmf(this, track));
+      });
+    };
+    const origRemoveStream = window2.RTCPeerConnection.prototype.removeStream;
+    window2.RTCPeerConnection.prototype.removeStream = function removeStream(stream) {
+      this._senders = this._senders || [];
+      origRemoveStream.apply(this, [stream]);
+      stream.getTracks().forEach((track) => {
+        const sender = this._senders.find((s) => s.track === track);
+        if (sender) {
+          this._senders.splice(this._senders.indexOf(sender), 1);
+        }
+      });
+    };
+  } else if (typeof window2 === "object" && window2.RTCPeerConnection && "getSenders" in window2.RTCPeerConnection.prototype && "createDTMFSender" in window2.RTCPeerConnection.prototype && window2.RTCRtpSender && !("dtmf" in window2.RTCRtpSender.prototype)) {
+    const origGetSenders = window2.RTCPeerConnection.prototype.getSenders;
+    window2.RTCPeerConnection.prototype.getSenders = function getSenders() {
+      const senders = origGetSenders.apply(this, []);
+      senders.forEach((sender) => sender._pc = this);
+      return senders;
+    };
+    Object.defineProperty(window2.RTCRtpSender.prototype, "dtmf", {
+      get() {
+        if (this._dtmf === void 0) {
+          if (this.track.kind === "audio") {
+            this._dtmf = this._pc.createDTMFSender(this.track);
+          } else {
+            this._dtmf = null;
+          }
+        }
+        return this._dtmf;
+      }
+    });
+  }
+}
+function shimSenderReceiverGetStats(window2, browserDetails) {
+  if (browserDetails.version >= 67) {
+    return;
+  }
+  if (!(typeof window2 === "object" && window2.RTCPeerConnection && window2.RTCRtpSender && window2.RTCRtpReceiver)) {
+    return;
+  }
+  if (!("getStats" in window2.RTCRtpSender.prototype)) {
+    const origGetSenders = window2.RTCPeerConnection.prototype.getSenders;
+    if (origGetSenders) {
+      window2.RTCPeerConnection.prototype.getSenders = function getSenders() {
+        const senders = origGetSenders.apply(this, []);
+        senders.forEach((sender) => sender._pc = this);
+        return senders;
+      };
+    }
+    const origAddTrack = window2.RTCPeerConnection.prototype.addTrack;
+    if (origAddTrack) {
+      window2.RTCPeerConnection.prototype.addTrack = function addTrack() {
+        const sender = origAddTrack.apply(this, arguments);
+        sender._pc = this;
+        return sender;
+      };
+    }
+    window2.RTCRtpSender.prototype.getStats = function getStats() {
+      const sender = this;
+      return this._pc.getStats().then((result) => (
+        /* Note: this will include stats of all senders that
+         *   send a track with the same id as sender.track as
+         *   it is not possible to identify the RTCRtpSender.
+         */
+        filterStats(result, sender.track, true)
+      ));
+    };
+  }
+  if (!("getStats" in window2.RTCRtpReceiver.prototype)) {
+    const origGetReceivers = window2.RTCPeerConnection.prototype.getReceivers;
+    if (origGetReceivers) {
+      window2.RTCPeerConnection.prototype.getReceivers = function getReceivers() {
+        const receivers = origGetReceivers.apply(this, []);
+        receivers.forEach((receiver) => receiver._pc = this);
+        return receivers;
+      };
+    }
+    wrapPeerConnectionEvent(window2, "track", (e) => {
+      e.receiver._pc = e.srcElement;
+      return e;
+    });
+    window2.RTCRtpReceiver.prototype.getStats = function getStats() {
+      const receiver = this;
+      return this._pc.getStats().then((result) => filterStats(result, receiver.track, false));
+    };
+  }
+  if (!("getStats" in window2.RTCRtpSender.prototype && "getStats" in window2.RTCRtpReceiver.prototype)) {
+    return;
+  }
+  const origGetStats = window2.RTCPeerConnection.prototype.getStats;
+  window2.RTCPeerConnection.prototype.getStats = function getStats() {
+    if (arguments.length > 0 && arguments[0] instanceof window2.MediaStreamTrack) {
+      const track = arguments[0];
+      let sender;
+      let receiver;
+      let err;
+      this.getSenders().forEach((s) => {
+        if (s.track === track) {
+          if (sender) {
+            err = true;
+          } else {
+            sender = s;
+          }
+        }
+      });
+      this.getReceivers().forEach((r) => {
+        if (r.track === track) {
+          if (receiver) {
+            err = true;
+          } else {
+            receiver = r;
+          }
+        }
+        return r.track === track;
+      });
+      if (err || sender && receiver) {
+        return Promise.reject(new DOMException(
+          "There are more than one sender or receiver for the track.",
+          "InvalidAccessError"
+        ));
+      } else if (sender) {
+        return sender.getStats();
+      } else if (receiver) {
+        return receiver.getStats();
+      }
+      return Promise.reject(new DOMException(
+        "There is no sender or receiver for the track.",
+        "InvalidAccessError"
+      ));
+    }
+    return origGetStats.apply(this, arguments);
+  };
+}
+function shimAddTrackRemoveTrackWithNative(window2) {
+  window2.RTCPeerConnection.prototype.getLocalStreams = function getLocalStreams() {
+    this._shimmedLocalStreams = this._shimmedLocalStreams || {};
+    return Object.keys(this._shimmedLocalStreams).map((streamId) => this._shimmedLocalStreams[streamId][0]);
+  };
+  const origAddTrack = window2.RTCPeerConnection.prototype.addTrack;
+  window2.RTCPeerConnection.prototype.addTrack = function addTrack(track, stream) {
+    if (!stream) {
+      return origAddTrack.apply(this, arguments);
+    }
+    this._shimmedLocalStreams = this._shimmedLocalStreams || {};
+    const sender = origAddTrack.apply(this, arguments);
+    if (!this._shimmedLocalStreams[stream.id]) {
+      this._shimmedLocalStreams[stream.id] = [stream, sender];
+    } else if (this._shimmedLocalStreams[stream.id].indexOf(sender) === -1) {
+      this._shimmedLocalStreams[stream.id].push(sender);
+    }
+    return sender;
+  };
+  const origAddStream = window2.RTCPeerConnection.prototype.addStream;
+  window2.RTCPeerConnection.prototype.addStream = function addStream(stream) {
+    this._shimmedLocalStreams = this._shimmedLocalStreams || {};
+    stream.getTracks().forEach((track) => {
+      const alreadyExists = this.getSenders().find((s) => s.track === track);
+      if (alreadyExists) {
+        throw new DOMException(
+          "Track already exists.",
+          "InvalidAccessError"
+        );
+      }
+    });
+    const existingSenders = this.getSenders();
+    origAddStream.apply(this, arguments);
+    const newSenders = this.getSenders().filter((newSender) => existingSenders.indexOf(newSender) === -1);
+    this._shimmedLocalStreams[stream.id] = [stream].concat(newSenders);
+  };
+  const origRemoveStream = window2.RTCPeerConnection.prototype.removeStream;
+  window2.RTCPeerConnection.prototype.removeStream = function removeStream(stream) {
+    this._shimmedLocalStreams = this._shimmedLocalStreams || {};
+    delete this._shimmedLocalStreams[stream.id];
+    return origRemoveStream.apply(this, arguments);
+  };
+  const origRemoveTrack = window2.RTCPeerConnection.prototype.removeTrack;
+  window2.RTCPeerConnection.prototype.removeTrack = function removeTrack(sender) {
+    this._shimmedLocalStreams = this._shimmedLocalStreams || {};
+    if (sender) {
+      Object.keys(this._shimmedLocalStreams).forEach((streamId) => {
+        const idx = this._shimmedLocalStreams[streamId].indexOf(sender);
+        if (idx !== -1) {
+          this._shimmedLocalStreams[streamId].splice(idx, 1);
+        }
+        if (this._shimmedLocalStreams[streamId].length === 1) {
+          delete this._shimmedLocalStreams[streamId];
+        }
+      });
+    }
+    return origRemoveTrack.apply(this, arguments);
+  };
+}
+function shimAddTrackRemoveTrack(window2, browserDetails) {
+  if (!window2.RTCPeerConnection) {
+    return;
+  }
+  if (window2.RTCPeerConnection.prototype.addTrack && browserDetails.version >= 65) {
+    return shimAddTrackRemoveTrackWithNative(window2);
+  }
+  const origGetLocalStreams = window2.RTCPeerConnection.prototype.getLocalStreams;
+  window2.RTCPeerConnection.prototype.getLocalStreams = function getLocalStreams() {
+    const nativeStreams = origGetLocalStreams.apply(this);
+    this._reverseStreams = this._reverseStreams || {};
+    return nativeStreams.map((stream) => this._reverseStreams[stream.id]);
+  };
+  const origAddStream = window2.RTCPeerConnection.prototype.addStream;
+  window2.RTCPeerConnection.prototype.addStream = function addStream(stream) {
+    this._streams = this._streams || {};
+    this._reverseStreams = this._reverseStreams || {};
+    stream.getTracks().forEach((track) => {
+      const alreadyExists = this.getSenders().find((s) => s.track === track);
+      if (alreadyExists) {
+        throw new DOMException(
+          "Track already exists.",
+          "InvalidAccessError"
+        );
+      }
+    });
+    if (!this._reverseStreams[stream.id]) {
+      const newStream = new window2.MediaStream(stream.getTracks());
+      this._streams[stream.id] = newStream;
+      this._reverseStreams[newStream.id] = stream;
+      stream = newStream;
+    }
+    origAddStream.apply(this, [stream]);
+  };
+  const origRemoveStream = window2.RTCPeerConnection.prototype.removeStream;
+  window2.RTCPeerConnection.prototype.removeStream = function removeStream(stream) {
+    this._streams = this._streams || {};
+    this._reverseStreams = this._reverseStreams || {};
+    origRemoveStream.apply(this, [this._streams[stream.id] || stream]);
+    delete this._reverseStreams[this._streams[stream.id] ? this._streams[stream.id].id : stream.id];
+    delete this._streams[stream.id];
+  };
+  window2.RTCPeerConnection.prototype.addTrack = function addTrack(track, stream) {
+    if (this.signalingState === "closed") {
+      throw new DOMException(
+        "The RTCPeerConnection's signalingState is 'closed'.",
+        "InvalidStateError"
+      );
+    }
+    const streams = [].slice.call(arguments, 1);
+    if (streams.length !== 1 || !streams[0].getTracks().find((t) => t === track)) {
+      throw new DOMException(
+        "The adapter.js addTrack polyfill only supports a single  stream which is associated with the specified track.",
+        "NotSupportedError"
+      );
+    }
+    const alreadyExists = this.getSenders().find((s) => s.track === track);
+    if (alreadyExists) {
+      throw new DOMException(
+        "Track already exists.",
+        "InvalidAccessError"
+      );
+    }
+    this._streams = this._streams || {};
+    this._reverseStreams = this._reverseStreams || {};
+    const oldStream = this._streams[stream.id];
+    if (oldStream) {
+      oldStream.addTrack(track);
+      Promise.resolve().then(() => {
+        this.dispatchEvent(new Event("negotiationneeded"));
+      });
+    } else {
+      const newStream = new window2.MediaStream([track]);
+      this._streams[stream.id] = newStream;
+      this._reverseStreams[newStream.id] = stream;
+      this.addStream(newStream);
+    }
+    return this.getSenders().find((s) => s.track === track);
+  };
+  function replaceInternalStreamId(pc, description) {
+    let sdp2 = description.sdp;
+    Object.keys(pc._reverseStreams || []).forEach((internalId) => {
+      const externalStream = pc._reverseStreams[internalId];
+      const internalStream = pc._streams[externalStream.id];
+      sdp2 = sdp2.replace(
+        new RegExp(internalStream.id, "g"),
+        externalStream.id
+      );
+    });
+    return new RTCSessionDescription({
+      type: description.type,
+      sdp: sdp2
+    });
+  }
+  function replaceExternalStreamId(pc, description) {
+    let sdp2 = description.sdp;
+    Object.keys(pc._reverseStreams || []).forEach((internalId) => {
+      const externalStream = pc._reverseStreams[internalId];
+      const internalStream = pc._streams[externalStream.id];
+      sdp2 = sdp2.replace(
+        new RegExp(externalStream.id, "g"),
+        internalStream.id
+      );
+    });
+    return new RTCSessionDescription({
+      type: description.type,
+      sdp: sdp2
+    });
+  }
+  ["createOffer", "createAnswer"].forEach(function(method) {
+    const nativeMethod = window2.RTCPeerConnection.prototype[method];
+    const methodObj = { [method]() {
+      const args = arguments;
+      const isLegacyCall = arguments.length && typeof arguments[0] === "function";
+      if (isLegacyCall) {
+        return nativeMethod.apply(this, [
+          (description) => {
+            const desc = replaceInternalStreamId(this, description);
+            args[0].apply(null, [desc]);
+          },
+          (err) => {
+            if (args[1]) {
+              args[1].apply(null, err);
+            }
+          },
+          arguments[2]
+        ]);
+      }
+      return nativeMethod.apply(this, arguments).then((description) => replaceInternalStreamId(this, description));
+    } };
+    window2.RTCPeerConnection.prototype[method] = methodObj[method];
+  });
+  const origSetLocalDescription = window2.RTCPeerConnection.prototype.setLocalDescription;
+  window2.RTCPeerConnection.prototype.setLocalDescription = function setLocalDescription() {
+    if (!arguments.length || !arguments[0].type) {
+      return origSetLocalDescription.apply(this, arguments);
+    }
+    arguments[0] = replaceExternalStreamId(this, arguments[0]);
+    return origSetLocalDescription.apply(this, arguments);
+  };
+  const origLocalDescription = Object.getOwnPropertyDescriptor(
+    window2.RTCPeerConnection.prototype,
+    "localDescription"
+  );
+  Object.defineProperty(
+    window2.RTCPeerConnection.prototype,
+    "localDescription",
+    {
+      get() {
+        const description = origLocalDescription.get.apply(this);
+        if (description.type === "") {
+          return description;
+        }
+        return replaceInternalStreamId(this, description);
+      }
+    }
+  );
+  window2.RTCPeerConnection.prototype.removeTrack = function removeTrack(sender) {
+    if (this.signalingState === "closed") {
+      throw new DOMException(
+        "The RTCPeerConnection's signalingState is 'closed'.",
+        "InvalidStateError"
+      );
+    }
+    if (!sender._pc) {
+      throw new DOMException("Argument 1 of RTCPeerConnection.removeTrack does not implement interface RTCRtpSender.", "TypeError");
+    }
+    const isLocal = sender._pc === this;
+    if (!isLocal) {
+      throw new DOMException(
+        "Sender was not created by this connection.",
+        "InvalidAccessError"
+      );
+    }
+    this._streams = this._streams || {};
+    let stream;
+    Object.keys(this._streams).forEach((streamid) => {
+      const hasTrack = this._streams[streamid].getTracks().find((track) => sender.track === track);
+      if (hasTrack) {
+        stream = this._streams[streamid];
+      }
+    });
+    if (stream) {
+      if (stream.getTracks().length === 1) {
+        this.removeStream(this._reverseStreams[stream.id]);
+      } else {
+        stream.removeTrack(sender.track);
+      }
+      this.dispatchEvent(new Event("negotiationneeded"));
+    }
+  };
+}
+function shimPeerConnection(window2, browserDetails) {
+  if (!window2.RTCPeerConnection && window2.webkitRTCPeerConnection) {
+    window2.RTCPeerConnection = window2.webkitRTCPeerConnection;
+  }
+  if (!window2.RTCPeerConnection) {
+    return;
+  }
+  if (browserDetails.version < 53) {
+    ["setLocalDescription", "setRemoteDescription", "addIceCandidate"].forEach(function(method) {
+      const nativeMethod = window2.RTCPeerConnection.prototype[method];
+      const methodObj = { [method]() {
+        arguments[0] = new (method === "addIceCandidate" ? window2.RTCIceCandidate : window2.RTCSessionDescription)(arguments[0]);
+        return nativeMethod.apply(this, arguments);
+      } };
+      window2.RTCPeerConnection.prototype[method] = methodObj[method];
+    });
+  }
+}
+function fixNegotiationNeeded(window2, browserDetails) {
+  if (browserDetails.version > 102) {
+    return;
+  }
+  wrapPeerConnectionEvent(window2, "negotiationneeded", (e) => {
+    const pc = e.target;
+    if (browserDetails.version < 72 || pc.getConfiguration && pc.getConfiguration().sdpSemantics === "plan-b") {
+      if (pc.signalingState !== "stable") {
+        return;
+      }
+    }
+    return e;
+  });
+}
+
+// node_modules/webrtc-adapter/src/js/firefox/firefox_shim.js
+var firefox_shim_exports = {};
+__export(firefox_shim_exports, {
+  shimAddTransceiver: () => shimAddTransceiver,
+  shimCreateAnswer: () => shimCreateAnswer,
+  shimCreateOffer: () => shimCreateOffer,
+  shimGetDisplayMedia: () => shimGetDisplayMedia,
+  shimGetParameters: () => shimGetParameters,
+  shimGetStats: () => shimGetStats,
+  shimGetUserMedia: () => shimGetUserMedia2,
+  shimOnTrack: () => shimOnTrack2,
+  shimPeerConnection: () => shimPeerConnection2,
+  shimRTCDataChannel: () => shimRTCDataChannel,
+  shimReceiverGetStats: () => shimReceiverGetStats,
+  shimRemoveStream: () => shimRemoveStream,
+  shimSenderGetStats: () => shimSenderGetStats
+});
+
+// node_modules/webrtc-adapter/src/js/firefox/getusermedia.js
+function shimGetUserMedia2(window2, browserDetails) {
+  const navigator2 = window2 && window2.navigator;
+  if (!navigator2.mediaDevices) {
+    return;
+  }
+  const MediaStreamTrack = window2 && window2.MediaStreamTrack;
+  navigator2.getUserMedia = function(constraints, onSuccess, onError) {
+    deprecated(
+      "navigator.getUserMedia",
+      "navigator.mediaDevices.getUserMedia"
+    );
+    navigator2.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
+  };
+  if (!(browserDetails.version > 55 && "autoGainControl" in navigator2.mediaDevices.getSupportedConstraints())) {
+    const remap = function(obj, a, b) {
+      if (a in obj && !(b in obj)) {
+        obj[b] = obj[a];
+        delete obj[a];
+      }
+    };
+    const nativeGetUserMedia = navigator2.mediaDevices.getUserMedia.bind(navigator2.mediaDevices);
+    navigator2.mediaDevices.getUserMedia = function(c) {
+      if (typeof c === "object" && typeof c.audio === "object") {
+        c = JSON.parse(JSON.stringify(c));
+        remap(c.audio, "autoGainControl", "mozAutoGainControl");
+        remap(c.audio, "noiseSuppression", "mozNoiseSuppression");
+      }
+      return nativeGetUserMedia(c);
+    };
+    if (MediaStreamTrack && MediaStreamTrack.prototype.getSettings) {
+      const nativeGetSettings = MediaStreamTrack.prototype.getSettings;
+      MediaStreamTrack.prototype.getSettings = function() {
+        const obj = nativeGetSettings.apply(this, arguments);
+        remap(obj, "mozAutoGainControl", "autoGainControl");
+        remap(obj, "mozNoiseSuppression", "noiseSuppression");
+        return obj;
+      };
+    }
+    if (MediaStreamTrack && MediaStreamTrack.prototype.applyConstraints) {
+      const nativeApplyConstraints = MediaStreamTrack.prototype.applyConstraints;
+      MediaStreamTrack.prototype.applyConstraints = function(c) {
+        if (this.kind === "audio" && typeof c === "object") {
+          c = JSON.parse(JSON.stringify(c));
+          remap(c, "autoGainControl", "mozAutoGainControl");
+          remap(c, "noiseSuppression", "mozNoiseSuppression");
+        }
+        return nativeApplyConstraints.apply(this, [c]);
+      };
+    }
+  }
+}
+
+// node_modules/webrtc-adapter/src/js/firefox/getdisplaymedia.js
+function shimGetDisplayMedia(window2, preferredMediaSource) {
+  if (!window2.navigator.mediaDevices) {
+    return;
+  }
+  if (window2.navigator.mediaDevices && "getDisplayMedia" in window2.navigator.mediaDevices) {
+    return;
+  }
+  window2.navigator.mediaDevices.getDisplayMedia = function getDisplayMedia(constraints) {
+    if (!(constraints && constraints.video)) {
+      const err = new DOMException("getDisplayMedia without video constraints is undefined");
+      err.name = "NotFoundError";
+      err.code = 8;
+      return Promise.reject(err);
+    }
+    if (constraints.video === true) {
+      constraints.video = { mediaSource: preferredMediaSource };
+    } else {
+      constraints.video.mediaSource = preferredMediaSource;
+    }
+    return window2.navigator.mediaDevices.getUserMedia(constraints);
+  };
+}
+
+// node_modules/webrtc-adapter/src/js/firefox/firefox_shim.js
+function shimOnTrack2(window2) {
+  if (typeof window2 === "object" && window2.RTCTrackEvent && "receiver" in window2.RTCTrackEvent.prototype && !("transceiver" in window2.RTCTrackEvent.prototype)) {
+    Object.defineProperty(window2.RTCTrackEvent.prototype, "transceiver", {
+      get() {
+        return { receiver: this.receiver };
+      }
+    });
+  }
+}
+function shimPeerConnection2(window2, browserDetails) {
+  if (typeof window2 !== "object" || !(window2.RTCPeerConnection || window2.mozRTCPeerConnection)) {
+    return;
+  }
+  if (!window2.RTCPeerConnection && window2.mozRTCPeerConnection) {
+    window2.RTCPeerConnection = window2.mozRTCPeerConnection;
+  }
+  if (browserDetails.version < 53) {
+    ["setLocalDescription", "setRemoteDescription", "addIceCandidate"].forEach(function(method) {
+      const nativeMethod = window2.RTCPeerConnection.prototype[method];
+      const methodObj = { [method]() {
+        arguments[0] = new (method === "addIceCandidate" ? window2.RTCIceCandidate : window2.RTCSessionDescription)(arguments[0]);
+        return nativeMethod.apply(this, arguments);
+      } };
+      window2.RTCPeerConnection.prototype[method] = methodObj[method];
+    });
+  }
+}
+function shimGetStats(window2, browserDetails) {
+  if (typeof window2 !== "object" || !(window2.RTCPeerConnection || window2.mozRTCPeerConnection)) {
+    return;
+  }
+  if (browserDetails.version >= 151) {
+    return;
+  }
+  const modernStatsTypes = {
+    inboundrtp: "inbound-rtp",
+    outboundrtp: "outbound-rtp",
+    candidatepair: "candidate-pair",
+    localcandidate: "local-candidate",
+    remotecandidate: "remote-candidate"
+  };
+  const nativeGetStats = window2.RTCPeerConnection.prototype.getStats;
+  window2.RTCPeerConnection.prototype.getStats = function getStats() {
+    const [selector, onSucc, onErr] = arguments;
+    if (this.signalingState === "closed") {
+      return Promise.resolve(/* @__PURE__ */ new Map());
+    }
+    return nativeGetStats.apply(this, [selector || null]).then((stats) => {
+      if (browserDetails.version < 53 && !onSucc) {
+        try {
+          stats.forEach((stat) => {
+            stat.type = modernStatsTypes[stat.type] || stat.type;
+          });
+        } catch (e) {
+          if (e.name !== "TypeError") {
+            throw e;
+          }
+          stats.forEach((stat, i) => {
+            stats.set(i, Object.assign({}, stat, {
+              type: modernStatsTypes[stat.type] || stat.type
+            }));
+          });
+        }
+      }
+      return stats;
+    }).then(onSucc, onErr);
+  };
+}
+function shimSenderGetStats(window2) {
+  if (!(typeof window2 === "object" && window2.RTCPeerConnection && window2.RTCRtpSender)) {
+    return;
+  }
+  if (window2.RTCRtpSender && "getStats" in window2.RTCRtpSender.prototype) {
+    return;
+  }
+  const origGetSenders = window2.RTCPeerConnection.prototype.getSenders;
+  if (origGetSenders) {
+    window2.RTCPeerConnection.prototype.getSenders = function getSenders() {
+      const senders = origGetSenders.apply(this, []);
+      senders.forEach((sender) => sender._pc = this);
+      return senders;
+    };
+  }
+  const origAddTrack = window2.RTCPeerConnection.prototype.addTrack;
+  if (origAddTrack) {
+    window2.RTCPeerConnection.prototype.addTrack = function addTrack() {
+      const sender = origAddTrack.apply(this, arguments);
+      sender._pc = this;
+      return sender;
+    };
+  }
+  window2.RTCRtpSender.prototype.getStats = function getStats() {
+    return this.track ? this._pc.getStats(this.track) : Promise.resolve(/* @__PURE__ */ new Map());
+  };
+}
+function shimReceiverGetStats(window2) {
+  if (!(typeof window2 === "object" && window2.RTCPeerConnection && window2.RTCRtpSender)) {
+    return;
+  }
+  if (window2.RTCRtpSender && "getStats" in window2.RTCRtpReceiver.prototype) {
+    return;
+  }
+  const origGetReceivers = window2.RTCPeerConnection.prototype.getReceivers;
+  if (origGetReceivers) {
+    window2.RTCPeerConnection.prototype.getReceivers = function getReceivers() {
+      const receivers = origGetReceivers.apply(this, []);
+      receivers.forEach((receiver) => receiver._pc = this);
+      return receivers;
+    };
+  }
+  wrapPeerConnectionEvent(window2, "track", (e) => {
+    e.receiver._pc = e.srcElement;
+    return e;
+  });
+  window2.RTCRtpReceiver.prototype.getStats = function getStats() {
+    return this._pc.getStats(this.track);
+  };
+}
+function shimRemoveStream(window2) {
+  if (!window2.RTCPeerConnection || "removeStream" in window2.RTCPeerConnection.prototype) {
+    return;
+  }
+  window2.RTCPeerConnection.prototype.removeStream = function removeStream(stream) {
+    deprecated("removeStream", "removeTrack");
+    this.getSenders().forEach((sender) => {
+      if (sender.track && stream.getTracks().includes(sender.track)) {
+        this.removeTrack(sender);
+      }
+    });
+  };
+}
+function shimRTCDataChannel(window2) {
+  if (window2.DataChannel && !window2.RTCDataChannel) {
+    window2.RTCDataChannel = window2.DataChannel;
+  }
+}
+function shimAddTransceiver(window2, browserDetails) {
+  if (!(typeof window2 === "object" && window2.RTCPeerConnection)) {
+    return;
+  }
+  if (browserDetails.version >= 110) {
+    return;
+  }
+  const origAddTransceiver = window2.RTCPeerConnection.prototype.addTransceiver;
+  if (origAddTransceiver) {
+    window2.RTCPeerConnection.prototype.addTransceiver = function addTransceiver() {
+      this.setParametersPromises = [];
+      let sendEncodings = arguments[1] && arguments[1].sendEncodings;
+      if (sendEncodings === void 0) {
+        sendEncodings = [];
+      }
+      sendEncodings = [...sendEncodings];
+      const shouldPerformCheck = sendEncodings.length > 0;
+      if (shouldPerformCheck) {
+        sendEncodings.forEach((encodingParam) => {
+          if ("rid" in encodingParam) {
+            const ridRegex = /^[a-z0-9]{0,16}$/i;
+            if (!ridRegex.test(encodingParam.rid)) {
+              throw new TypeError("Invalid RID value provided.");
+            }
+          }
+          if ("scaleResolutionDownBy" in encodingParam) {
+            if (!(parseFloat(encodingParam.scaleResolutionDownBy) >= 1)) {
+              throw new RangeError("scale_resolution_down_by must be >= 1.0");
+            }
+          }
+          if ("maxFramerate" in encodingParam) {
+            if (!(parseFloat(encodingParam.maxFramerate) >= 0)) {
+              throw new RangeError("max_framerate must be >= 0.0");
+            }
+          }
+        });
+      }
+      const transceiver = origAddTransceiver.apply(this, arguments);
+      if (shouldPerformCheck) {
+        const { sender } = transceiver;
+        const params = sender.getParameters();
+        if (!("encodings" in params) || // Avoid being fooled by patched getParameters() below.
+        params.encodings.length === 1 && Object.keys(params.encodings[0]).length === 0) {
+          params.encodings = sendEncodings;
+          sender.sendEncodings = sendEncodings;
+          this.setParametersPromises.push(
+            sender.setParameters(params).then(() => {
+              delete sender.sendEncodings;
+            }).catch(() => {
+              delete sender.sendEncodings;
+            })
+          );
+        }
+      }
+      return transceiver;
+    };
+  }
+}
+function shimGetParameters(window2, browserDetails) {
+  if (!(typeof window2 === "object" && window2.RTCRtpSender)) {
+    return;
+  }
+  if (browserDetails.version >= 110) {
+    return;
+  }
+  const origGetParameters = window2.RTCRtpSender.prototype.getParameters;
+  if (origGetParameters) {
+    window2.RTCRtpSender.prototype.getParameters = function getParameters() {
+      const params = origGetParameters.apply(this, arguments);
+      if (!("encodings" in params)) {
+        params.encodings = [].concat(this.sendEncodings || [{}]);
+      }
+      return params;
+    };
+  }
+}
+function shimCreateOffer(window2, browserDetails) {
+  if (!(typeof window2 === "object" && window2.RTCPeerConnection)) {
+    return;
+  }
+  if (browserDetails.version >= 110) {
+    return;
+  }
+  const origCreateOffer = window2.RTCPeerConnection.prototype.createOffer;
+  window2.RTCPeerConnection.prototype.createOffer = function createOffer() {
+    if (this.setParametersPromises && this.setParametersPromises.length) {
+      return Promise.all(this.setParametersPromises).then(() => {
+        return origCreateOffer.apply(this, arguments);
+      }).finally(() => {
+        this.setParametersPromises = [];
+      });
+    }
+    return origCreateOffer.apply(this, arguments);
+  };
+}
+function shimCreateAnswer(window2, browserDetails) {
+  if (!(typeof window2 === "object" && window2.RTCPeerConnection)) {
+    return;
+  }
+  if (browserDetails.version >= 110) {
+    return;
+  }
+  const origCreateAnswer = window2.RTCPeerConnection.prototype.createAnswer;
+  window2.RTCPeerConnection.prototype.createAnswer = function createAnswer() {
+    if (this.setParametersPromises && this.setParametersPromises.length) {
+      return Promise.all(this.setParametersPromises).then(() => {
+        return origCreateAnswer.apply(this, arguments);
+      }).finally(() => {
+        this.setParametersPromises = [];
+      });
+    }
+    return origCreateAnswer.apply(this, arguments);
+  };
+}
+
+// node_modules/webrtc-adapter/src/js/safari/safari_shim.js
+var safari_shim_exports = {};
+__export(safari_shim_exports, {
+  shimAudioContext: () => shimAudioContext,
+  shimCallbacksAPI: () => shimCallbacksAPI,
+  shimConstraints: () => shimConstraints,
+  shimCreateOfferLegacy: () => shimCreateOfferLegacy,
+  shimGetUserMedia: () => shimGetUserMedia3,
+  shimLocalStreamsAPI: () => shimLocalStreamsAPI,
+  shimRTCIceServerUrls: () => shimRTCIceServerUrls,
+  shimRemoteStreamsAPI: () => shimRemoteStreamsAPI,
+  shimTrackEventTransceiver: () => shimTrackEventTransceiver
+});
+function shimLocalStreamsAPI(window2) {
+  if (typeof window2 !== "object" || !window2.RTCPeerConnection) {
+    return;
+  }
+  if (!("getLocalStreams" in window2.RTCPeerConnection.prototype)) {
+    window2.RTCPeerConnection.prototype.getLocalStreams = function getLocalStreams() {
+      if (!this._localStreams) {
+        this._localStreams = [];
+      }
+      return this._localStreams;
+    };
+  }
+  if (!("addStream" in window2.RTCPeerConnection.prototype)) {
+    const _addTrack = window2.RTCPeerConnection.prototype.addTrack;
+    window2.RTCPeerConnection.prototype.addStream = function addStream(stream) {
+      if (!this._localStreams) {
+        this._localStreams = [];
+      }
+      if (!this._localStreams.includes(stream)) {
+        this._localStreams.push(stream);
+      }
+      stream.getAudioTracks().forEach((track) => _addTrack.call(
+        this,
+        track,
+        stream
+      ));
+      stream.getVideoTracks().forEach((track) => _addTrack.call(
+        this,
+        track,
+        stream
+      ));
+    };
+    window2.RTCPeerConnection.prototype.addTrack = function addTrack(track, ...streams) {
+      if (streams) {
+        streams.forEach((stream) => {
+          if (!this._localStreams) {
+            this._localStreams = [stream];
+          } else if (!this._localStreams.includes(stream)) {
+            this._localStreams.push(stream);
+          }
+        });
+      }
+      return _addTrack.apply(this, arguments);
+    };
+  }
+  if (!("removeStream" in window2.RTCPeerConnection.prototype)) {
+    window2.RTCPeerConnection.prototype.removeStream = function removeStream(stream) {
+      if (!this._localStreams) {
+        this._localStreams = [];
+      }
+      const index = this._localStreams.indexOf(stream);
+      if (index === -1) {
+        return;
+      }
+      this._localStreams.splice(index, 1);
+      const tracks = stream.getTracks();
+      this.getSenders().forEach((sender) => {
+        if (tracks.includes(sender.track)) {
+          this.removeTrack(sender);
+        }
+      });
+    };
+  }
+}
+function shimRemoteStreamsAPI(window2) {
+  if (typeof window2 !== "object" || !window2.RTCPeerConnection) {
+    return;
+  }
+  if (!("getRemoteStreams" in window2.RTCPeerConnection.prototype)) {
+    window2.RTCPeerConnection.prototype.getRemoteStreams = function getRemoteStreams() {
+      return this._remoteStreams ? this._remoteStreams : [];
+    };
+  }
+  if (!("onaddstream" in window2.RTCPeerConnection.prototype)) {
+    Object.defineProperty(window2.RTCPeerConnection.prototype, "onaddstream", {
+      get() {
+        return this._onaddstream;
+      },
+      set(f) {
+        if (this._onaddstream) {
+          this.removeEventListener("addstream", this._onaddstream);
+          this.removeEventListener("track", this._onaddstreampoly);
+        }
+        this.addEventListener("addstream", this._onaddstream = f);
+        this.addEventListener("track", this._onaddstreampoly = (e) => {
+          e.streams.forEach((stream) => {
+            if (!this._remoteStreams) {
+              this._remoteStreams = [];
+            }
+            if (this._remoteStreams.includes(stream)) {
+              return;
+            }
+            this._remoteStreams.push(stream);
+            const event = new Event("addstream");
+            event.stream = stream;
+            this.dispatchEvent(event);
+          });
+        });
+      }
+    });
+    const origSetRemoteDescription = window2.RTCPeerConnection.prototype.setRemoteDescription;
+    window2.RTCPeerConnection.prototype.setRemoteDescription = function setRemoteDescription() {
+      const pc = this;
+      if (!this._onaddstreampoly) {
+        this.addEventListener("track", this._onaddstreampoly = function(e) {
+          e.streams.forEach((stream) => {
+            if (!pc._remoteStreams) {
+              pc._remoteStreams = [];
+            }
+            if (pc._remoteStreams.indexOf(stream) >= 0) {
+              return;
+            }
+            pc._remoteStreams.push(stream);
+            const event = new Event("addstream");
+            event.stream = stream;
+            pc.dispatchEvent(event);
+          });
+        });
+      }
+      return origSetRemoteDescription.apply(pc, arguments);
+    };
+  }
+}
+function shimCallbacksAPI(window2) {
+  if (typeof window2 !== "object" || !window2.RTCPeerConnection) {
+    return;
+  }
+  const prototype = window2.RTCPeerConnection.prototype;
+  const origCreateOffer = prototype.createOffer;
+  const origCreateAnswer = prototype.createAnswer;
+  const setLocalDescription = prototype.setLocalDescription;
+  const setRemoteDescription = prototype.setRemoteDescription;
+  const addIceCandidate = prototype.addIceCandidate;
+  prototype.createOffer = function createOffer(successCallback, failureCallback) {
+    const options = arguments.length >= 2 ? arguments[2] : arguments[0];
+    const promise = origCreateOffer.apply(this, [options]);
+    if (!failureCallback) {
+      return promise;
+    }
+    promise.then(successCallback, failureCallback);
+    return Promise.resolve();
+  };
+  prototype.createAnswer = function createAnswer(successCallback, failureCallback) {
+    const options = arguments.length >= 2 ? arguments[2] : arguments[0];
+    const promise = origCreateAnswer.apply(this, [options]);
+    if (!failureCallback) {
+      return promise;
+    }
+    promise.then(successCallback, failureCallback);
+    return Promise.resolve();
+  };
+  let withCallback = function(description, successCallback, failureCallback) {
+    const promise = setLocalDescription.apply(this, [description]);
+    if (!failureCallback) {
+      return promise;
+    }
+    promise.then(successCallback, failureCallback);
+    return Promise.resolve();
+  };
+  prototype.setLocalDescription = withCallback;
+  withCallback = function(description, successCallback, failureCallback) {
+    const promise = setRemoteDescription.apply(this, [description]);
+    if (!failureCallback) {
+      return promise;
+    }
+    promise.then(successCallback, failureCallback);
+    return Promise.resolve();
+  };
+  prototype.setRemoteDescription = withCallback;
+  withCallback = function(candidate, successCallback, failureCallback) {
+    const promise = addIceCandidate.apply(this, [candidate]);
+    if (!failureCallback) {
+      return promise;
+    }
+    promise.then(successCallback, failureCallback);
+    return Promise.resolve();
+  };
+  prototype.addIceCandidate = withCallback;
+}
+function shimGetUserMedia3(window2) {
+  const navigator2 = window2 && window2.navigator;
+  if (navigator2.mediaDevices && navigator2.mediaDevices.getUserMedia) {
+    const mediaDevices = navigator2.mediaDevices;
+    const _getUserMedia = mediaDevices.getUserMedia.bind(mediaDevices);
+    navigator2.mediaDevices.getUserMedia = (constraints) => {
+      return _getUserMedia(shimConstraints(constraints));
+    };
+  }
+  if (!navigator2.getUserMedia && navigator2.mediaDevices && navigator2.mediaDevices.getUserMedia) {
+    navigator2.getUserMedia = function getUserMedia(constraints, cb, errcb) {
+      navigator2.mediaDevices.getUserMedia(constraints).then(cb, errcb);
+    }.bind(navigator2);
+  }
+}
+function shimConstraints(constraints) {
+  if (constraints && constraints.video !== void 0) {
+    return Object.assign(
+      {},
+      constraints,
+      { video: compactObject(constraints.video) }
+    );
+  }
+  return constraints;
+}
+function shimRTCIceServerUrls(window2) {
+  if (!window2.RTCPeerConnection) {
+    return;
+  }
+  const OrigPeerConnection = window2.RTCPeerConnection;
+  window2.RTCPeerConnection = function RTCPeerConnection2(pcConfig, pcConstraints) {
+    if (pcConfig && pcConfig.iceServers) {
+      const newIceServers = [];
+      for (let i = 0; i < pcConfig.iceServers.length; i++) {
+        let server = pcConfig.iceServers[i];
+        if (server.urls === void 0 && server.url) {
+          deprecated("RTCIceServer.url", "RTCIceServer.urls");
+          server = JSON.parse(JSON.stringify(server));
+          server.urls = server.url;
+          delete server.url;
+          newIceServers.push(server);
+        } else {
+          newIceServers.push(pcConfig.iceServers[i]);
+        }
+      }
+      pcConfig.iceServers = newIceServers;
+    }
+    return new OrigPeerConnection(pcConfig, pcConstraints);
+  };
+  window2.RTCPeerConnection.prototype = OrigPeerConnection.prototype;
+  if ("generateCertificate" in OrigPeerConnection) {
+    Object.defineProperty(window2.RTCPeerConnection, "generateCertificate", {
+      get() {
+        return OrigPeerConnection.generateCertificate;
+      }
+    });
+  }
+}
+function shimTrackEventTransceiver(window2) {
+  if (typeof window2 === "object" && window2.RTCTrackEvent && "receiver" in window2.RTCTrackEvent.prototype && !("transceiver" in window2.RTCTrackEvent.prototype)) {
+    Object.defineProperty(window2.RTCTrackEvent.prototype, "transceiver", {
+      get() {
+        return { receiver: this.receiver };
+      }
+    });
+  }
+}
+function shimCreateOfferLegacy(window2) {
+  const origCreateOffer = window2.RTCPeerConnection.prototype.createOffer;
+  window2.RTCPeerConnection.prototype.createOffer = function createOffer(offerOptions) {
+    if (offerOptions) {
+      if (typeof offerOptions.offerToReceiveAudio !== "undefined") {
+        offerOptions.offerToReceiveAudio = !!offerOptions.offerToReceiveAudio;
+      }
+      const audioTransceiver = this.getTransceivers().find((transceiver) => transceiver.receiver.track.kind === "audio");
+      if (offerOptions.offerToReceiveAudio === false && audioTransceiver) {
+        if (audioTransceiver.direction === "sendrecv") {
+          if (audioTransceiver.setDirection) {
+            audioTransceiver.setDirection("sendonly");
+          } else {
+            audioTransceiver.direction = "sendonly";
+          }
+        } else if (audioTransceiver.direction === "recvonly") {
+          if (audioTransceiver.setDirection) {
+            audioTransceiver.setDirection("inactive");
+          } else {
+            audioTransceiver.direction = "inactive";
+          }
+        }
+      } else if (offerOptions.offerToReceiveAudio === true && !audioTransceiver) {
+        this.addTransceiver("audio", { direction: "recvonly" });
+      }
+      if (typeof offerOptions.offerToReceiveVideo !== "undefined") {
+        offerOptions.offerToReceiveVideo = !!offerOptions.offerToReceiveVideo;
+      }
+      const videoTransceiver = this.getTransceivers().find((transceiver) => transceiver.receiver.track.kind === "video");
+      if (offerOptions.offerToReceiveVideo === false && videoTransceiver) {
+        if (videoTransceiver.direction === "sendrecv") {
+          if (videoTransceiver.setDirection) {
+            videoTransceiver.setDirection("sendonly");
+          } else {
+            videoTransceiver.direction = "sendonly";
+          }
+        } else if (videoTransceiver.direction === "recvonly") {
+          if (videoTransceiver.setDirection) {
+            videoTransceiver.setDirection("inactive");
+          } else {
+            videoTransceiver.direction = "inactive";
+          }
+        }
+      } else if (offerOptions.offerToReceiveVideo === true && !videoTransceiver) {
+        this.addTransceiver("video", { direction: "recvonly" });
+      }
+    }
+    return origCreateOffer.apply(this, arguments);
+  };
+}
+function shimAudioContext(window2) {
+  if (typeof window2 !== "object" || window2.AudioContext) {
+    return;
+  }
+  window2.AudioContext = window2.webkitAudioContext;
+}
+
+// node_modules/webrtc-adapter/src/js/common_shim.js
+var common_shim_exports = {};
+__export(common_shim_exports, {
+  removeExtmapAllowMixed: () => removeExtmapAllowMixed,
+  shimAddIceCandidateNullOrEmpty: () => shimAddIceCandidateNullOrEmpty,
+  shimConnectionState: () => shimConnectionState,
+  shimMaxMessageSize: () => shimMaxMessageSize,
+  shimParameterlessSetLocalDescription: () => shimParameterlessSetLocalDescription,
+  shimRTCIceCandidate: () => shimRTCIceCandidate,
+  shimRTCIceCandidateRelayProtocol: () => shimRTCIceCandidateRelayProtocol,
+  shimSendThrowTypeError: () => shimSendThrowTypeError
+});
+var import_sdp = __toESM(require_sdp());
+function shimRTCIceCandidate(window2) {
+  if (!window2.RTCIceCandidate || window2.RTCIceCandidate && "foundation" in window2.RTCIceCandidate.prototype) {
+    return;
+  }
+  const NativeRTCIceCandidate = window2.RTCIceCandidate;
+  window2.RTCIceCandidate = function RTCIceCandidate(args) {
+    if (typeof args === "object" && args.candidate && args.candidate.indexOf("a=") === 0) {
+      args = JSON.parse(JSON.stringify(args));
+      args.candidate = args.candidate.substring(2);
+    }
+    if (args.candidate && args.candidate.length) {
+      const nativeCandidate = new NativeRTCIceCandidate(args);
+      const parsedCandidate = import_sdp.default.parseCandidate(args.candidate);
+      for (const key in parsedCandidate) {
+        if (!(key in nativeCandidate)) {
+          Object.defineProperty(
+            nativeCandidate,
+            key,
+            { value: parsedCandidate[key] }
+          );
+        }
+      }
+      nativeCandidate.toJSON = function toJSON() {
+        return {
+          candidate: nativeCandidate.candidate,
+          sdpMid: nativeCandidate.sdpMid,
+          sdpMLineIndex: nativeCandidate.sdpMLineIndex,
+          usernameFragment: nativeCandidate.usernameFragment
+        };
+      };
+      return nativeCandidate;
+    }
+    return new NativeRTCIceCandidate(args);
+  };
+  window2.RTCIceCandidate.prototype = NativeRTCIceCandidate.prototype;
+  wrapPeerConnectionEvent(window2, "icecandidate", (e) => {
+    if (e.candidate) {
+      Object.defineProperty(e, "candidate", {
+        value: new window2.RTCIceCandidate(e.candidate),
+        writable: "false"
+      });
+    }
+    return e;
+  });
+}
+function shimRTCIceCandidateRelayProtocol(window2) {
+  if (!window2.RTCIceCandidate || window2.RTCIceCandidate && "relayProtocol" in window2.RTCIceCandidate.prototype) {
+    return;
+  }
+  wrapPeerConnectionEvent(window2, "icecandidate", (e) => {
+    if (e.candidate) {
+      const parsedCandidate = import_sdp.default.parseCandidate(e.candidate.candidate);
+      if (parsedCandidate.type === "relay") {
+        e.candidate.relayProtocol = {
+          0: "tls",
+          1: "tcp",
+          2: "udp"
+        }[parsedCandidate.priority >> 24];
+      }
+    }
+    return e;
+  });
+}
+function shimMaxMessageSize(window2, browserDetails) {
+  if (!window2.RTCPeerConnection) {
+    return;
+  }
+  if (browserDetails.browser === "chrome" && browserDetails.version > 102) {
+    return;
+  }
+  if (browserDetails.browser === "firefox" && browserDetails.version >= 113) {
+    return;
+  }
+  if (!("sctp" in window2.RTCPeerConnection.prototype)) {
+    Object.defineProperty(window2.RTCPeerConnection.prototype, "sctp", {
+      get() {
+        return typeof this._sctp === "undefined" ? null : this._sctp;
+      }
+    });
+  }
+  const sctpInDescription = function(description) {
+    if (!description || !description.sdp) {
+      return false;
+    }
+    const sections = import_sdp.default.splitSections(description.sdp);
+    sections.shift();
+    return sections.some((mediaSection) => {
+      const mLine = import_sdp.default.parseMLine(mediaSection);
+      return mLine && mLine.kind === "application" && mLine.protocol.indexOf("SCTP") !== -1;
+    });
+  };
+  const getRemoteFirefoxVersion = function(description) {
+    const match = description.sdp.match(/mozilla...THIS_IS_SDPARTA-(\d+)/);
+    if (match === null || match.length < 2) {
+      return -1;
+    }
+    const version = parseInt(match[1], 10);
+    return version !== version ? -1 : version;
+  };
+  const getCanSendMaxMessageSize = function(remoteIsFirefox) {
+    let canSendMaxMessageSize = 65536;
+    if (browserDetails.browser === "firefox") {
+      if (browserDetails.version < 57) {
+        if (remoteIsFirefox === -1) {
+          canSendMaxMessageSize = 16384;
+        } else {
+          canSendMaxMessageSize = 2147483637;
+        }
+      } else if (browserDetails.version < 60) {
+        canSendMaxMessageSize = browserDetails.version === 57 ? 65535 : 65536;
+      } else {
+        canSendMaxMessageSize = 2147483637;
+      }
+    }
+    return canSendMaxMessageSize;
+  };
+  const getMaxMessageSize = function(description, remoteIsFirefox) {
+    let maxMessageSize = 65536;
+    if (browserDetails.browser === "firefox" && browserDetails.version === 57) {
+      maxMessageSize = 65535;
+    }
+    const match = import_sdp.default.matchPrefix(
+      description.sdp,
+      "a=max-message-size:"
+    );
+    if (match.length > 0) {
+      maxMessageSize = parseInt(match[0].substring(19), 10);
+    } else if (browserDetails.browser === "firefox" && remoteIsFirefox !== -1) {
+      maxMessageSize = 2147483637;
+    }
+    return maxMessageSize;
+  };
+  const origSetRemoteDescription = window2.RTCPeerConnection.prototype.setRemoteDescription;
+  window2.RTCPeerConnection.prototype.setRemoteDescription = function setRemoteDescription() {
+    this._sctp = null;
+    if (browserDetails.browser === "chrome" && browserDetails.version >= 76) {
+      const { sdpSemantics } = this.getConfiguration();
+      if (sdpSemantics === "plan-b") {
+        Object.defineProperty(this, "sctp", {
+          get() {
+            return typeof this._sctp === "undefined" ? null : this._sctp;
+          },
+          enumerable: true,
+          configurable: true
+        });
+      }
+    }
+    if (sctpInDescription(arguments[0])) {
+      const isFirefox = getRemoteFirefoxVersion(arguments[0]);
+      const canSendMMS = getCanSendMaxMessageSize(isFirefox);
+      const remoteMMS = getMaxMessageSize(arguments[0], isFirefox);
+      let maxMessageSize;
+      if (canSendMMS === 0 && remoteMMS === 0) {
+        maxMessageSize = Number.POSITIVE_INFINITY;
+      } else if (canSendMMS === 0 || remoteMMS === 0) {
+        maxMessageSize = Math.max(canSendMMS, remoteMMS);
+      } else {
+        maxMessageSize = Math.min(canSendMMS, remoteMMS);
+      }
+      const sctp = {};
+      Object.defineProperty(sctp, "maxMessageSize", {
+        get() {
+          return maxMessageSize;
+        }
+      });
+      this._sctp = sctp;
+    }
+    return origSetRemoteDescription.apply(this, arguments);
+  };
+}
+function shimSendThrowTypeError(window2, browserDetails) {
+  if (!(window2.RTCPeerConnection && "createDataChannel" in window2.RTCPeerConnection.prototype)) {
+    return;
+  }
+  if (browserDetails.browser === "chrome" && browserDetails.version >= 149) {
+    return;
+  }
+  if (browserDetails.browser === "firefox" && browserDetails.version > 60) {
+    return;
+  }
+  function wrapDcSend(dc, pc) {
+    const origDataChannelSend = dc.send;
+    dc.send = function send() {
+      const data = arguments[0];
+      const length = data.length || data.size || data.byteLength;
+      if (dc.readyState === "open" && pc.sctp && length > pc.sctp.maxMessageSize) {
+        throw new TypeError("Message too large (can send a maximum of " + pc.sctp.maxMessageSize + " bytes)");
+      }
+      return origDataChannelSend.apply(dc, arguments);
+    };
+  }
+  const origCreateDataChannel = window2.RTCPeerConnection.prototype.createDataChannel;
+  window2.RTCPeerConnection.prototype.createDataChannel = function createDataChannel() {
+    const dataChannel = origCreateDataChannel.apply(this, arguments);
+    wrapDcSend(dataChannel, this);
+    return dataChannel;
+  };
+  wrapPeerConnectionEvent(window2, "datachannel", (e) => {
+    wrapDcSend(e.channel, e.target);
+    return e;
+  });
+}
+function shimConnectionState(window2) {
+  if (!window2.RTCPeerConnection || "connectionState" in window2.RTCPeerConnection.prototype) {
+    return;
+  }
+  const proto = window2.RTCPeerConnection.prototype;
+  Object.defineProperty(proto, "connectionState", {
+    get() {
+      return {
+        completed: "connected",
+        checking: "connecting"
+      }[this.iceConnectionState] || this.iceConnectionState;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(proto, "onconnectionstatechange", {
+    get() {
+      return this._onconnectionstatechange || null;
+    },
+    set(cb) {
+      if (this._onconnectionstatechange) {
+        this.removeEventListener(
+          "connectionstatechange",
+          this._onconnectionstatechange
+        );
+        delete this._onconnectionstatechange;
+      }
+      if (cb) {
+        this.addEventListener(
+          "connectionstatechange",
+          this._onconnectionstatechange = cb
+        );
+      }
+    },
+    enumerable: true,
+    configurable: true
+  });
+  ["setLocalDescription", "setRemoteDescription"].forEach((method) => {
+    const origMethod = proto[method];
+    proto[method] = function() {
+      if (!this._connectionstatechangepoly) {
+        this._connectionstatechangepoly = (e) => {
+          const pc = e.target;
+          if (pc._lastConnectionState !== pc.connectionState) {
+            pc._lastConnectionState = pc.connectionState;
+            const newEvent = new Event("connectionstatechange", e);
+            pc.dispatchEvent(newEvent);
+          }
+          return e;
+        };
+        this.addEventListener(
+          "iceconnectionstatechange",
+          this._connectionstatechangepoly
+        );
+      }
+      return origMethod.apply(this, arguments);
+    };
+  });
+}
+function removeExtmapAllowMixed(window2, browserDetails) {
+  if (!window2.RTCPeerConnection) {
+    return;
+  }
+  if (browserDetails.browser === "chrome" && browserDetails.version >= 71) {
+    return;
+  }
+  if (browserDetails.browser === "safari" && browserDetails._safariVersion >= 13.1) {
+    return;
+  }
+  const nativeSRD = window2.RTCPeerConnection.prototype.setRemoteDescription;
+  window2.RTCPeerConnection.prototype.setRemoteDescription = function setRemoteDescription(desc) {
+    if (desc && desc.sdp && desc.sdp.indexOf("\na=extmap-allow-mixed") !== -1) {
+      const sdp2 = desc.sdp.split("\n").filter((line) => {
+        return line.trim() !== "a=extmap-allow-mixed";
+      }).join("\n");
+      if (window2.RTCSessionDescription && desc instanceof window2.RTCSessionDescription) {
+        arguments[0] = new window2.RTCSessionDescription({
+          type: desc.type,
+          sdp: sdp2
+        });
+      } else {
+        desc.sdp = sdp2;
+      }
+    }
+    return nativeSRD.apply(this, arguments);
+  };
+}
+function shimAddIceCandidateNullOrEmpty(window2, browserDetails) {
+  if (!(window2.RTCPeerConnection && window2.RTCPeerConnection.prototype)) {
+    return;
+  }
+  const nativeAddIceCandidate = window2.RTCPeerConnection.prototype.addIceCandidate;
+  if (!nativeAddIceCandidate || nativeAddIceCandidate.length === 0) {
+    return;
+  }
+  window2.RTCPeerConnection.prototype.addIceCandidate = function addIceCandidate() {
+    if (!arguments[0]) {
+      if (arguments[1]) {
+        arguments[1].apply(null);
+      }
+      return Promise.resolve();
+    }
+    if ((browserDetails.browser === "chrome" && browserDetails.version < 78 || browserDetails.browser === "firefox" && browserDetails.version < 68 || browserDetails.browser === "safari") && arguments[0] && arguments[0].candidate === "") {
+      return Promise.resolve();
+    }
+    return nativeAddIceCandidate.apply(this, arguments);
+  };
+}
+function shimParameterlessSetLocalDescription(window2, browserDetails) {
+  if (!(window2.RTCPeerConnection && window2.RTCPeerConnection.prototype)) {
+    return;
+  }
+  const nativeSetLocalDescription = window2.RTCPeerConnection.prototype.setLocalDescription;
+  if (!nativeSetLocalDescription || nativeSetLocalDescription.length === 0) {
+    return;
+  }
+  window2.RTCPeerConnection.prototype.setLocalDescription = function setLocalDescription() {
+    let desc = arguments[0] || {};
+    if (typeof desc !== "object" || desc.type && desc.sdp) {
+      return nativeSetLocalDescription.apply(this, arguments);
+    }
+    desc = { type: desc.type, sdp: desc.sdp };
+    if (!desc.type) {
+      switch (this.signalingState) {
+        case "stable":
+        case "have-local-offer":
+        case "have-remote-pranswer":
+          desc.type = "offer";
+          break;
+        default:
+          desc.type = "answer";
+          break;
+      }
+    }
+    if (desc.sdp || desc.type !== "offer" && desc.type !== "answer") {
+      return nativeSetLocalDescription.apply(this, [desc]);
+    }
+    const func = desc.type === "offer" ? this.createOffer : this.createAnswer;
+    return func.apply(this).then((d) => nativeSetLocalDescription.apply(this, [d]));
+  };
+}
+
+// node_modules/webrtc-adapter/src/js/adapter_factory.js
+var sdp = __toESM(require_sdp());
+function adapterFactory({ window: window2 } = {}, options = {
+  shimChrome: true,
+  shimFirefox: true,
+  shimSafari: true
+}) {
+  const logging2 = log2;
+  const browserDetails = detectBrowser(window2);
+  const adapter2 = {
+    browserDetails,
+    commonShim: common_shim_exports,
+    extractVersion,
+    disableLog,
+    disableWarnings,
+    // Expose sdp as a convenience. For production apps include directly.
+    sdp
+  };
+  switch (browserDetails.browser) {
+    case "chrome":
+      if (!chrome_shim_exports || !shimPeerConnection || !options.shimChrome) {
+        logging2("Chrome shim is not included in this adapter release.");
+        return adapter2;
+      }
+      if (browserDetails.version === null) {
+        logging2("Chrome shim can not determine version, not shimming.");
+        return adapter2;
+      }
+      logging2("adapter.js shimming chrome.");
+      adapter2.browserShim = chrome_shim_exports;
+      shimAddIceCandidateNullOrEmpty(window2, browserDetails);
+      shimParameterlessSetLocalDescription(window2, browserDetails);
+      shimGetUserMedia(window2, browserDetails);
+      shimMediaStream(window2, browserDetails);
+      shimPeerConnection(window2, browserDetails);
+      shimOnTrack(window2, browserDetails);
+      shimAddTrackRemoveTrack(window2, browserDetails);
+      shimGetSendersWithDtmf(window2, browserDetails);
+      shimSenderReceiverGetStats(window2, browserDetails);
+      fixNegotiationNeeded(window2, browserDetails);
+      shimRTCIceCandidate(window2, browserDetails);
+      shimRTCIceCandidateRelayProtocol(window2, browserDetails);
+      shimConnectionState(window2, browserDetails);
+      shimMaxMessageSize(window2, browserDetails);
+      shimSendThrowTypeError(window2, browserDetails);
+      removeExtmapAllowMixed(window2, browserDetails);
+      break;
+    case "firefox":
+      if (!firefox_shim_exports || !shimPeerConnection2 || !options.shimFirefox) {
+        logging2("Firefox shim is not included in this adapter release.");
+        return adapter2;
+      }
+      logging2("adapter.js shimming firefox.");
+      adapter2.browserShim = firefox_shim_exports;
+      shimAddIceCandidateNullOrEmpty(window2, browserDetails);
+      shimParameterlessSetLocalDescription(window2, browserDetails);
+      shimGetUserMedia2(window2, browserDetails);
+      shimPeerConnection2(window2, browserDetails);
+      shimGetStats(window2, browserDetails);
+      shimOnTrack2(window2, browserDetails);
+      shimRemoveStream(window2, browserDetails);
+      shimSenderGetStats(window2, browserDetails);
+      shimReceiverGetStats(window2, browserDetails);
+      shimRTCDataChannel(window2, browserDetails);
+      shimAddTransceiver(window2, browserDetails);
+      shimGetParameters(window2, browserDetails);
+      shimCreateOffer(window2, browserDetails);
+      shimCreateAnswer(window2, browserDetails);
+      shimRTCIceCandidate(window2, browserDetails);
+      shimConnectionState(window2, browserDetails);
+      shimMaxMessageSize(window2, browserDetails);
+      shimSendThrowTypeError(window2, browserDetails);
+      break;
+    case "safari":
+      if (!safari_shim_exports || !options.shimSafari) {
+        logging2("Safari shim is not included in this adapter release.");
+        return adapter2;
+      }
+      logging2("adapter.js shimming safari.");
+      adapter2.browserShim = safari_shim_exports;
+      shimAddIceCandidateNullOrEmpty(window2, browserDetails);
+      shimParameterlessSetLocalDescription(window2, browserDetails);
+      shimRTCIceServerUrls(window2, browserDetails);
+      shimCreateOfferLegacy(window2, browserDetails);
+      shimCallbacksAPI(window2, browserDetails);
+      shimLocalStreamsAPI(window2, browserDetails);
+      shimRemoteStreamsAPI(window2, browserDetails);
+      shimTrackEventTransceiver(window2, browserDetails);
+      shimGetUserMedia3(window2, browserDetails);
+      shimAudioContext(window2, browserDetails);
+      shimRTCIceCandidate(window2, browserDetails);
+      shimRTCIceCandidateRelayProtocol(window2, browserDetails);
+      shimMaxMessageSize(window2, browserDetails);
+      shimSendThrowTypeError(window2, browserDetails);
+      removeExtmapAllowMixed(window2, browserDetails);
+      break;
+    default:
+      logging2("Unsupported browser!");
+      break;
+  }
+  return adapter2;
+}
+
+// node_modules/webrtc-adapter/src/js/adapter_core.js
+var adapter = adapterFactory({ window: typeof window === "undefined" ? void 0 : window });
+var adapter_core_default = adapter;
+
+// node_modules/peerjs/dist/bundler.mjs
+function $parcel$export(e, n, v, s) {
+  Object.defineProperty(e, n, { get: v, set: s, enumerable: true, configurable: true });
+}
+var $fcbcc7538a6776d5$export$f1c5f4c9cb95390b = class {
+  constructor() {
+    this.chunkedMTU = 16300;
+    this._dataCount = 1;
+    this.chunk = (blob) => {
+      const chunks = [];
+      const size = blob.byteLength;
+      const total = Math.ceil(size / this.chunkedMTU);
+      let index = 0;
+      let start = 0;
+      while (start < size) {
+        const end = Math.min(size, start + this.chunkedMTU);
+        const b = blob.slice(start, end);
+        const chunk = {
+          __peerData: this._dataCount,
+          n: index,
+          data: b,
+          total
+        };
+        chunks.push(chunk);
+        start = end;
+        index++;
+      }
+      this._dataCount++;
+      return chunks;
+    };
+  }
+};
+function $fcbcc7538a6776d5$export$52c89ebcdc4f53f2(bufs) {
+  let size = 0;
+  for (const buf of bufs) size += buf.byteLength;
+  const result = new Uint8Array(size);
+  let offset = 0;
+  for (const buf of bufs) {
+    result.set(buf, offset);
+    offset += buf.byteLength;
+  }
+  return result;
+}
+var $fb63e766cfafaab9$var$webRTCAdapter = (
+  //@ts-ignore
+  (0, adapter_core_default).default || (0, adapter_core_default)
+);
+var $fb63e766cfafaab9$export$25be9502477c137d = new class {
+  isWebRTCSupported() {
+    return typeof RTCPeerConnection !== "undefined";
+  }
+  isBrowserSupported() {
+    const browser = this.getBrowser();
+    const version = this.getVersion();
+    const validBrowser = this.supportedBrowsers.includes(browser);
+    if (!validBrowser) return false;
+    if (browser === "chrome") return version >= this.minChromeVersion;
+    if (browser === "firefox") return version >= this.minFirefoxVersion;
+    if (browser === "safari") return !this.isIOS && version >= this.minSafariVersion;
+    return false;
+  }
+  getBrowser() {
+    return $fb63e766cfafaab9$var$webRTCAdapter.browserDetails.browser;
+  }
+  getVersion() {
+    return $fb63e766cfafaab9$var$webRTCAdapter.browserDetails.version || 0;
+  }
+  isUnifiedPlanSupported() {
+    const browser = this.getBrowser();
+    const version = $fb63e766cfafaab9$var$webRTCAdapter.browserDetails.version || 0;
+    if (browser === "chrome" && version < this.minChromeVersion) return false;
+    if (browser === "firefox" && version >= this.minFirefoxVersion) return true;
+    if (!window.RTCRtpTransceiver || !("currentDirection" in RTCRtpTransceiver.prototype)) return false;
+    let tempPc;
+    let supported = false;
+    try {
+      tempPc = new RTCPeerConnection();
+      tempPc.addTransceiver("audio");
+      supported = true;
+    } catch (e) {
+    } finally {
+      if (tempPc) tempPc.close();
+    }
+    return supported;
+  }
+  toString() {
+    return `Supports:
+    browser:${this.getBrowser()}
+    version:${this.getVersion()}
+    isIOS:${this.isIOS}
+    isWebRTCSupported:${this.isWebRTCSupported()}
+    isBrowserSupported:${this.isBrowserSupported()}
+    isUnifiedPlanSupported:${this.isUnifiedPlanSupported()}`;
+  }
+  constructor() {
+    this.isIOS = typeof navigator !== "undefined" ? [
+      "iPad",
+      "iPhone",
+      "iPod"
+    ].includes(navigator.platform) : false;
+    this.supportedBrowsers = [
+      "firefox",
+      "chrome",
+      "safari"
+    ];
+    this.minFirefoxVersion = 59;
+    this.minChromeVersion = 72;
+    this.minSafariVersion = 605;
+  }
+}();
+var $9a84a32bf0bf36bb$export$f35f128fd59ea256 = (id) => {
+  return !id || /^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/.test(id);
+};
+var $0e5fd1585784c252$export$4e61f672936bec77 = () => Math.random().toString(36).slice(2);
+var $4f4134156c446392$var$DEFAULT_CONFIG = {
+  iceServers: [
+    {
+      urls: "stun:stun.l.google.com:19302"
+    },
+    {
+      urls: [
+        "turn:eu-0.turn.peerjs.com:3478",
+        "turn:us-0.turn.peerjs.com:3478"
+      ],
+      username: "peerjs",
+      credential: "peerjsp"
+    }
+  ],
+  sdpSemantics: "unified-plan"
+};
+var $4f4134156c446392$export$f8f26dd395d7e1bd = class extends (0, $fcbcc7538a6776d5$export$f1c5f4c9cb95390b) {
+  noop() {
+  }
+  blobToArrayBuffer(blob, cb) {
+    const fr = new FileReader();
+    fr.onload = function(evt) {
+      if (evt.target) cb(evt.target.result);
+    };
+    fr.readAsArrayBuffer(blob);
+    return fr;
+  }
+  binaryStringToArrayBuffer(binary) {
+    const byteArray = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) byteArray[i] = binary.charCodeAt(i) & 255;
+    return byteArray.buffer;
+  }
+  isSecure() {
+    return location.protocol === "https:";
+  }
+  constructor(...args) {
+    super(...args);
+    this.CLOUD_HOST = "0.peerjs.com";
+    this.CLOUD_PORT = 443;
+    this.chunkedBrowsers = {
+      Chrome: 1,
+      chrome: 1
+    };
+    this.defaultConfig = $4f4134156c446392$var$DEFAULT_CONFIG;
+    this.browser = (0, $fb63e766cfafaab9$export$25be9502477c137d).getBrowser();
+    this.browserVersion = (0, $fb63e766cfafaab9$export$25be9502477c137d).getVersion();
+    this.pack = $0cfd7828ad59115f$export$2a703dbb0cb35339;
+    this.unpack = $0cfd7828ad59115f$export$417857010dc9287f;
+    this.supports = (function() {
+      const supported = {
+        browser: (0, $fb63e766cfafaab9$export$25be9502477c137d).isBrowserSupported(),
+        webRTC: (0, $fb63e766cfafaab9$export$25be9502477c137d).isWebRTCSupported(),
+        audioVideo: false,
+        data: false,
+        binaryBlob: false,
+        reliable: false
+      };
+      if (!supported.webRTC) return supported;
+      let pc;
+      try {
+        pc = new RTCPeerConnection($4f4134156c446392$var$DEFAULT_CONFIG);
+        supported.audioVideo = true;
+        let dc;
+        try {
+          dc = pc.createDataChannel("_PEERJSTEST", {
+            ordered: true
+          });
+          supported.data = true;
+          supported.reliable = !!dc.ordered;
+          try {
+            dc.binaryType = "blob";
+            supported.binaryBlob = !(0, $fb63e766cfafaab9$export$25be9502477c137d).isIOS;
+          } catch (e) {
+          }
+        } catch (e) {
+        } finally {
+          if (dc) dc.close();
+        }
+      } catch (e) {
+      } finally {
+        if (pc) pc.close();
+      }
+      return supported;
+    })();
+    this.validateId = (0, $9a84a32bf0bf36bb$export$f35f128fd59ea256);
+    this.randomToken = (0, $0e5fd1585784c252$export$4e61f672936bec77);
+  }
+};
+var $4f4134156c446392$export$7debb50ef11d5e0b = new $4f4134156c446392$export$f8f26dd395d7e1bd();
+var $257947e92926277a$var$LOG_PREFIX = "PeerJS: ";
+var $257947e92926277a$export$243e62d78d3b544d;
+(function(LogLevel) {
+  LogLevel[LogLevel["Disabled"] = 0] = "Disabled";
+  LogLevel[LogLevel["Errors"] = 1] = "Errors";
+  LogLevel[LogLevel["Warnings"] = 2] = "Warnings";
+  LogLevel[LogLevel["All"] = 3] = "All";
+})($257947e92926277a$export$243e62d78d3b544d || ($257947e92926277a$export$243e62d78d3b544d = {}));
+var $257947e92926277a$var$Logger = class {
+  get logLevel() {
+    return this._logLevel;
+  }
+  set logLevel(logLevel) {
+    this._logLevel = logLevel;
+  }
+  log(...args) {
+    if (this._logLevel >= 3) this._print(3, ...args);
+  }
+  warn(...args) {
+    if (this._logLevel >= 2) this._print(2, ...args);
+  }
+  error(...args) {
+    if (this._logLevel >= 1) this._print(1, ...args);
+  }
+  setLogFunction(fn) {
+    this._print = fn;
+  }
+  _print(logLevel, ...rest) {
+    const copy = [
+      $257947e92926277a$var$LOG_PREFIX,
+      ...rest
+    ];
+    for (const i in copy) if (copy[i] instanceof Error) copy[i] = "(" + copy[i].name + ") " + copy[i].message;
+    if (logLevel >= 3) console.log(...copy);
+    else if (logLevel >= 2) console.warn("WARNING", ...copy);
+    else if (logLevel >= 1) console.error("ERROR", ...copy);
+  }
+  constructor() {
+    this._logLevel = 0;
+  }
+};
+var $257947e92926277a$export$2e2bcd8739ae039 = new $257947e92926277a$var$Logger();
+var $c4dcfd1d1ea86647$exports = {};
+var $c4dcfd1d1ea86647$var$has = Object.prototype.hasOwnProperty;
+var $c4dcfd1d1ea86647$var$prefix = "~";
+function $c4dcfd1d1ea86647$var$Events() {
+}
+if (Object.create) {
+  $c4dcfd1d1ea86647$var$Events.prototype = /* @__PURE__ */ Object.create(null);
+  if (!new $c4dcfd1d1ea86647$var$Events().__proto__) $c4dcfd1d1ea86647$var$prefix = false;
+}
+function $c4dcfd1d1ea86647$var$EE(fn, context, once2) {
+  this.fn = fn;
+  this.context = context;
+  this.once = once2 || false;
+}
+function $c4dcfd1d1ea86647$var$addListener(emitter, event, fn, context, once2) {
+  if (typeof fn !== "function") throw new TypeError("The listener must be a function");
+  var listener = new $c4dcfd1d1ea86647$var$EE(fn, context || emitter, once2), evt = $c4dcfd1d1ea86647$var$prefix ? $c4dcfd1d1ea86647$var$prefix + event : event;
+  if (!emitter._events[evt]) emitter._events[evt] = listener, emitter._eventsCount++;
+  else if (!emitter._events[evt].fn) emitter._events[evt].push(listener);
+  else emitter._events[evt] = [
+    emitter._events[evt],
+    listener
+  ];
+  return emitter;
+}
+function $c4dcfd1d1ea86647$var$clearEvent(emitter, evt) {
+  if (--emitter._eventsCount === 0) emitter._events = new $c4dcfd1d1ea86647$var$Events();
+  else delete emitter._events[evt];
+}
+function $c4dcfd1d1ea86647$var$EventEmitter() {
+  this._events = new $c4dcfd1d1ea86647$var$Events();
+  this._eventsCount = 0;
+}
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.eventNames = function eventNames() {
+  var names = [], events, name;
+  if (this._eventsCount === 0) return names;
+  for (name in events = this._events) if ($c4dcfd1d1ea86647$var$has.call(events, name)) names.push($c4dcfd1d1ea86647$var$prefix ? name.slice(1) : name);
+  if (Object.getOwnPropertySymbols) return names.concat(Object.getOwnPropertySymbols(events));
+  return names;
+};
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.listeners = function listeners(event) {
+  var evt = $c4dcfd1d1ea86647$var$prefix ? $c4dcfd1d1ea86647$var$prefix + event : event, handlers = this._events[evt];
+  if (!handlers) return [];
+  if (handlers.fn) return [
+    handlers.fn
+  ];
+  for (var i = 0, l = handlers.length, ee = new Array(l); i < l; i++) ee[i] = handlers[i].fn;
+  return ee;
+};
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.listenerCount = function listenerCount(event) {
+  var evt = $c4dcfd1d1ea86647$var$prefix ? $c4dcfd1d1ea86647$var$prefix + event : event, listeners2 = this._events[evt];
+  if (!listeners2) return 0;
+  if (listeners2.fn) return 1;
+  return listeners2.length;
+};
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+  var evt = $c4dcfd1d1ea86647$var$prefix ? $c4dcfd1d1ea86647$var$prefix + event : event;
+  if (!this._events[evt]) return false;
+  var listeners2 = this._events[evt], len = arguments.length, args, i;
+  if (listeners2.fn) {
+    if (listeners2.once) this.removeListener(event, listeners2.fn, void 0, true);
+    switch (len) {
+      case 1:
+        return listeners2.fn.call(listeners2.context), true;
+      case 2:
+        return listeners2.fn.call(listeners2.context, a1), true;
+      case 3:
+        return listeners2.fn.call(listeners2.context, a1, a2), true;
+      case 4:
+        return listeners2.fn.call(listeners2.context, a1, a2, a3), true;
+      case 5:
+        return listeners2.fn.call(listeners2.context, a1, a2, a3, a4), true;
+      case 6:
+        return listeners2.fn.call(listeners2.context, a1, a2, a3, a4, a5), true;
+    }
+    for (i = 1, args = new Array(len - 1); i < len; i++) args[i - 1] = arguments[i];
+    listeners2.fn.apply(listeners2.context, args);
+  } else {
+    var length = listeners2.length, j;
+    for (i = 0; i < length; i++) {
+      if (listeners2[i].once) this.removeListener(event, listeners2[i].fn, void 0, true);
+      switch (len) {
+        case 1:
+          listeners2[i].fn.call(listeners2[i].context);
+          break;
+        case 2:
+          listeners2[i].fn.call(listeners2[i].context, a1);
+          break;
+        case 3:
+          listeners2[i].fn.call(listeners2[i].context, a1, a2);
+          break;
+        case 4:
+          listeners2[i].fn.call(listeners2[i].context, a1, a2, a3);
+          break;
+        default:
+          if (!args) for (j = 1, args = new Array(len - 1); j < len; j++) args[j - 1] = arguments[j];
+          listeners2[i].fn.apply(listeners2[i].context, args);
+      }
+    }
+  }
+  return true;
+};
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.on = function on(event, fn, context) {
+  return $c4dcfd1d1ea86647$var$addListener(this, event, fn, context, false);
+};
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.once = function once(event, fn, context) {
+  return $c4dcfd1d1ea86647$var$addListener(this, event, fn, context, true);
+};
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once2) {
+  var evt = $c4dcfd1d1ea86647$var$prefix ? $c4dcfd1d1ea86647$var$prefix + event : event;
+  if (!this._events[evt]) return this;
+  if (!fn) {
+    $c4dcfd1d1ea86647$var$clearEvent(this, evt);
+    return this;
+  }
+  var listeners2 = this._events[evt];
+  if (listeners2.fn) {
+    if (listeners2.fn === fn && (!once2 || listeners2.once) && (!context || listeners2.context === context)) $c4dcfd1d1ea86647$var$clearEvent(this, evt);
+  } else {
+    for (var i = 0, events = [], length = listeners2.length; i < length; i++) if (listeners2[i].fn !== fn || once2 && !listeners2[i].once || context && listeners2[i].context !== context) events.push(listeners2[i]);
+    if (events.length) this._events[evt] = events.length === 1 ? events[0] : events;
+    else $c4dcfd1d1ea86647$var$clearEvent(this, evt);
+  }
+  return this;
+};
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+  var evt;
+  if (event) {
+    evt = $c4dcfd1d1ea86647$var$prefix ? $c4dcfd1d1ea86647$var$prefix + event : event;
+    if (this._events[evt]) $c4dcfd1d1ea86647$var$clearEvent(this, evt);
+  } else {
+    this._events = new $c4dcfd1d1ea86647$var$Events();
+    this._eventsCount = 0;
+  }
+  return this;
+};
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.off = $c4dcfd1d1ea86647$var$EventEmitter.prototype.removeListener;
+$c4dcfd1d1ea86647$var$EventEmitter.prototype.addListener = $c4dcfd1d1ea86647$var$EventEmitter.prototype.on;
+$c4dcfd1d1ea86647$var$EventEmitter.prefixed = $c4dcfd1d1ea86647$var$prefix;
+$c4dcfd1d1ea86647$var$EventEmitter.EventEmitter = $c4dcfd1d1ea86647$var$EventEmitter;
+$c4dcfd1d1ea86647$exports = $c4dcfd1d1ea86647$var$EventEmitter;
+var $78455e22dea96b8c$exports = {};
+$parcel$export($78455e22dea96b8c$exports, "ConnectionType", () => $78455e22dea96b8c$export$3157d57b4135e3bc);
+$parcel$export($78455e22dea96b8c$exports, "PeerErrorType", () => $78455e22dea96b8c$export$9547aaa2e39030ff);
+$parcel$export($78455e22dea96b8c$exports, "BaseConnectionErrorType", () => $78455e22dea96b8c$export$7974935686149686);
+$parcel$export($78455e22dea96b8c$exports, "DataConnectionErrorType", () => $78455e22dea96b8c$export$49ae800c114df41d);
+$parcel$export($78455e22dea96b8c$exports, "SerializationType", () => $78455e22dea96b8c$export$89f507cf986a947);
+$parcel$export($78455e22dea96b8c$exports, "SocketEventType", () => $78455e22dea96b8c$export$3b5c4a4b6354f023);
+$parcel$export($78455e22dea96b8c$exports, "ServerMessageType", () => $78455e22dea96b8c$export$adb4a1754da6f10d);
+var $78455e22dea96b8c$export$3157d57b4135e3bc;
+(function(ConnectionType) {
+  ConnectionType["Data"] = "data";
+  ConnectionType["Media"] = "media";
+})($78455e22dea96b8c$export$3157d57b4135e3bc || ($78455e22dea96b8c$export$3157d57b4135e3bc = {}));
+var $78455e22dea96b8c$export$9547aaa2e39030ff;
+(function(PeerErrorType) {
+  PeerErrorType["BrowserIncompatible"] = "browser-incompatible";
+  PeerErrorType["Disconnected"] = "disconnected";
+  PeerErrorType["InvalidID"] = "invalid-id";
+  PeerErrorType["InvalidKey"] = "invalid-key";
+  PeerErrorType["Network"] = "network";
+  PeerErrorType["PeerUnavailable"] = "peer-unavailable";
+  PeerErrorType["SslUnavailable"] = "ssl-unavailable";
+  PeerErrorType["ServerError"] = "server-error";
+  PeerErrorType["SocketError"] = "socket-error";
+  PeerErrorType["SocketClosed"] = "socket-closed";
+  PeerErrorType["UnavailableID"] = "unavailable-id";
+  PeerErrorType["WebRTC"] = "webrtc";
+})($78455e22dea96b8c$export$9547aaa2e39030ff || ($78455e22dea96b8c$export$9547aaa2e39030ff = {}));
+var $78455e22dea96b8c$export$7974935686149686;
+(function(BaseConnectionErrorType) {
+  BaseConnectionErrorType["NegotiationFailed"] = "negotiation-failed";
+  BaseConnectionErrorType["ConnectionClosed"] = "connection-closed";
+})($78455e22dea96b8c$export$7974935686149686 || ($78455e22dea96b8c$export$7974935686149686 = {}));
+var $78455e22dea96b8c$export$49ae800c114df41d;
+(function(DataConnectionErrorType) {
+  DataConnectionErrorType["NotOpenYet"] = "not-open-yet";
+  DataConnectionErrorType["MessageToBig"] = "message-too-big";
+})($78455e22dea96b8c$export$49ae800c114df41d || ($78455e22dea96b8c$export$49ae800c114df41d = {}));
+var $78455e22dea96b8c$export$89f507cf986a947;
+(function(SerializationType) {
+  SerializationType["Binary"] = "binary";
+  SerializationType["BinaryUTF8"] = "binary-utf8";
+  SerializationType["JSON"] = "json";
+  SerializationType["None"] = "raw";
+})($78455e22dea96b8c$export$89f507cf986a947 || ($78455e22dea96b8c$export$89f507cf986a947 = {}));
+var $78455e22dea96b8c$export$3b5c4a4b6354f023;
+(function(SocketEventType) {
+  SocketEventType["Message"] = "message";
+  SocketEventType["Disconnected"] = "disconnected";
+  SocketEventType["Error"] = "error";
+  SocketEventType["Close"] = "close";
+})($78455e22dea96b8c$export$3b5c4a4b6354f023 || ($78455e22dea96b8c$export$3b5c4a4b6354f023 = {}));
+var $78455e22dea96b8c$export$adb4a1754da6f10d;
+(function(ServerMessageType) {
+  ServerMessageType["Heartbeat"] = "HEARTBEAT";
+  ServerMessageType["Candidate"] = "CANDIDATE";
+  ServerMessageType["Offer"] = "OFFER";
+  ServerMessageType["Answer"] = "ANSWER";
+  ServerMessageType["Open"] = "OPEN";
+  ServerMessageType["Error"] = "ERROR";
+  ServerMessageType["IdTaken"] = "ID-TAKEN";
+  ServerMessageType["InvalidKey"] = "INVALID-KEY";
+  ServerMessageType["Leave"] = "LEAVE";
+  ServerMessageType["Expire"] = "EXPIRE";
+})($78455e22dea96b8c$export$adb4a1754da6f10d || ($78455e22dea96b8c$export$adb4a1754da6f10d = {}));
+var $f5f881ec4575f1fc$exports = {};
+$f5f881ec4575f1fc$exports = JSON.parse('{"name":"peerjs","version":"1.5.4","keywords":["peerjs","webrtc","p2p","rtc"],"description":"PeerJS client","homepage":"https://peerjs.com","bugs":{"url":"https://github.com/peers/peerjs/issues"},"repository":{"type":"git","url":"https://github.com/peers/peerjs"},"license":"MIT","contributors":["Michelle Bu <michelle@michellebu.com>","afrokick <devbyru@gmail.com>","ericz <really.ez@gmail.com>","Jairo <kidandcat@gmail.com>","Jonas Gloning <34194370+jonasgloning@users.noreply.github.com>","Jairo Caro-Accino Viciana <jairo@galax.be>","Carlos Caballero <carlos.caballero.gonzalez@gmail.com>","hc <hheennrryy@gmail.com>","Muhammad Asif <capripio@gmail.com>","PrashoonB <prashoonbhattacharjee@gmail.com>","Harsh Bardhan Mishra <47351025+HarshCasper@users.noreply.github.com>","akotynski <aleksanderkotbury@gmail.com>","lmb <i@lmb.io>","Jairooo <jairocaro@msn.com>","Moritz St\xFCckler <moritz.stueckler@gmail.com>","Simon <crydotsnakegithub@gmail.com>","Denis Lukov <denismassters@gmail.com>","Philipp Hancke <fippo@andyet.net>","Hans Oksendahl <hansoksendahl@gmail.com>","Jess <jessachandler@gmail.com>","khankuan <khankuan@gmail.com>","DUODVK <kurmanov.work@gmail.com>","XiZhao <kwang1imsa@gmail.com>","Matthias Lohr <matthias@lohr.me>","=frank tree <=frnktrb@googlemail.com>","Andre Eckardt <aeckardt@outlook.com>","Chris Cowan <agentme49@gmail.com>","Alex Chuev <alex@chuev.com>","alxnull <alxnull@e.mail.de>","Yemel Jardi <angel.jardi@gmail.com>","Ben Parnell <benjaminparnell.94@gmail.com>","Benny Lichtner <bennlich@gmail.com>","fresheneesz <bitetrudpublic@gmail.com>","bob.barstead@exaptive.com <bob.barstead@exaptive.com>","chandika <chandika@gmail.com>","emersion <contact@emersion.fr>","Christopher Van <cvan@users.noreply.github.com>","eddieherm <edhermoso@gmail.com>","Eduardo Pinho <enet4mikeenet@gmail.com>","Evandro Zanatta <ezanatta@tray.net.br>","Gardner Bickford <gardner@users.noreply.github.com>","Gian Luca <gianluca.cecchi@cynny.com>","PatrickJS <github@gdi2290.com>","jonnyf <github@jonathanfoss.co.uk>","Hizkia Felix <hizkifw@gmail.com>","Hristo Oskov <hristo.oskov@gmail.com>","Isaac Madwed <i.madwed@gmail.com>","Ilya Konanykhin <ilya.konanykhin@gmail.com>","jasonbarry <jasbarry@me.com>","Jonathan Burke <jonathan.burke.1311@googlemail.com>","Josh Hamit <josh.hamit@gmail.com>","Jordan Austin <jrax86@gmail.com>","Joel Wetzell <jwetzell@yahoo.com>","xizhao <kevin.wang@cloudera.com>","Alberto Torres <kungfoobar@gmail.com>","Jonathan Mayol <mayoljonathan@gmail.com>","Jefferson Felix <me@jsfelix.dev>","Rolf Erik Lekang <me@rolflekang.com>","Kevin Mai-Husan Chia <mhchia@users.noreply.github.com>","Pepijn de Vos <pepijndevos@gmail.com>","JooYoung <qkdlql@naver.com>","Tobias Speicher <rootcommander@gmail.com>","Steve Blaurock <sblaurock@gmail.com>","Kyrylo Shegeda <shegeda@ualberta.ca>","Diwank Singh Tomer <singh@diwank.name>","So\u0308ren Balko <Soeren.Balko@gmail.com>","Arpit Solanki <solankiarpit1997@gmail.com>","Yuki Ito <yuki@gnnk.net>","Artur Zayats <zag2art@gmail.com>"],"funding":{"type":"opencollective","url":"https://opencollective.com/peer"},"collective":{"type":"opencollective","url":"https://opencollective.com/peer"},"files":["dist/*"],"sideEffects":["lib/global.ts","lib/supports.ts"],"main":"dist/bundler.cjs","module":"dist/bundler.mjs","browser-minified":"dist/peerjs.min.js","browser-unminified":"dist/peerjs.js","browser-minified-msgpack":"dist/serializer.msgpack.mjs","types":"dist/types.d.ts","engines":{"node":">= 14"},"targets":{"types":{"source":"lib/exports.ts"},"main":{"source":"lib/exports.ts","sourceMap":{"inlineSources":true}},"module":{"source":"lib/exports.ts","includeNodeModules":["eventemitter3"],"sourceMap":{"inlineSources":true}},"browser-minified":{"context":"browser","outputFormat":"global","optimize":true,"engines":{"browsers":"chrome >= 83, edge >= 83, firefox >= 80, safari >= 15"},"source":"lib/global.ts"},"browser-unminified":{"context":"browser","outputFormat":"global","optimize":false,"engines":{"browsers":"chrome >= 83, edge >= 83, firefox >= 80, safari >= 15"},"source":"lib/global.ts"},"browser-minified-msgpack":{"context":"browser","outputFormat":"esmodule","isLibrary":true,"optimize":true,"engines":{"browsers":"chrome >= 83, edge >= 83, firefox >= 102, safari >= 15"},"source":"lib/dataconnection/StreamConnection/MsgPack.ts"}},"scripts":{"contributors":"git-authors-cli --print=false && prettier --write package.json && git add package.json package-lock.json && git commit -m \\"chore(contributors): update and sort contributors list\\"","check":"tsc --noEmit && tsc -p e2e/tsconfig.json --noEmit","watch":"parcel watch","build":"rm -rf dist && parcel build","prepublishOnly":"npm run build","test":"jest","test:watch":"jest --watch","coverage":"jest --coverage --collectCoverageFrom=\\"./lib/**\\"","format":"prettier --write .","format:check":"prettier --check .","semantic-release":"semantic-release","e2e":"wdio run e2e/wdio.local.conf.ts","e2e:bstack":"wdio run e2e/wdio.bstack.conf.ts"},"devDependencies":{"@parcel/config-default":"^2.9.3","@parcel/packager-ts":"^2.9.3","@parcel/transformer-typescript-tsc":"^2.9.3","@parcel/transformer-typescript-types":"^2.9.3","@semantic-release/changelog":"^6.0.1","@semantic-release/git":"^10.0.1","@swc/core":"^1.3.27","@swc/jest":"^0.2.24","@types/jasmine":"^4.3.4","@wdio/browserstack-service":"^8.11.2","@wdio/cli":"^8.11.2","@wdio/globals":"^8.11.2","@wdio/jasmine-framework":"^8.11.2","@wdio/local-runner":"^8.11.2","@wdio/spec-reporter":"^8.11.2","@wdio/types":"^8.10.4","http-server":"^14.1.1","jest":"^29.3.1","jest-environment-jsdom":"^29.3.1","mock-socket":"^9.0.0","parcel":"^2.9.3","prettier":"^3.0.0","semantic-release":"^21.0.0","ts-node":"^10.9.1","typescript":"^5.0.0","wdio-geckodriver-service":"^5.0.1"},"dependencies":{"@msgpack/msgpack":"^2.8.0","eventemitter3":"^4.0.7","peerjs-js-binarypack":"^2.1.0","webrtc-adapter":"^9.0.0"},"alias":{"process":false,"buffer":false}}');
+var $8f5bfa60836d261d$export$4798917dbf149b79 = class extends (0, $c4dcfd1d1ea86647$exports.EventEmitter) {
+  constructor(secure, host, port, path, key, pingInterval = 5e3) {
+    super();
+    this.pingInterval = pingInterval;
+    this._disconnected = true;
+    this._messagesQueue = [];
+    const wsProtocol = secure ? "wss://" : "ws://";
+    this._baseUrl = wsProtocol + host + ":" + port + path + "peerjs?key=" + key;
+  }
+  start(id, token) {
+    this._id = id;
+    const wsUrl = `${this._baseUrl}&id=${id}&token=${token}`;
+    if (!!this._socket || !this._disconnected) return;
+    this._socket = new WebSocket(wsUrl + "&version=" + (0, $f5f881ec4575f1fc$exports.version));
+    this._disconnected = false;
+    this._socket.onmessage = (event) => {
+      let data;
+      try {
+        data = JSON.parse(event.data);
+        (0, $257947e92926277a$export$2e2bcd8739ae039).log("Server message received:", data);
+      } catch (e) {
+        (0, $257947e92926277a$export$2e2bcd8739ae039).log("Invalid server message", event.data);
+        return;
+      }
+      this.emit((0, $78455e22dea96b8c$export$3b5c4a4b6354f023).Message, data);
+    };
+    this._socket.onclose = (event) => {
+      if (this._disconnected) return;
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Socket closed.", event);
+      this._cleanup();
+      this._disconnected = true;
+      this.emit((0, $78455e22dea96b8c$export$3b5c4a4b6354f023).Disconnected);
+    };
+    this._socket.onopen = () => {
+      if (this._disconnected) return;
+      this._sendQueuedMessages();
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Socket open");
+      this._scheduleHeartbeat();
+    };
+  }
+  _scheduleHeartbeat() {
+    this._wsPingTimer = setTimeout(() => {
+      this._sendHeartbeat();
+    }, this.pingInterval);
+  }
+  _sendHeartbeat() {
+    if (!this._wsOpen()) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Cannot send heartbeat, because socket closed`);
+      return;
+    }
+    const message = JSON.stringify({
+      type: (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Heartbeat
+    });
+    this._socket.send(message);
+    this._scheduleHeartbeat();
+  }
+  /** Is the websocket currently open? */
+  _wsOpen() {
+    return !!this._socket && this._socket.readyState === 1;
+  }
+  /** Send queued messages. */
+  _sendQueuedMessages() {
+    const copiedQueue = [
+      ...this._messagesQueue
+    ];
+    this._messagesQueue = [];
+    for (const message of copiedQueue) this.send(message);
+  }
+  /** Exposed send for DC & Peer. */
+  send(data) {
+    if (this._disconnected) return;
+    if (!this._id) {
+      this._messagesQueue.push(data);
+      return;
+    }
+    if (!data.type) {
+      this.emit((0, $78455e22dea96b8c$export$3b5c4a4b6354f023).Error, "Invalid message");
+      return;
+    }
+    if (!this._wsOpen()) return;
+    const message = JSON.stringify(data);
+    this._socket.send(message);
+  }
+  close() {
+    if (this._disconnected) return;
+    this._cleanup();
+    this._disconnected = true;
+  }
+  _cleanup() {
+    if (this._socket) {
+      this._socket.onopen = this._socket.onmessage = this._socket.onclose = null;
+      this._socket.close();
+      this._socket = void 0;
+    }
+    clearTimeout(this._wsPingTimer);
+  }
+};
+var $b82fb8fc0514bfc1$export$89e6bb5ad64bf4a = class {
+  constructor(connection) {
+    this.connection = connection;
+  }
+  /** Returns a PeerConnection object set up correctly (for data, media). */
+  startConnection(options) {
+    const peerConnection = this._startPeerConnection();
+    this.connection.peerConnection = peerConnection;
+    if (this.connection.type === (0, $78455e22dea96b8c$export$3157d57b4135e3bc).Media && options._stream) this._addTracksToConnection(options._stream, peerConnection);
+    if (options.originator) {
+      const dataConnection = this.connection;
+      const config = {
+        ordered: !!options.reliable
+      };
+      const dataChannel = peerConnection.createDataChannel(dataConnection.label, config);
+      dataConnection._initializeDataChannel(dataChannel);
+      this._makeOffer();
+    } else this.handleSDP("OFFER", options.sdp);
+  }
+  /** Start a PC. */
+  _startPeerConnection() {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log("Creating RTCPeerConnection.");
+    const peerConnection = new RTCPeerConnection(this.connection.provider.options.config);
+    this._setupListeners(peerConnection);
+    return peerConnection;
+  }
+  /** Set up various WebRTC listeners. */
+  _setupListeners(peerConnection) {
+    const peerId = this.connection.peer;
+    const connectionId = this.connection.connectionId;
+    const connectionType = this.connection.type;
+    const provider = this.connection.provider;
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log("Listening for ICE candidates.");
+    peerConnection.onicecandidate = (evt) => {
+      if (!evt.candidate || !evt.candidate.candidate) return;
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Received ICE candidates for ${peerId}:`, evt.candidate);
+      provider.socket.send({
+        type: (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Candidate,
+        payload: {
+          candidate: evt.candidate,
+          type: connectionType,
+          connectionId
+        },
+        dst: peerId
+      });
+    };
+    peerConnection.oniceconnectionstatechange = () => {
+      switch (peerConnection.iceConnectionState) {
+        case "failed":
+          (0, $257947e92926277a$export$2e2bcd8739ae039).log("iceConnectionState is failed, closing connections to " + peerId);
+          this.connection.emitError((0, $78455e22dea96b8c$export$7974935686149686).NegotiationFailed, "Negotiation of connection to " + peerId + " failed.");
+          this.connection.close();
+          break;
+        case "closed":
+          (0, $257947e92926277a$export$2e2bcd8739ae039).log("iceConnectionState is closed, closing connections to " + peerId);
+          this.connection.emitError((0, $78455e22dea96b8c$export$7974935686149686).ConnectionClosed, "Connection to " + peerId + " closed.");
+          this.connection.close();
+          break;
+        case "disconnected":
+          (0, $257947e92926277a$export$2e2bcd8739ae039).log("iceConnectionState changed to disconnected on the connection with " + peerId);
+          break;
+        case "completed":
+          peerConnection.onicecandidate = () => {
+          };
+          break;
+      }
+      this.connection.emit("iceStateChanged", peerConnection.iceConnectionState);
+    };
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log("Listening for data channel");
+    peerConnection.ondatachannel = (evt) => {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Received data channel");
+      const dataChannel = evt.channel;
+      const connection = provider.getConnection(peerId, connectionId);
+      connection._initializeDataChannel(dataChannel);
+    };
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log("Listening for remote stream");
+    peerConnection.ontrack = (evt) => {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Received remote stream");
+      const stream = evt.streams[0];
+      const connection = provider.getConnection(peerId, connectionId);
+      if (connection.type === (0, $78455e22dea96b8c$export$3157d57b4135e3bc).Media) {
+        const mediaConnection = connection;
+        this._addStreamToMediaConnection(stream, mediaConnection);
+      }
+    };
+  }
+  cleanup() {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log("Cleaning up PeerConnection to " + this.connection.peer);
+    const peerConnection = this.connection.peerConnection;
+    if (!peerConnection) return;
+    this.connection.peerConnection = null;
+    peerConnection.onicecandidate = peerConnection.oniceconnectionstatechange = peerConnection.ondatachannel = peerConnection.ontrack = () => {
+    };
+    const peerConnectionNotClosed = peerConnection.signalingState !== "closed";
+    let dataChannelNotClosed = false;
+    const dataChannel = this.connection.dataChannel;
+    if (dataChannel) dataChannelNotClosed = !!dataChannel.readyState && dataChannel.readyState !== "closed";
+    if (peerConnectionNotClosed || dataChannelNotClosed) peerConnection.close();
+  }
+  async _makeOffer() {
+    const peerConnection = this.connection.peerConnection;
+    const provider = this.connection.provider;
+    try {
+      const offer = await peerConnection.createOffer(this.connection.options.constraints);
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Created offer.");
+      if (this.connection.options.sdpTransform && typeof this.connection.options.sdpTransform === "function") offer.sdp = this.connection.options.sdpTransform(offer.sdp) || offer.sdp;
+      try {
+        await peerConnection.setLocalDescription(offer);
+        (0, $257947e92926277a$export$2e2bcd8739ae039).log("Set localDescription:", offer, `for:${this.connection.peer}`);
+        let payload = {
+          sdp: offer,
+          type: this.connection.type,
+          connectionId: this.connection.connectionId,
+          metadata: this.connection.metadata
+        };
+        if (this.connection.type === (0, $78455e22dea96b8c$export$3157d57b4135e3bc).Data) {
+          const dataConnection = this.connection;
+          payload = {
+            ...payload,
+            label: dataConnection.label,
+            reliable: dataConnection.reliable,
+            serialization: dataConnection.serialization
+          };
+        }
+        provider.socket.send({
+          type: (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Offer,
+          payload,
+          dst: this.connection.peer
+        });
+      } catch (err) {
+        if (err != "OperationError: Failed to set local offer sdp: Called in wrong state: kHaveRemoteOffer") {
+          provider.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).WebRTC, err);
+          (0, $257947e92926277a$export$2e2bcd8739ae039).log("Failed to setLocalDescription, ", err);
+        }
+      }
+    } catch (err_1) {
+      provider.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).WebRTC, err_1);
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Failed to createOffer, ", err_1);
+    }
+  }
+  async _makeAnswer() {
+    const peerConnection = this.connection.peerConnection;
+    const provider = this.connection.provider;
+    try {
+      const answer = await peerConnection.createAnswer();
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Created answer.");
+      if (this.connection.options.sdpTransform && typeof this.connection.options.sdpTransform === "function") answer.sdp = this.connection.options.sdpTransform(answer.sdp) || answer.sdp;
+      try {
+        await peerConnection.setLocalDescription(answer);
+        (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Set localDescription:`, answer, `for:${this.connection.peer}`);
+        provider.socket.send({
+          type: (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Answer,
+          payload: {
+            sdp: answer,
+            type: this.connection.type,
+            connectionId: this.connection.connectionId
+          },
+          dst: this.connection.peer
+        });
+      } catch (err) {
+        provider.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).WebRTC, err);
+        (0, $257947e92926277a$export$2e2bcd8739ae039).log("Failed to setLocalDescription, ", err);
+      }
+    } catch (err_1) {
+      provider.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).WebRTC, err_1);
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Failed to create answer, ", err_1);
+    }
+  }
+  /** Handle an SDP. */
+  async handleSDP(type, sdp2) {
+    sdp2 = new RTCSessionDescription(sdp2);
+    const peerConnection = this.connection.peerConnection;
+    const provider = this.connection.provider;
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log("Setting remote description", sdp2);
+    const self2 = this;
+    try {
+      await peerConnection.setRemoteDescription(sdp2);
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Set remoteDescription:${type} for:${this.connection.peer}`);
+      if (type === "OFFER") await self2._makeAnswer();
+    } catch (err) {
+      provider.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).WebRTC, err);
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Failed to setRemoteDescription, ", err);
+    }
+  }
+  /** Handle a candidate. */
+  async handleCandidate(ice) {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log(`handleCandidate:`, ice);
+    try {
+      await this.connection.peerConnection.addIceCandidate(ice);
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Added ICE candidate for:${this.connection.peer}`);
+    } catch (err) {
+      this.connection.provider.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).WebRTC, err);
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log("Failed to handleCandidate, ", err);
+    }
+  }
+  _addTracksToConnection(stream, peerConnection) {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log(`add tracks from stream ${stream.id} to peer connection`);
+    if (!peerConnection.addTrack) return (0, $257947e92926277a$export$2e2bcd8739ae039).error(`Your browser does't support RTCPeerConnection#addTrack. Ignored.`);
+    stream.getTracks().forEach((track) => {
+      peerConnection.addTrack(track, stream);
+    });
+  }
+  _addStreamToMediaConnection(stream, mediaConnection) {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log(`add stream ${stream.id} to media connection ${mediaConnection.connectionId}`);
+    mediaConnection.addStream(stream);
+  }
+};
+var $23779d1881157a18$export$6a678e589c8a4542 = class extends (0, $c4dcfd1d1ea86647$exports.EventEmitter) {
+  /**
+  * Emits a typed error message.
+  *
+  * @internal
+  */
+  emitError(type, err) {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).error("Error:", err);
+    this.emit("error", new $23779d1881157a18$export$98871882f492de82(`${type}`, err));
+  }
+};
+var $23779d1881157a18$export$98871882f492de82 = class extends Error {
+  /**
+  * @internal
+  */
+  constructor(type, err) {
+    if (typeof err === "string") super(err);
+    else {
+      super();
+      Object.assign(this, err);
+    }
+    this.type = type;
+  }
+};
+var $5045192fc6d387ba$export$23a2a68283c24d80 = class extends (0, $23779d1881157a18$export$6a678e589c8a4542) {
+  /**
+  * Whether the media connection is active (e.g. your call has been answered).
+  * You can check this if you want to set a maximum wait time for a one-sided call.
+  */
+  get open() {
+    return this._open;
+  }
+  constructor(peer, provider, options) {
+    super();
+    this.peer = peer;
+    this.provider = provider;
+    this.options = options;
+    this._open = false;
+    this.metadata = options.metadata;
+  }
+};
+var $5c1d08c7c57da9a3$export$4a84e95a2324ac29 = class _$5c1d08c7c57da9a3$export$4a84e95a2324ac29 extends (0, $5045192fc6d387ba$export$23a2a68283c24d80) {
+  static #_ = this.ID_PREFIX = "mc_";
+  /**
+  * For media connections, this is always 'media'.
+  */
+  get type() {
+    return (0, $78455e22dea96b8c$export$3157d57b4135e3bc).Media;
+  }
+  get localStream() {
+    return this._localStream;
+  }
+  get remoteStream() {
+    return this._remoteStream;
+  }
+  constructor(peerId, provider, options) {
+    super(peerId, provider, options);
+    this._localStream = this.options._stream;
+    this.connectionId = this.options.connectionId || _$5c1d08c7c57da9a3$export$4a84e95a2324ac29.ID_PREFIX + (0, $4f4134156c446392$export$7debb50ef11d5e0b).randomToken();
+    this._negotiator = new (0, $b82fb8fc0514bfc1$export$89e6bb5ad64bf4a)(this);
+    if (this._localStream) this._negotiator.startConnection({
+      _stream: this._localStream,
+      originator: true
+    });
+  }
+  /** Called by the Negotiator when the DataChannel is ready. */
+  _initializeDataChannel(dc) {
+    this.dataChannel = dc;
+    this.dataChannel.onopen = () => {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`DC#${this.connectionId} dc connection success`);
+      this.emit("willCloseOnRemote");
+    };
+    this.dataChannel.onclose = () => {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`DC#${this.connectionId} dc closed for:`, this.peer);
+      this.close();
+    };
+  }
+  addStream(remoteStream) {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log("Receiving stream", remoteStream);
+    this._remoteStream = remoteStream;
+    super.emit("stream", remoteStream);
+  }
+  /**
+  * @internal
+  */
+  handleMessage(message) {
+    const type = message.type;
+    const payload = message.payload;
+    switch (message.type) {
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Answer:
+        this._negotiator.handleSDP(type, payload.sdp);
+        this._open = true;
+        break;
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Candidate:
+        this._negotiator.handleCandidate(payload.candidate);
+        break;
+      default:
+        (0, $257947e92926277a$export$2e2bcd8739ae039).warn(`Unrecognized message type:${type} from peer:${this.peer}`);
+        break;
+    }
+  }
+  /**
+       * When receiving a {@apilink PeerEvents | `call`} event on a peer, you can call
+       * `answer` on the media connection provided by the callback to accept the call
+       * and optionally send your own media stream.
+  
+       *
+       * @param stream A WebRTC media stream.
+       * @param options
+       * @returns
+       */
+  answer(stream, options = {}) {
+    if (this._localStream) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).warn("Local stream already exists on this MediaConnection. Are you answering a call twice?");
+      return;
+    }
+    this._localStream = stream;
+    if (options && options.sdpTransform) this.options.sdpTransform = options.sdpTransform;
+    this._negotiator.startConnection({
+      ...this.options._payload,
+      _stream: stream
+    });
+    const messages = this.provider._getMessages(this.connectionId);
+    for (const message of messages) this.handleMessage(message);
+    this._open = true;
+  }
+  /**
+  * Exposed functionality for users.
+  */
+  /**
+  * Closes the media connection.
+  */
+  close() {
+    if (this._negotiator) {
+      this._negotiator.cleanup();
+      this._negotiator = null;
+    }
+    this._localStream = null;
+    this._remoteStream = null;
+    if (this.provider) {
+      this.provider._removeConnection(this);
+      this.provider = null;
+    }
+    if (this.options && this.options._stream) this.options._stream = null;
+    if (!this.open) return;
+    this._open = false;
+    super.emit("close");
+  }
+};
+var $abf266641927cd89$export$2c4e825dc9120f87 = class {
+  constructor(_options) {
+    this._options = _options;
+  }
+  _buildRequest(method) {
+    const protocol = this._options.secure ? "https" : "http";
+    const { host, port, path, key } = this._options;
+    const url = new URL(`${protocol}://${host}:${port}${path}${key}/${method}`);
+    url.searchParams.set("ts", `${Date.now()}${Math.random()}`);
+    url.searchParams.set("version", (0, $f5f881ec4575f1fc$exports.version));
+    return fetch(url.href, {
+      referrerPolicy: this._options.referrerPolicy
+    });
+  }
+  /** Get a unique ID from the server via XHR and initialize with it. */
+  async retrieveId() {
+    try {
+      const response = await this._buildRequest("id");
+      if (response.status !== 200) throw new Error(`Error. Status:${response.status}`);
+      return response.text();
+    } catch (error2) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).error("Error retrieving ID", error2);
+      let pathError = "";
+      if (this._options.path === "/" && this._options.host !== (0, $4f4134156c446392$export$7debb50ef11d5e0b).CLOUD_HOST) pathError = " If you passed in a `path` to your self-hosted PeerServer, you'll also need to pass in that same path when creating a new Peer.";
+      throw new Error("Could not get an ID from the server." + pathError);
+    }
+  }
+  /** @deprecated */
+  async listAllPeers() {
+    try {
+      const response = await this._buildRequest("peers");
+      if (response.status !== 200) {
+        if (response.status === 401) {
+          let helpfulError = "";
+          if (this._options.host === (0, $4f4134156c446392$export$7debb50ef11d5e0b).CLOUD_HOST) helpfulError = "It looks like you're using the cloud server. You can email team@peerjs.com to enable peer listing for your API key.";
+          else helpfulError = "You need to enable `allow_discovery` on your self-hosted PeerServer to use this feature.";
+          throw new Error("It doesn't look like you have permission to list peers IDs. " + helpfulError);
+        }
+        throw new Error(`Error. Status:${response.status}`);
+      }
+      return response.json();
+    } catch (error2) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).error("Error retrieving list peers", error2);
+      throw new Error("Could not get list peers from the server." + error2);
+    }
+  }
+};
+var $6366c4ca161bc297$export$d365f7ad9d7df9c9 = class _$6366c4ca161bc297$export$d365f7ad9d7df9c9 extends (0, $5045192fc6d387ba$export$23a2a68283c24d80) {
+  static #_ = this.ID_PREFIX = "dc_";
+  static #_2 = this.MAX_BUFFERED_AMOUNT = 8388608;
+  get type() {
+    return (0, $78455e22dea96b8c$export$3157d57b4135e3bc).Data;
+  }
+  constructor(peerId, provider, options) {
+    super(peerId, provider, options);
+    this.connectionId = this.options.connectionId || _$6366c4ca161bc297$export$d365f7ad9d7df9c9.ID_PREFIX + (0, $0e5fd1585784c252$export$4e61f672936bec77)();
+    this.label = this.options.label || this.connectionId;
+    this.reliable = !!this.options.reliable;
+    this._negotiator = new (0, $b82fb8fc0514bfc1$export$89e6bb5ad64bf4a)(this);
+    this._negotiator.startConnection(this.options._payload || {
+      originator: true,
+      reliable: this.reliable
+    });
+  }
+  /** Called by the Negotiator when the DataChannel is ready. */
+  _initializeDataChannel(dc) {
+    this.dataChannel = dc;
+    this.dataChannel.onopen = () => {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`DC#${this.connectionId} dc connection success`);
+      this._open = true;
+      this.emit("open");
+    };
+    this.dataChannel.onmessage = (e) => {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`DC#${this.connectionId} dc onmessage:`, e.data);
+    };
+    this.dataChannel.onclose = () => {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`DC#${this.connectionId} dc closed for:`, this.peer);
+      this.close();
+    };
+  }
+  /**
+  * Exposed functionality for users.
+  */
+  /** Allows user to close connection. */
+  close(options) {
+    if (options?.flush) {
+      this.send({
+        __peerData: {
+          type: "close"
+        }
+      });
+      return;
+    }
+    if (this._negotiator) {
+      this._negotiator.cleanup();
+      this._negotiator = null;
+    }
+    if (this.provider) {
+      this.provider._removeConnection(this);
+      this.provider = null;
+    }
+    if (this.dataChannel) {
+      this.dataChannel.onopen = null;
+      this.dataChannel.onmessage = null;
+      this.dataChannel.onclose = null;
+      this.dataChannel = null;
+    }
+    if (!this.open) return;
+    this._open = false;
+    super.emit("close");
+  }
+  /** Allows user to send data. */
+  send(data, chunked = false) {
+    if (!this.open) {
+      this.emitError((0, $78455e22dea96b8c$export$49ae800c114df41d).NotOpenYet, "Connection is not open. You should listen for the `open` event before sending messages.");
+      return;
+    }
+    return this._send(data, chunked);
+  }
+  async handleMessage(message) {
+    const payload = message.payload;
+    switch (message.type) {
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Answer:
+        await this._negotiator.handleSDP(message.type, payload.sdp);
+        break;
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Candidate:
+        await this._negotiator.handleCandidate(payload.candidate);
+        break;
+      default:
+        (0, $257947e92926277a$export$2e2bcd8739ae039).warn("Unrecognized message type:", message.type, "from peer:", this.peer);
+        break;
+    }
+  }
+};
+var $a229bedbcaa6ca23$export$ff7c9d4c11d94e8b = class extends (0, $6366c4ca161bc297$export$d365f7ad9d7df9c9) {
+  get bufferSize() {
+    return this._bufferSize;
+  }
+  _initializeDataChannel(dc) {
+    super._initializeDataChannel(dc);
+    this.dataChannel.binaryType = "arraybuffer";
+    this.dataChannel.addEventListener("message", (e) => this._handleDataMessage(e));
+  }
+  _bufferedSend(msg) {
+    if (this._buffering || !this._trySend(msg)) {
+      this._buffer.push(msg);
+      this._bufferSize = this._buffer.length;
+    }
+  }
+  // Returns true if the send succeeds.
+  _trySend(msg) {
+    if (!this.open) return false;
+    if (this.dataChannel.bufferedAmount > (0, $6366c4ca161bc297$export$d365f7ad9d7df9c9).MAX_BUFFERED_AMOUNT) {
+      this._buffering = true;
+      setTimeout(() => {
+        this._buffering = false;
+        this._tryBuffer();
+      }, 50);
+      return false;
+    }
+    try {
+      this.dataChannel.send(msg);
+    } catch (e) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).error(`DC#:${this.connectionId} Error when sending:`, e);
+      this._buffering = true;
+      this.close();
+      return false;
+    }
+    return true;
+  }
+  // Try to send the first message in the buffer.
+  _tryBuffer() {
+    if (!this.open) return;
+    if (this._buffer.length === 0) return;
+    const msg = this._buffer[0];
+    if (this._trySend(msg)) {
+      this._buffer.shift();
+      this._bufferSize = this._buffer.length;
+      this._tryBuffer();
+    }
+  }
+  close(options) {
+    if (options?.flush) {
+      this.send({
+        __peerData: {
+          type: "close"
+        }
+      });
+      return;
+    }
+    this._buffer = [];
+    this._bufferSize = 0;
+    super.close();
+  }
+  constructor(...args) {
+    super(...args);
+    this._buffer = [];
+    this._bufferSize = 0;
+    this._buffering = false;
+  }
+};
+var $9fcfddb3ae148f88$export$f0a5a64d5bb37108 = class extends (0, $a229bedbcaa6ca23$export$ff7c9d4c11d94e8b) {
+  close(options) {
+    super.close(options);
+    this._chunkedData = {};
+  }
+  constructor(peerId, provider, options) {
+    super(peerId, provider, options);
+    this.chunker = new (0, $fcbcc7538a6776d5$export$f1c5f4c9cb95390b)();
+    this.serialization = (0, $78455e22dea96b8c$export$89f507cf986a947).Binary;
+    this._chunkedData = {};
+  }
+  // Handles a DataChannel message.
+  _handleDataMessage({ data }) {
+    const deserializedData = (0, $0cfd7828ad59115f$export$417857010dc9287f)(data);
+    const peerData = deserializedData["__peerData"];
+    if (peerData) {
+      if (peerData.type === "close") {
+        this.close();
+        return;
+      }
+      this._handleChunk(deserializedData);
+      return;
+    }
+    this.emit("data", deserializedData);
+  }
+  _handleChunk(data) {
+    const id = data.__peerData;
+    const chunkInfo = this._chunkedData[id] || {
+      data: [],
+      count: 0,
+      total: data.total
+    };
+    chunkInfo.data[data.n] = new Uint8Array(data.data);
+    chunkInfo.count++;
+    this._chunkedData[id] = chunkInfo;
+    if (chunkInfo.total === chunkInfo.count) {
+      delete this._chunkedData[id];
+      const data2 = (0, $fcbcc7538a6776d5$export$52c89ebcdc4f53f2)(chunkInfo.data);
+      this._handleDataMessage({
+        data: data2
+      });
+    }
+  }
+  _send(data, chunked) {
+    const blob = (0, $0cfd7828ad59115f$export$2a703dbb0cb35339)(data);
+    if (blob instanceof Promise) return this._send_blob(blob);
+    if (!chunked && blob.byteLength > this.chunker.chunkedMTU) {
+      this._sendChunks(blob);
+      return;
+    }
+    this._bufferedSend(blob);
+  }
+  async _send_blob(blobPromise) {
+    const blob = await blobPromise;
+    if (blob.byteLength > this.chunker.chunkedMTU) {
+      this._sendChunks(blob);
+      return;
+    }
+    this._bufferedSend(blob);
+  }
+  _sendChunks(blob) {
+    const blobs = this.chunker.chunk(blob);
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log(`DC#${this.connectionId} Try to send ${blobs.length} chunks...`);
+    for (const blob2 of blobs) this.send(blob2, true);
+  }
+};
+var $bbaee3f15f714663$export$6f88fe47d32c9c94 = class extends (0, $a229bedbcaa6ca23$export$ff7c9d4c11d94e8b) {
+  _handleDataMessage({ data }) {
+    super.emit("data", data);
+  }
+  _send(data, _chunked) {
+    this._bufferedSend(data);
+  }
+  constructor(...args) {
+    super(...args);
+    this.serialization = (0, $78455e22dea96b8c$export$89f507cf986a947).None;
+  }
+};
+var $817f931e3f9096cf$export$48880ac635f47186 = class extends (0, $a229bedbcaa6ca23$export$ff7c9d4c11d94e8b) {
+  // Handles a DataChannel message.
+  _handleDataMessage({ data }) {
+    const deserializedData = this.parse(this.decoder.decode(data));
+    const peerData = deserializedData["__peerData"];
+    if (peerData && peerData.type === "close") {
+      this.close();
+      return;
+    }
+    this.emit("data", deserializedData);
+  }
+  _send(data, _chunked) {
+    const encodedData = this.encoder.encode(this.stringify(data));
+    if (encodedData.byteLength >= (0, $4f4134156c446392$export$7debb50ef11d5e0b).chunkedMTU) {
+      this.emitError((0, $78455e22dea96b8c$export$49ae800c114df41d).MessageToBig, "Message too big for JSON channel");
+      return;
+    }
+    this._bufferedSend(encodedData);
+  }
+  constructor(...args) {
+    super(...args);
+    this.serialization = (0, $78455e22dea96b8c$export$89f507cf986a947).JSON;
+    this.encoder = new TextEncoder();
+    this.decoder = new TextDecoder();
+    this.stringify = JSON.stringify;
+    this.parse = JSON.parse;
+  }
+};
+var $416260bce337df90$export$ecd1fc136c422448 = class _$416260bce337df90$export$ecd1fc136c422448 extends (0, $23779d1881157a18$export$6a678e589c8a4542) {
+  static #_ = this.DEFAULT_KEY = "peerjs";
+  /**
+  * The brokering ID of this peer
+  *
+  * If no ID was specified in {@apilink Peer | the constructor},
+  * this will be `undefined` until the {@apilink PeerEvents | `open`} event is emitted.
+  */
+  get id() {
+    return this._id;
+  }
+  get options() {
+    return this._options;
+  }
+  get open() {
+    return this._open;
+  }
+  /**
+  * @internal
+  */
+  get socket() {
+    return this._socket;
+  }
+  /**
+  * A hash of all connections associated with this peer, keyed by the remote peer's ID.
+  * @deprecated
+  * Return type will change from Object to Map<string,[]>
+  */
+  get connections() {
+    const plainConnections = /* @__PURE__ */ Object.create(null);
+    for (const [k, v] of this._connections) plainConnections[k] = v;
+    return plainConnections;
+  }
+  /**
+  * true if this peer and all of its connections can no longer be used.
+  */
+  get destroyed() {
+    return this._destroyed;
+  }
+  /**
+  * false if there is an active connection to the PeerServer.
+  */
+  get disconnected() {
+    return this._disconnected;
+  }
+  constructor(id, options) {
+    super();
+    this._serializers = {
+      raw: (0, $bbaee3f15f714663$export$6f88fe47d32c9c94),
+      json: (0, $817f931e3f9096cf$export$48880ac635f47186),
+      binary: (0, $9fcfddb3ae148f88$export$f0a5a64d5bb37108),
+      "binary-utf8": (0, $9fcfddb3ae148f88$export$f0a5a64d5bb37108),
+      default: (0, $9fcfddb3ae148f88$export$f0a5a64d5bb37108)
+    };
+    this._id = null;
+    this._lastServerId = null;
+    this._destroyed = false;
+    this._disconnected = false;
+    this._open = false;
+    this._connections = /* @__PURE__ */ new Map();
+    this._lostMessages = /* @__PURE__ */ new Map();
+    let userId;
+    if (id && id.constructor == Object) options = id;
+    else if (id) userId = id.toString();
+    options = {
+      debug: 0,
+      host: (0, $4f4134156c446392$export$7debb50ef11d5e0b).CLOUD_HOST,
+      port: (0, $4f4134156c446392$export$7debb50ef11d5e0b).CLOUD_PORT,
+      path: "/",
+      key: _$416260bce337df90$export$ecd1fc136c422448.DEFAULT_KEY,
+      token: (0, $4f4134156c446392$export$7debb50ef11d5e0b).randomToken(),
+      config: (0, $4f4134156c446392$export$7debb50ef11d5e0b).defaultConfig,
+      referrerPolicy: "strict-origin-when-cross-origin",
+      serializers: {},
+      ...options
+    };
+    this._options = options;
+    this._serializers = {
+      ...this._serializers,
+      ...this.options.serializers
+    };
+    if (this._options.host === "/") this._options.host = window.location.hostname;
+    if (this._options.path) {
+      if (this._options.path[0] !== "/") this._options.path = "/" + this._options.path;
+      if (this._options.path[this._options.path.length - 1] !== "/") this._options.path += "/";
+    }
+    if (this._options.secure === void 0 && this._options.host !== (0, $4f4134156c446392$export$7debb50ef11d5e0b).CLOUD_HOST) this._options.secure = (0, $4f4134156c446392$export$7debb50ef11d5e0b).isSecure();
+    else if (this._options.host == (0, $4f4134156c446392$export$7debb50ef11d5e0b).CLOUD_HOST) this._options.secure = true;
+    if (this._options.logFunction) (0, $257947e92926277a$export$2e2bcd8739ae039).setLogFunction(this._options.logFunction);
+    (0, $257947e92926277a$export$2e2bcd8739ae039).logLevel = this._options.debug || 0;
+    this._api = new (0, $abf266641927cd89$export$2c4e825dc9120f87)(options);
+    this._socket = this._createServerConnection();
+    if (!(0, $4f4134156c446392$export$7debb50ef11d5e0b).supports.audioVideo && !(0, $4f4134156c446392$export$7debb50ef11d5e0b).supports.data) {
+      this._delayedAbort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).BrowserIncompatible, "The current browser does not support WebRTC");
+      return;
+    }
+    if (!!userId && !(0, $4f4134156c446392$export$7debb50ef11d5e0b).validateId(userId)) {
+      this._delayedAbort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).InvalidID, `ID "${userId}" is invalid`);
+      return;
+    }
+    if (userId) this._initialize(userId);
+    else this._api.retrieveId().then((id2) => this._initialize(id2)).catch((error2) => this._abort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).ServerError, error2));
+  }
+  _createServerConnection() {
+    const socket = new (0, $8f5bfa60836d261d$export$4798917dbf149b79)(this._options.secure, this._options.host, this._options.port, this._options.path, this._options.key, this._options.pingInterval);
+    socket.on((0, $78455e22dea96b8c$export$3b5c4a4b6354f023).Message, (data) => {
+      this._handleMessage(data);
+    });
+    socket.on((0, $78455e22dea96b8c$export$3b5c4a4b6354f023).Error, (error2) => {
+      this._abort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).SocketError, error2);
+    });
+    socket.on((0, $78455e22dea96b8c$export$3b5c4a4b6354f023).Disconnected, () => {
+      if (this.disconnected) return;
+      this.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).Network, "Lost connection to server.");
+      this.disconnect();
+    });
+    socket.on((0, $78455e22dea96b8c$export$3b5c4a4b6354f023).Close, () => {
+      if (this.disconnected) return;
+      this._abort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).SocketClosed, "Underlying socket is already closed.");
+    });
+    return socket;
+  }
+  /** Initialize a connection with the server. */
+  _initialize(id) {
+    this._id = id;
+    this.socket.start(id, this._options.token);
+  }
+  /** Handles messages from the server. */
+  _handleMessage(message) {
+    const type = message.type;
+    const payload = message.payload;
+    const peerId = message.src;
+    switch (type) {
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Open:
+        this._lastServerId = this.id;
+        this._open = true;
+        this.emit("open", this.id);
+        break;
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Error:
+        this._abort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).ServerError, payload.msg);
+        break;
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).IdTaken:
+        this._abort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).UnavailableID, `ID "${this.id}" is taken`);
+        break;
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).InvalidKey:
+        this._abort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).InvalidKey, `API KEY "${this._options.key}" is invalid`);
+        break;
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Leave:
+        (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Received leave message from ${peerId}`);
+        this._cleanupPeer(peerId);
+        this._connections.delete(peerId);
+        break;
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Expire:
+        this.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).PeerUnavailable, `Could not connect to peer ${peerId}`);
+        break;
+      case (0, $78455e22dea96b8c$export$adb4a1754da6f10d).Offer: {
+        const connectionId = payload.connectionId;
+        let connection = this.getConnection(peerId, connectionId);
+        if (connection) {
+          connection.close();
+          (0, $257947e92926277a$export$2e2bcd8739ae039).warn(`Offer received for existing Connection ID:${connectionId}`);
+        }
+        if (payload.type === (0, $78455e22dea96b8c$export$3157d57b4135e3bc).Media) {
+          const mediaConnection = new (0, $5c1d08c7c57da9a3$export$4a84e95a2324ac29)(peerId, this, {
+            connectionId,
+            _payload: payload,
+            metadata: payload.metadata
+          });
+          connection = mediaConnection;
+          this._addConnection(peerId, connection);
+          this.emit("call", mediaConnection);
+        } else if (payload.type === (0, $78455e22dea96b8c$export$3157d57b4135e3bc).Data) {
+          const dataConnection = new this._serializers[payload.serialization](peerId, this, {
+            connectionId,
+            _payload: payload,
+            metadata: payload.metadata,
+            label: payload.label,
+            serialization: payload.serialization,
+            reliable: payload.reliable
+          });
+          connection = dataConnection;
+          this._addConnection(peerId, connection);
+          this.emit("connection", dataConnection);
+        } else {
+          (0, $257947e92926277a$export$2e2bcd8739ae039).warn(`Received malformed connection type:${payload.type}`);
+          return;
+        }
+        const messages = this._getMessages(connectionId);
+        for (const message2 of messages) connection.handleMessage(message2);
+        break;
+      }
+      default: {
+        if (!payload) {
+          (0, $257947e92926277a$export$2e2bcd8739ae039).warn(`You received a malformed message from ${peerId} of type ${type}`);
+          return;
+        }
+        const connectionId = payload.connectionId;
+        const connection = this.getConnection(peerId, connectionId);
+        if (connection && connection.peerConnection)
+          connection.handleMessage(message);
+        else if (connectionId)
+          this._storeMessage(connectionId, message);
+        else (0, $257947e92926277a$export$2e2bcd8739ae039).warn("You received an unrecognized message:", message);
+        break;
+      }
+    }
+  }
+  /** Stores messages without a set up connection, to be claimed later. */
+  _storeMessage(connectionId, message) {
+    if (!this._lostMessages.has(connectionId)) this._lostMessages.set(connectionId, []);
+    this._lostMessages.get(connectionId).push(message);
+  }
+  /**
+  * Retrieve messages from lost message store
+  * @internal
+  */
+  //TODO Change it to private
+  _getMessages(connectionId) {
+    const messages = this._lostMessages.get(connectionId);
+    if (messages) {
+      this._lostMessages.delete(connectionId);
+      return messages;
+    }
+    return [];
+  }
+  /**
+  * Connects to the remote peer specified by id and returns a data connection.
+  * @param peer The brokering ID of the remote peer (their {@apilink Peer.id}).
+  * @param options for specifying details about Peer Connection
+  */
+  connect(peer, options = {}) {
+    options = {
+      serialization: "default",
+      ...options
+    };
+    if (this.disconnected) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).warn("You cannot connect to a new Peer because you called .disconnect() on this Peer and ended your connection with the server. You can create a new Peer to reconnect, or call reconnect on this peer if you believe its ID to still be available.");
+      this.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).Disconnected, "Cannot connect to new Peer after disconnecting from server.");
+      return;
+    }
+    const dataConnection = new this._serializers[options.serialization](peer, this, options);
+    this._addConnection(peer, dataConnection);
+    return dataConnection;
+  }
+  /**
+  * Calls the remote peer specified by id and returns a media connection.
+  * @param peer The brokering ID of the remote peer (their peer.id).
+  * @param stream The caller's media stream
+  * @param options Metadata associated with the connection, passed in by whoever initiated the connection.
+  */
+  call(peer, stream, options = {}) {
+    if (this.disconnected) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).warn("You cannot connect to a new Peer because you called .disconnect() on this Peer and ended your connection with the server. You can create a new Peer to reconnect.");
+      this.emitError((0, $78455e22dea96b8c$export$9547aaa2e39030ff).Disconnected, "Cannot connect to new Peer after disconnecting from server.");
+      return;
+    }
+    if (!stream) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).error("To call a peer, you must provide a stream from your browser's `getUserMedia`.");
+      return;
+    }
+    const mediaConnection = new (0, $5c1d08c7c57da9a3$export$4a84e95a2324ac29)(peer, this, {
+      ...options,
+      _stream: stream
+    });
+    this._addConnection(peer, mediaConnection);
+    return mediaConnection;
+  }
+  /** Add a data/media connection to this peer. */
+  _addConnection(peerId, connection) {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log(`add connection ${connection.type}:${connection.connectionId} to peerId:${peerId}`);
+    if (!this._connections.has(peerId)) this._connections.set(peerId, []);
+    this._connections.get(peerId).push(connection);
+  }
+  //TODO should be private
+  _removeConnection(connection) {
+    const connections = this._connections.get(connection.peer);
+    if (connections) {
+      const index = connections.indexOf(connection);
+      if (index !== -1) connections.splice(index, 1);
+    }
+    this._lostMessages.delete(connection.connectionId);
+  }
+  /** Retrieve a data/media connection for this peer. */
+  getConnection(peerId, connectionId) {
+    const connections = this._connections.get(peerId);
+    if (!connections) return null;
+    for (const connection of connections) {
+      if (connection.connectionId === connectionId) return connection;
+    }
+    return null;
+  }
+  _delayedAbort(type, message) {
+    setTimeout(() => {
+      this._abort(type, message);
+    }, 0);
+  }
+  /**
+  * Emits an error message and destroys the Peer.
+  * The Peer is not destroyed if it's in a disconnected state, in which case
+  * it retains its disconnected state and its existing connections.
+  */
+  _abort(type, message) {
+    (0, $257947e92926277a$export$2e2bcd8739ae039).error("Aborting!");
+    this.emitError(type, message);
+    if (!this._lastServerId) this.destroy();
+    else this.disconnect();
+  }
+  /**
+  * Destroys the Peer: closes all active connections as well as the connection
+  * to the server.
+  *
+  * :::caution
+  * This cannot be undone; the respective peer object will no longer be able
+  * to create or receive any connections, its ID will be forfeited on the server,
+  * and all of its data and media connections will be closed.
+  * :::
+  */
+  destroy() {
+    if (this.destroyed) return;
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Destroy peer with ID:${this.id}`);
+    this.disconnect();
+    this._cleanup();
+    this._destroyed = true;
+    this.emit("close");
+  }
+  /** Disconnects every connection on this peer. */
+  _cleanup() {
+    for (const peerId of this._connections.keys()) {
+      this._cleanupPeer(peerId);
+      this._connections.delete(peerId);
+    }
+    this.socket.removeAllListeners();
+  }
+  /** Closes all connections to this peer. */
+  _cleanupPeer(peerId) {
+    const connections = this._connections.get(peerId);
+    if (!connections) return;
+    for (const connection of connections) connection.close();
+  }
+  /**
+  * Disconnects the Peer's connection to the PeerServer. Does not close any
+  *  active connections.
+  * Warning: The peer can no longer create or accept connections after being
+  *  disconnected. It also cannot reconnect to the server.
+  */
+  disconnect() {
+    if (this.disconnected) return;
+    const currentId = this.id;
+    (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Disconnect peer with ID:${currentId}`);
+    this._disconnected = true;
+    this._open = false;
+    this.socket.close();
+    this._lastServerId = currentId;
+    this._id = null;
+    this.emit("disconnected", currentId);
+  }
+  /** Attempts to reconnect with the same ID.
+  *
+  * Only {@apilink Peer.disconnect | disconnected peers} can be reconnected.
+  * Destroyed peers cannot be reconnected.
+  * If the connection fails (as an example, if the peer's old ID is now taken),
+  * the peer's existing connections will not close, but any associated errors events will fire.
+  */
+  reconnect() {
+    if (this.disconnected && !this.destroyed) {
+      (0, $257947e92926277a$export$2e2bcd8739ae039).log(`Attempting reconnection to server with ID ${this._lastServerId}`);
+      this._disconnected = false;
+      this._initialize(this._lastServerId);
+    } else if (this.destroyed) throw new Error("This peer cannot reconnect to the server. It has already been destroyed.");
+    else if (!this.disconnected && !this.open)
+      (0, $257947e92926277a$export$2e2bcd8739ae039).error("In a hurry? We're still trying to make the initial connection!");
+    else throw new Error(`Peer ${this.id} cannot reconnect because it is not disconnected from the server!`);
+  }
+  /**
+  * Get a list of available peer IDs. If you're running your own server, you'll
+  * want to set allow_discovery: true in the PeerServer options. If you're using
+  * the cloud server, email team@peerjs.com to get the functionality enabled for
+  * your key.
+  */
+  listAllPeers(cb = (_) => {
+  }) {
+    this._api.listAllPeers().then((peers) => cb(peers)).catch((error2) => this._abort((0, $78455e22dea96b8c$export$9547aaa2e39030ff).ServerError, error2));
+  }
+};
+
+// source/net/transports.js
+var MAX_PLAYERS = 8;
+var ID_PREFIX = "a2racer4-mp-";
+var CONNECT_MS = 4e3;
+function roomPeerId(name) {
+  const slug = String(name).trim().toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return ID_PREFIX + (slug || "server");
+}
+var WsTransport = class {
+  constructor(url) {
+    this.url = url;
+    this.kind = "lobby";
+    this.lists = true;
+  }
+  open(onMessage, onClose) {
+    return new Promise((resolve, reject) => {
+      let ws;
+      try {
+        ws = new WebSocket(this.url);
+      } catch (e) {
+        reject(e);
+        return;
+      }
+      this.ws = ws;
+      const timer = setTimeout(() => {
+        ws.close();
+        reject(new Error("Geen verbinding met de lobby op " + this.url));
+      }, CONNECT_MS);
+      ws.onopen = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      ws.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error("Geen verbinding met de lobby op " + this.url));
+      };
+      ws.onclose = () => {
+        if (this.ws === ws) onClose();
+      };
+      ws.onmessage = (e) => {
+        try {
+          onMessage(JSON.parse(e.data));
+        } catch {
+        }
+      };
+    });
+  }
+  send(msg) {
+    if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(msg));
+  }
+  close() {
+    const ws = this.ws;
+    this.ws = null;
+    if (ws) ws.close();
+  }
+};
+var PeerTransport = class {
+  /** options: PeerJS options, for another broker; none for the public one. */
+  constructor(options = {}) {
+    this.options = { debug: 0, ...options };
+    this.kind = "peer";
+    this.lists = false;
+    this.peer = null;
+    this.members = /* @__PURE__ */ new Map();
+    this.hostConn = null;
+    this.racing = false;
+  }
+  open(onMessage, onClose) {
+    this.emit = onMessage;
+    this.onClose = onClose;
+    this.emit({ t: "welcome", you: null, max: MAX_PLAYERS });
+    return Promise.resolve();
+  }
+  /** A fresh broker connection: under the room's id for a host, any id for a member. */
+  newPeer(id) {
+    this.drop();
+    return new Promise((resolve, reject) => {
+      const peer = id ? new $416260bce337df90$export$ecd1fc136c422448(id, this.options) : new $416260bce337df90$export$ecd1fc136c422448(this.options);
+      this.peer = peer;
+      let opened = false;
+      peer.on("open", (you) => {
+        opened = true;
+        this.you = you;
+        this.emit({ t: "welcome", you, max: MAX_PLAYERS });
+        resolve(peer);
+      });
+      peer.on("error", (e) => {
+        if (this.peer !== peer) return;
+        if (!opened) {
+          reject(e);
+          return;
+        }
+        if (e.type === "peer-unavailable") this.emit({ t: "error", error: "no-room" });
+        else if (e.type === "network" || e.type === "server-error" || e.type === "socket-error") this.emit({ t: "error", error: "broker" });
+      });
+    });
+  }
+  /** Forgets the room: the broker connection and every data connection. */
+  drop() {
+    for (const c of this.members.values()) c.close();
+    this.members.clear();
+    if (this.hostConn) {
+      const c = this.hostConn;
+      this.hostConn = null;
+      c.close();
+    }
+    if (this.peer) {
+      const p = this.peer;
+      this.peer = null;
+      p.destroy();
+    }
+    this.role = null;
+    this.racing = false;
+  }
+  send(msg) {
+    switch (msg.t) {
+      case "list":
+        this.emit({ t: "rooms", rooms: [], unlisted: true });
+        break;
+      case "host":
+        this.host(msg.name);
+        break;
+      case "join":
+        this.join(msg.room);
+        break;
+      case "meta":
+        this.racing = msg.state === "racing";
+        break;
+      case "kick": {
+        const c = this.members.get(msg.id);
+        if (c) {
+          c.send({ t: "closed", reason: "kicked" });
+          setTimeout(() => c.close(), 300);
+        }
+        break;
+      }
+      case "to":
+        if (this.role === "host") this.relay(this.you, msg.to, msg.d);
+        else if (this.hostConn && this.hostConn.open) this.hostConn.send({ t: "to", to: msg.to, d: msg.d });
+        break;
+      case "leave":
+        if (this.role === "host") for (const c of this.members.values()) c.send({ t: "closed", reason: "host-left" });
+        setTimeout(() => this.drop(), 200);
+        this.role = null;
+        break;
+      default:
+        break;
+    }
+  }
+  /** The host's browser is the hub: a member's message for everyone goes on to the others here. */
+  relay(from, to, d) {
+    const out = { t: "from", from, d };
+    if (to === "*" || to === this.you) {
+      if (from !== this.you) this.emit(out);
+      if (to === "*") {
+        for (const [id, c] of this.members) if (id !== from && c.open) c.send(out);
+      }
+    } else {
+      const c = this.members.get(to);
+      if (c && c.open) c.send(out);
+    }
+  }
+  async host(name) {
+    let peer;
+    try {
+      peer = await this.newPeer(roomPeerId(name));
+    } catch (e) {
+      this.emit({ t: "error", error: e && e.type === "unavailable-id" ? "name-taken" : "broker" });
+      return;
+    }
+    this.role = "host";
+    peer.on("connection", (conn) => {
+      conn.on("open", () => {
+        if (this.members.size >= MAX_PLAYERS - 1 || this.racing) {
+          conn.send({ t: "closed", reason: this.racing ? "racing" : "room-full" });
+          setTimeout(() => conn.close(), 300);
+          return;
+        }
+        this.members.set(conn.peer, conn);
+        this.emit({ t: "peer", id: conn.peer, event: "join" });
+      });
+      conn.on("data", (m) => {
+        if (m && m.t === "to" && this.members.get(conn.peer) === conn) this.relay(conn.peer, m.to, m.d);
+      });
+      const gone = () => {
+        if (this.members.get(conn.peer) !== conn) return;
+        this.members.delete(conn.peer);
+        this.emit({ t: "peer", id: conn.peer, event: "leave" });
+      };
+      conn.on("close", gone);
+      conn.on("error", gone);
+      conn.on("iceStateChanged", (state) => {
+        if (state === "failed" || state === "closed") gone();
+      });
+    });
+    this.emit({ t: "hosted", room: this.you, name: String(name).trim() || "Server" });
+  }
+  async join(name) {
+    let peer;
+    try {
+      peer = await this.newPeer(null);
+    } catch {
+      this.emit({ t: "error", error: "broker" });
+      return;
+    }
+    const hostId = roomPeerId(name);
+    const conn = peer.connect(hostId, { reliable: true, serialization: "json" });
+    this.hostConn = conn;
+    this.role = "member";
+    const timer = setTimeout(() => {
+      if (this.hostConn === conn && !conn.open) {
+        this.emit({ t: "error", error: "no-room" });
+        this.drop();
+      }
+    }, 15e3);
+    conn.on("open", () => {
+      clearTimeout(timer);
+      this.emit({ t: "joined", room: hostId, name: String(name).trim(), host: hostId });
+    });
+    conn.on("data", (m) => {
+      if (!m || this.hostConn !== conn) return;
+      if (m.t === "closed") {
+        this.hostConn = null;
+        this.emit({ t: "closed", reason: m.reason });
+        this.drop();
+      } else if (m.t === "from") {
+        this.emit(m);
+      }
+    });
+    const gone = () => {
+      if (this.hostConn !== conn) return;
+      clearTimeout(timer);
+      this.hostConn = null;
+      this.emit({ t: "closed", reason: "host-left" });
+      this.drop();
+    };
+    conn.on("close", gone);
+    conn.on("iceStateChanged", (state) => {
+      if (state === "failed" || state === "closed") gone();
+    });
+  }
+  close() {
+    this.drop();
+  }
+};
+
+// source/net/session.js
+function lobbyChoice(params) {
+  const given = params && params.get("lobby");
+  if (given === "peer") return { url: null, fallback: true };
+  if (given) return { url: given, fallback: false };
+  const u = new URL("lobby", location.href);
+  u.protocol = u.protocol === "https:" ? "wss:" : "ws:";
+  u.search = "";
+  u.hash = "";
+  return { url: u.href, fallback: true };
+}
+var MAX_PLAYERS2 = 8;
+var PING_MS = 2e3;
+var LOAD_TIMEOUT_MS = 6e4;
+var GO_DELAY_MS = 1500;
+var SAMPLE_TICKS = 2;
+var now = () => performance.now();
+var NetSession = class {
+  /** choice: lobbyChoice(). */
+  constructor(choice) {
+    this.choice = choice;
+    this.transport = null;
+    this.you = null;
+    this.role = null;
+    this.roomId = null;
+    this.room = null;
+    this.rooms = [];
+    this.listeners = /* @__PURE__ */ new Set();
+    this.offset = 0;
+    this.bestRtt = Infinity;
+    this.rtt = 0;
+    this.race = null;
+    this.net = null;
+  }
+  on(fn) {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
+  emit(event, data) {
+    for (const fn of this.listeners) fn(event, data);
+  }
+  /** The room's shared clock in seconds: the host's performance.now(). */
+  clock = () => (now() + this.offset) / 1e3;
+  get isHost() {
+    return this.role === "host";
+  }
+  get connected() {
+    return Boolean(this.transport);
+  }
+  /** Whether the way the browsers meet can list servers. The broker cannot. */
+  get lists() {
+    return Boolean(this.transport && this.transport.lists);
+  }
+  connect() {
+    if (this.ready) return this.ready;
+    const attempt = async () => {
+      const onMessage = (msg) => this.lobbyMessage(msg);
+      const onClose = (t) => () => {
+        if (this.transport !== t) return;
+        this.transport = null;
+        this.ready = null;
+        const wasIn = Boolean(this.roomId);
+        this.resetRoom();
+        this.emit("disconnected", { wasIn });
+      };
+      if (this.choice.url) {
+        const ws = new WsTransport(this.choice.url);
+        try {
+          await ws.open(onMessage, onClose(ws));
+          this.transport = ws;
+          return;
+        } catch (e) {
+          if (!this.choice.fallback) throw e;
+        }
+      }
+      const peer = new PeerTransport();
+      await peer.open(onMessage, onClose(peer));
+      this.transport = peer;
+    };
+    this.ready = attempt().catch((e) => {
+      this.ready = null;
+      throw e;
+    });
+    return this.ready;
+  }
+  close() {
+    const t = this.transport;
+    this.transport = null;
+    this.ready = null;
+    this.resetRoom();
+    if (t) t.close();
+  }
+  put(msg) {
+    if (this.transport) this.transport.send(msg);
+  }
+  to(id, d) {
+    this.put({ t: "to", to: id, d });
+  }
+  toAll(d) {
+    this.put({ t: "to", to: "*", d });
+  }
+  list() {
+    this.put({ t: "list" });
+  }
+  resetRoom() {
+    clearInterval(this.pingTimer);
+    clearTimeout(this.loadTimer);
+    this.role = null;
+    this.roomId = null;
+    this.room = null;
+    this.offset = 0;
+    this.bestRtt = Infinity;
+  }
+  // --- joining and hosting -----------------------------------------------------------
+  /** Opens a room named name. me: { nick, car }. track: { etappe, laps, name } to start with. */
+  async host(name, me, track) {
+    await this.connect();
+    this.pending = { kind: "host", me, track };
+    this.put({ t: "host", name });
+    return this.wait("room");
+  }
+  async join(room, me) {
+    await this.connect();
+    this.pending = { kind: "join", me };
+    this.put({ t: "join", room });
+    return this.wait("room");
+  }
+  /** Resolves on the next event of that kind, rejects on an error first. */
+  wait(kind) {
+    return new Promise((resolve, reject) => {
+      const off = this.on((event, data) => {
+        if (event === kind) {
+          off();
+          resolve(data);
+        } else if (event === "error" || event === "closed" || event === "disconnected") {
+          off();
+          reject(new Error(data && data.error ? data.error : event));
+        }
+      });
+    });
+  }
+  leave() {
+    if (this.roomId) this.put({ t: "leave" });
+    this.resetRoom();
+    this.emit("left");
+  }
+  lobbyMessage(msg) {
+    switch (msg.t) {
+      case "welcome":
+        if (msg.you) this.you = msg.you;
+        break;
+      case "rooms":
+        this.rooms = msg.rooms || [];
+        this.emit("rooms", this.rooms);
+        break;
+      case "error":
+        this.pending = null;
+        this.emit("error", { error: msg.error });
+        break;
+      case "hosted": {
+        const p = this.pending || { me: { nick: "Host", car: 0 }, track: { etappe: 0, laps: 2, name: "" } };
+        this.pending = null;
+        this.role = "host";
+        this.roomId = msg.room;
+        this.room = {
+          id: msg.room,
+          name: msg.name,
+          host: this.you,
+          phase: "lobby",
+          etappe: p.track.etappe,
+          laps: p.track.laps,
+          trackName: p.track.name,
+          players: [{ id: this.you, nick: p.me.nick, car: p.me.car, ready: true, ping: 0 }],
+          results: null,
+          raceId: 0
+        };
+        this.publish();
+        break;
+      }
+      case "joined": {
+        const p = this.pending || { me: { nick: "Speler", car: 0 } };
+        this.pending = null;
+        this.role = "member";
+        this.roomId = msg.room;
+        this.hostId = msg.host;
+        this.to(this.hostId, { k: "hello", nick: p.me.nick, car: p.me.car });
+        clearInterval(this.pingTimer);
+        this.pingTimer = setInterval(() => this.to(this.hostId, { k: "ping", c: now() }), PING_MS);
+        this.to(this.hostId, { k: "ping", c: now() });
+        break;
+      }
+      case "peer":
+        if (this.isHost) this.peer(msg.id, msg.event);
+        break;
+      case "closed": {
+        const reason = msg.reason;
+        this.resetRoom();
+        this.emit("closed", { error: reason });
+        break;
+      }
+      case "from":
+        this.message(msg.from, msg.d);
+        break;
+      default:
+        break;
+    }
+  }
+  // --- the room, kept by the host --------------------------------------------------------
+  /** Host: sends the room to everyone and to the listing. */
+  publish() {
+    if (!this.isHost || !this.room) return;
+    this.toAll({ k: "room", room: this.room });
+    this.put({ t: "meta", state: this.room.phase === "lobby" ? "lobby" : "racing", track: this.room.trackName || "" });
+    this.emit("room", this.room);
+  }
+  peer(id, event) {
+    const r = this.room;
+    if (!r) return;
+    if (event === "leave") {
+      const gone = r.players.find((p) => p.id === id);
+      r.players = r.players.filter((p) => p.id !== id);
+      if (gone && this.net) this.net.remove(id);
+      if (r.phase !== "lobby") this.raceProgress();
+      this.publish();
+    }
+  }
+  /** Host: what a member sent. Members: what the host or another member sent. */
+  message(from, d) {
+    if (!d || typeof d !== "object") return;
+    const r = this.room;
+    if (this.isHost) {
+      const p = r && r.players.find((x) => x.id === from);
+      switch (d.k) {
+        case "hello":
+          if (!r) return;
+          if (r.players.length >= MAX_PLAYERS2 && !p) return;
+          if (!p) r.players.push({ id: from, nick: cleanNick(d.nick), car: carOf(d.car), ready: false, ping: 0 });
+          this.publish();
+          return;
+        case "set":
+          if (!p) return;
+          if (d.car !== void 0 && r.phase === "lobby") p.car = carOf(d.car);
+          if (d.ready !== void 0) p.ready = Boolean(d.ready);
+          if (d.nick !== void 0) p.nick = cleanNick(d.nick);
+          this.publish();
+          return;
+        case "ping":
+          this.to(from, { k: "pong", c: d.c, h: now() });
+          if (p && typeof d.rtt === "number") p.ping = Math.round(d.rtt);
+          return;
+        case "loaded":
+          if (p) p.loaded = true;
+          this.maybeGo();
+          return;
+        default:
+          break;
+      }
+    } else {
+      switch (d.k) {
+        case "room":
+          this.room = d.room;
+          this.emit("room", this.room);
+          return;
+        case "pong": {
+          const rtt = now() - d.c;
+          this.rtt = rtt;
+          if (rtt <= this.bestRtt * 1.5 || rtt < 30) {
+            this.bestRtt = Math.min(this.bestRtt, rtt);
+            this.offset = d.h + rtt / 2 - now();
+          }
+          clearInterval(this.pingTimer);
+          this.pingTimer = setInterval(() => this.to(this.hostId, { k: "ping", c: now(), rtt: this.rtt }), PING_MS);
+          return;
+        }
+        case "start":
+          if (from === this.hostId && d.race) {
+            this.currentRace = d.race;
+            this.emit("start", d.race);
+          }
+          return;
+        case "go":
+          if (from === this.hostId) {
+            this.lastGo = { at: d.at - this.offset, raceId: d.raceId };
+            this.emit("go", this.lastGo);
+          }
+          return;
+        default:
+          break;
+      }
+    }
+    switch (d.k) {
+      case "s":
+        if (this.net && d.s) this.net.receive(from, d.s);
+        return;
+      case "fin":
+        this.finished(from, d.time);
+        return;
+      case "left":
+        if (this.net) this.net.remove(from);
+        if (this.isHost && r) {
+          const p = r.players.find((x) => x.id === from);
+          if (p) p.inRace = false;
+          this.raceProgress();
+          this.publish();
+        }
+        return;
+      default:
+        break;
+    }
+  }
+  // --- the host's settings --------------------------------------------------------------
+  setTrack(etappe, laps, name) {
+    if (!this.isHost || this.room.phase !== "lobby") return;
+    Object.assign(this.room, { etappe, laps, trackName: name });
+    this.publish();
+  }
+  /** Mine: the car I drive, and whether I am ready. */
+  setMine(change) {
+    if (!this.room) return;
+    if (this.isHost) {
+      const p = this.room.players.find((x) => x.id === this.you);
+      if (change.car !== void 0) p.car = carOf(change.car);
+      if (change.nick !== void 0) p.nick = cleanNick(change.nick);
+      this.publish();
+    } else {
+      this.to(this.hostId, { k: "set", ...change });
+    }
+  }
+  kick(id) {
+    if (this.isHost) this.put({ t: "kick", id });
+  }
+  canStart() {
+    const r = this.room;
+    return Boolean(this.isHost && r && r.phase === "lobby" && r.players.every((p) => p.ready || p.id === this.you));
+  }
+  /** Host: the grid is the order of the list, the host first. */
+  start() {
+    if (!this.canStart()) return;
+    const r = this.room;
+    r.raceId = (r.raceId || 0) + 1;
+    r.phase = "loading";
+    r.results = [];
+    const race = {
+      id: r.raceId,
+      etappe: r.etappe,
+      laps: r.laps,
+      difficulty: r.difficulty ?? 1,
+      trackName: r.trackName,
+      seed: 1 + Math.floor(Math.random() * 9e4) / 1e3,
+      players: r.players.map((p, grid) => ({ id: p.id, nick: p.nick, car: p.car, grid }))
+    };
+    for (const p of r.players) {
+      p.loaded = false;
+      p.inRace = true;
+      p.finished = false;
+      p.time = null;
+      if (p.id !== this.you) p.ready = false;
+    }
+    this.currentRace = race;
+    this.toAll({ k: "start", race });
+    this.publish();
+    clearTimeout(this.loadTimer);
+    this.loadTimer = setTimeout(() => this.go(), LOAD_TIMEOUT_MS);
+    this.emit("start", race);
+  }
+  maybeGo() {
+    const r = this.room;
+    if (!this.isHost || !r || r.phase !== "loading") return;
+    if (r.players.every((p) => p.loaded || !p.inRace)) this.go();
+  }
+  go() {
+    const r = this.room;
+    if (!this.isHost || !r || r.phase !== "loading") return;
+    clearTimeout(this.loadTimer);
+    r.phase = "racing";
+    const at = now() + GO_DELAY_MS;
+    this.toAll({ k: "go", at, raceId: r.raceId });
+    this.publish();
+    this.lastGo = { at, raceId: r.raceId };
+    this.emit("go", this.lastGo);
+  }
+  // --- in a race ------------------------------------------------------------------------
+  /** This browser's race is booted: the host starts when all are. Resolves at the shared start. */
+  loaded(net) {
+    this.net = net;
+    this.tickCount = 0;
+    this.myFinish = null;
+    const raceId = this.currentRace && this.currentRace.id;
+    const go = new Promise((resolve) => {
+      if (this.lastGo && this.lastGo.raceId === raceId) {
+        resolve(this.lastGo.at);
+        return;
+      }
+      const off = this.on((event, data) => {
+        if (event === "go" && data.raceId === raceId) {
+          off();
+          resolve(data.at);
+        } else if (event === "closed" || event === "disconnected" || event === "left") {
+          off();
+          resolve(null);
+        }
+      });
+    });
+    if (this.isHost) {
+      const me = this.room.players.find((p) => p.id === this.you);
+      if (me) me.loaded = true;
+      this.maybeGo();
+    } else {
+      this.to(this.hostId, { k: "loaded" });
+    }
+    return go.then((at) => {
+      if (at === null) return;
+      this.goClock = (at + this.offset) / 1e3;
+      const wait = at - now();
+      return wait > 0 ? new Promise((r) => setTimeout(r, wait)) : void 0;
+    });
+  }
+  /** After each tick of the local race. */
+  afterTick() {
+    const net = this.net;
+    if (!net) return;
+    this.tickCount++;
+    if (!this.myFinish && net.finishedNow) {
+      this.myFinish = this.clock() - (this.goClock || this.clock());
+      this.toAll({ k: "fin", time: this.myFinish });
+      this.finished(this.you, this.myFinish);
+    }
+    if (this.tickCount % SAMPLE_TICKS === 0 && this.roomId) this.toAll({ k: "s", s: net.sample() });
+  }
+  finished(id, time) {
+    const r = this.room;
+    if (!r) return;
+    if (typeof time !== "number" || !isFinite(time)) return;
+    const p = r.players.find((x) => x.id === id);
+    if (p) {
+      p.finished = true;
+      p.time = time;
+    }
+    if (this.isHost) {
+      r.results = r.results || [];
+      if (!r.results.some((x) => x.id === id) && p) r.results.push({ id, nick: p.nick, car: p.car, time });
+      r.results.sort((a, b) => a.time - b.time);
+      this.publish();
+    } else {
+      this.emit("room", r);
+    }
+  }
+  /** The local race has ended: back to the room. */
+  raceEnded() {
+    this.toAll({ k: "left" });
+    const net = this.net;
+    this.net = null;
+    if (this.isHost && this.room) {
+      const me = this.room.players.find((p) => p.id === this.you);
+      if (me) me.inRace = false;
+      this.raceProgress();
+      this.publish();
+    }
+    return net;
+  }
+  /** Host: back to the lobby once nobody is racing. Those who did not finish get no time. */
+  raceProgress() {
+    const r = this.room;
+    if (!this.isHost || !r || r.phase === "lobby") return;
+    if (r.players.some((p) => p.inRace)) return;
+    r.phase = "lobby";
+    clearTimeout(this.loadTimer);
+  }
+};
+function cleanNick(s) {
+  const t = String(s ?? "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 16);
+  return t || "Speler";
+}
+function carOf(c) {
+  const n = Number(c);
+  return Number.isInteger(n) && n >= 0 && n <= 7 ? n : 0;
+}
+
+// source/net/lobby-ui.js
+var LIST_MS = 2e3;
+var STORE2 = "a2racer4.multiplayer";
+var ERRORS = {
+  "name-taken": "Die servernaam is al in gebruik. Kies een andere naam.",
+  "no-room": "Die server bestaat niet (meer).",
+  "room-full": `Die server is vol: er kunnen ${MAX_PLAYERS2} spelers mee.`,
+  racing: "Op die server wordt nu geracet. Probeer het na de race opnieuw.",
+  full: "Er zijn te veel servers. Probeer het later opnieuw.",
+  broker: "Geen verbinding met de PeerJS-server waarmee browsers elkaar vinden. Probeer het later opnieuw.",
+  "host-left": "De host heeft de server gesloten.",
+  kicked: "De host heeft je van de server gehaald."
+};
+var DIFFICULTY = ["Makkelijk", "Normaal", "Moeilijk"];
+var CAR_NAMES = { 6: "Politie-auto", 7: "De Schaduw (truck)" };
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v;
+    else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v !== null && v !== void 0) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of children) if (c !== null && c !== void 0) e.append(c);
+  return e;
+}
+function load() {
+  try {
+    return JSON.parse(localStorage.getItem(STORE2) || "{}");
+  } catch {
+    return {};
+  }
+}
+function store(v) {
+  try {
+    localStorage.setItem(STORE2, JSON.stringify(v));
+  } catch {
+  }
+}
+function formatTime2(s) {
+  if (typeof s !== "number" || !isFinite(s)) return "-";
+  const m = Math.floor(s / 60);
+  return `${m}:${(s - m * 60).toFixed(2).padStart(5, "0")}`;
+}
+var LobbyUI = class {
+  constructor(app2, root) {
+    this.app = app2;
+    this.root = root;
+    this.saved = load();
+    this.session = new NetSession(lobbyChoice(app2.params));
+    this.session.on((event, data) => this.event(event, data));
+    this.build();
+  }
+  get data() {
+    return this.app.data;
+  }
+  /** The cars a player may pick: indexInGame 0 to 7, named as static.ini has them. */
+  cars() {
+    const out = [];
+    for (let c = 0; c <= 7; c++) {
+      const ch = this.data.static.chars.find((x) => x.indexInGame === c);
+      out.push({ car: c, name: CAR_NAMES[c] || (ch ? ch.name : `Auto ${c}`) });
+    }
+    return out;
+  }
+  /** Races, not chases: a chase has no opponents (FUN_0042de60), so no slots for others. */
+  tracks() {
+    return this.data.static.tracks.filter((t) => !t.isChase && this.data.trackFilesExist(t));
+  }
+  carName(c) {
+    return (this.cars().find((x) => x.car === c) || { name: `Auto ${c}` }).name;
+  }
+  build() {
+    const r = this.root;
+    r.textContent = "";
+    this.error = el("p", { class: "mp-error", role: "alert", hidden: true });
+    this.nick = el("input", { id: "mp-nick", maxlength: 16, autocomplete: "off", spellcheck: "false" });
+    this.serverName = el("input", { id: "mp-server", maxlength: 24, autocomplete: "off", spellcheck: "false", placeholder: "Bijvoorbeeld: Racen bij Roland" });
+    this.joinName = el("input", { id: "mp-join", maxlength: 24, autocomplete: "off", spellcheck: "false", placeholder: "Servernaam" });
+    this.roomList = el("ul", { class: "mp-rooms" });
+    this.browse = el(
+      "section",
+      { class: "mp-browse" },
+      el("label", { class: "mp-field", for: "mp-nick" }, el("span", { text: "Jouw naam" }), this.nick),
+      el(
+        "div",
+        { class: "mp-box" },
+        el("h2", { text: "Een server maken" }),
+        el("label", { class: "mp-field", for: "mp-server" }, el("span", { text: "Servernaam" }), this.serverName),
+        el("button", { class: "mp-primary", text: "Server maken", onclick: () => this.hostClick() })
+      ),
+      el(
+        "div",
+        { class: "mp-box" },
+        el("h2", { text: "Meedoen met een server" }),
+        this.joinHint = el("p", { class: "mp-empty", hidden: true, text: "Typ de naam van de server, zoals de host hem noemde." }),
+        this.roomList,
+        el("div", { class: "mp-row" }, this.joinName, el("button", { text: "Meedoen", onclick: () => this.joinClick(this.joinName.value) }))
+      )
+    );
+    this.roomTitle = el("h2", { class: "mp-roomname" });
+    this.trackSel = el("select", { id: "mp-track", onchange: () => this.settingsChanged() });
+    this.lapSel = el("select", { id: "mp-laps", onchange: () => this.settingsChanged() });
+    for (let n = 1; n <= 9; n++) this.lapSel.append(el("option", { value: n, text: String(n) }));
+    this.diffSel = el("select", { id: "mp-difficulty", onchange: () => this.settingsChanged() });
+    DIFFICULTY.forEach((d, k) => this.diffSel.append(el("option", { value: k, text: d })));
+    this.settingsText = el("p", { class: "mp-settings-text" });
+    this.settingsForm = el(
+      "div",
+      { class: "mp-settings" },
+      el("label", { class: "mp-field", for: "mp-track" }, el("span", { text: "Etappe" }), this.trackSel),
+      el("label", { class: "mp-field", for: "mp-laps" }, el("span", { text: "Ronden" }), this.lapSel),
+      el("label", { class: "mp-field", for: "mp-difficulty" }, el("span", { text: "Moeilijkheid" }), this.diffSel)
+    );
+    this.carSel = el("select", { id: "mp-car", onchange: () => this.carChanged() });
+    for (const c of this.cars()) this.carSel.append(el("option", { value: c.car, text: c.name }));
+    this.players = el("tbody");
+    this.results = el("div", { class: "mp-results", hidden: true });
+    this.readyBtn = el("button", { class: "mp-primary", onclick: () => this.readyClick() });
+    this.startBtn = el("button", { class: "mp-primary", text: "Start de race", onclick: () => this.session.start() });
+    this.status = el("p", { class: "mp-status" });
+    this.room = el(
+      "section",
+      { class: "mp-room", hidden: true },
+      this.roomTitle,
+      this.settingsForm,
+      this.settingsText,
+      el(
+        "table",
+        { class: "mp-players" },
+        el("thead", {}, el("tr", {}, el("th", { text: "Start" }), el("th", { text: "Naam" }), el("th", { text: "Auto" }), el("th", { text: "Status" }), el("th", { text: "Ping" }), el("th"))),
+        this.players
+      ),
+      el("label", { class: "mp-field", for: "mp-car" }, el("span", { text: "Jouw auto" }), this.carSel),
+      this.results,
+      this.status,
+      el(
+        "div",
+        { class: "mp-row mp-actions" },
+        el("button", { text: "Server verlaten", onclick: () => this.leaveClick() }),
+        this.readyBtn,
+        this.startBtn
+      )
+    );
+    r.append(el(
+      "div",
+      { class: "mp-panel", role: "dialog", "aria-label": "Multiplayer" },
+      el(
+        "header",
+        {},
+        el("h1", { text: "Multiplayer" }),
+        el("button", { class: "mp-close", text: "Terug", onclick: () => this.closeClick() })
+      ),
+      this.error,
+      this.browse,
+      this.room,
+      el("p", { class: "mp-note", text: `Tot ${MAX_PLAYERS2} spelers. Elke speler rijdt zijn eigen race in de browser; de anderen rijden mee op de plaatsen van de tegenstanders. Verkeer en politie zijn per speler.` })
+    ));
+    r.addEventListener("keydown", (e) => {
+      e.stopPropagation();
+      if (e.key === "Escape") this.closeClick();
+    });
+    for (const ev of ["keyup", "pointerdown", "pointerup", "wheel"]) r.addEventListener(ev, (e) => e.stopPropagation());
+  }
+  show() {
+    const player = this.data.player;
+    this.nick.value = this.saved.nick || (player ? player.name : "") || "Speler";
+    this.serverName.value = this.saved.server || (player ? `${player.name}s server` : "Mijn server");
+    if (!this.mineCar && this.mineCar !== 0) this.mineCar = this.saved.car ?? (player && player.qrChar ? player.qrChar.indexInGame : 0);
+    this.carSel.value = String(this.mineCar);
+    this.root.hidden = false;
+    if (this.session.room) {
+      this.showRoom(this.session.room);
+    } else {
+      this.showBrowse();
+    }
+  }
+  hide() {
+    this.root.hidden = true;
+    clearInterval(this.listTimer);
+  }
+  say(text3) {
+    this.error.textContent = text3 || "";
+    this.error.hidden = !text3;
+  }
+  remember() {
+    this.saved = { ...this.saved, nick: this.nick.value.trim(), server: this.serverName.value.trim(), car: this.mineCar };
+    store(this.saved);
+  }
+  async showBrowse() {
+    this.browse.hidden = false;
+    this.room.hidden = true;
+    clearInterval(this.listTimer);
+    try {
+      await this.session.connect();
+      this.roomList.hidden = !this.session.lists;
+      this.joinHint.hidden = this.session.lists;
+      if (this.session.lists) {
+        this.session.list();
+        this.listTimer = setInterval(() => this.session.list(), LIST_MS);
+      }
+    } catch (e) {
+      this.say(`${e.message}. Draait de server met de lobby? Zie docs/multiplayer.md.`);
+    }
+  }
+  renderRooms(rooms) {
+    if (this.browse.hidden) return;
+    const items = rooms.map((r) => el(
+      "li",
+      {},
+      el("span", { class: "mp-room-name", text: r.name }),
+      el("span", { class: "mp-room-info", text: `${r.players}/${r.max}${r.track ? " \xB7 " + r.track : ""}${r.state === "racing" ? " \xB7 racet" : ""}` }),
+      el("button", { text: "Meedoen", disabled: r.players >= r.max || r.state === "racing", onclick: () => this.joinClick(r.id) })
+    ));
+    if (!items.length) items.push(el("li", { class: "mp-empty", text: "Nog geen servers. Maak er zelf een." }));
+    this.roomList.replaceChildren(...items);
+  }
+  me() {
+    return { nick: this.nick.value.trim() || "Speler", car: this.mineCar };
+  }
+  async hostClick() {
+    this.say("");
+    this.remember();
+    const tracks = this.tracks();
+    const t = tracks[0];
+    try {
+      await this.session.host(this.serverName.value.trim() || "Server", this.me(), { etappe: t ? t.indexInGame : 0, laps: t ? t.nrLaps : 2, name: t ? t.name : "" });
+      this.session.room.difficulty = 1;
+      this.session.publish();
+    } catch (e) {
+      this.say(ERRORS[e.message] || e.message);
+    }
+  }
+  async joinClick(room) {
+    this.say("");
+    if (!String(room || "").trim()) return;
+    this.remember();
+    try {
+      await this.session.join(String(room).trim(), this.me());
+    } catch (e) {
+      this.say(ERRORS[e.message] || e.message);
+    }
+  }
+  leaveClick() {
+    this.session.leave();
+    this.showBrowse();
+  }
+  closeClick() {
+    if (this.session.room) this.session.leave();
+    this.session.close();
+    this.hide();
+    this.app.closeMultiplayer();
+  }
+  readyClick() {
+    const r = this.session.room;
+    const me = r && r.players.find((p) => p.id === this.session.you);
+    if (me) this.session.setMine({ ready: !me.ready });
+  }
+  carChanged() {
+    this.mineCar = Number(this.carSel.value);
+    this.remember();
+    this.session.setMine({ car: this.mineCar });
+  }
+  settingsChanged() {
+    const t = this.tracks().find((x) => x.indexInGame === Number(this.trackSel.value));
+    if (!t) return;
+    const trackChanged = this.session.room && this.session.room.etappe !== t.indexInGame;
+    const laps = trackChanged ? t.nrLaps : Number(this.lapSel.value);
+    this.session.room.difficulty = Number(this.diffSel.value);
+    this.session.setTrack(t.indexInGame, laps, t.name);
+  }
+  event(event, data) {
+    if (this.root.hidden && event !== "start") return;
+    switch (event) {
+      case "rooms":
+        this.renderRooms(data);
+        break;
+      case "room":
+        this.showRoom(data);
+        break;
+      case "closed":
+        this.say(ERRORS[data && data.error] || "De server is gesloten.");
+        this.showBrowse();
+        break;
+      case "disconnected":
+        this.say("De verbinding met de lobby is verbroken.");
+        this.showBrowse();
+        break;
+      case "error":
+        if (data && ERRORS[data.error]) this.say(ERRORS[data.error]);
+        break;
+      case "start":
+        this.hide();
+        this.app.startNetRace(data);
+        break;
+      default:
+        break;
+    }
+  }
+  showRoom(room) {
+    if (!room) return;
+    clearInterval(this.listTimer);
+    this.browse.hidden = true;
+    this.room.hidden = false;
+    const s = this.session;
+    const host = s.isHost;
+    this.roomTitle.textContent = `Server: ${room.name}`;
+    const tracks = this.tracks();
+    if (this.trackSel.options.length !== tracks.length) {
+      this.trackSel.replaceChildren(...tracks.map((t) => el("option", { value: t.indexInGame, text: `${t.name} (${t.type})` })));
+    }
+    this.trackSel.value = String(room.etappe);
+    this.lapSel.value = String(room.laps);
+    this.diffSel.value = String(room.difficulty ?? 1);
+    const lobby = room.phase === "lobby";
+    for (const sel of [this.trackSel, this.lapSel, this.diffSel]) sel.disabled = !host || !lobby;
+    this.settingsForm.hidden = !host;
+    this.settingsText.hidden = host;
+    this.settingsText.textContent = `${room.trackName || "Etappe " + room.etappe} \xB7 ${room.laps} ${room.laps === 1 ? "ronde" : "ronden"} \xB7 ${DIFFICULTY[room.difficulty ?? 1]}`;
+    const me = room.players.find((p) => p.id === s.you);
+    this.players.replaceChildren(...room.players.map((p, k) => {
+      let state = p.id === room.host ? "Host" : p.ready ? "Klaar" : "Nog niet klaar";
+      if (room.phase !== "lobby") state = p.finished ? `Binnen: ${formatTime2(p.time)}` : p.inRace ? "Racet" : "Gestopt";
+      const kick = host && p.id !== s.you && lobby ? el("button", { class: "mp-kick", text: "Weg", title: "Van de server halen", onclick: () => s.kick(p.id) }) : null;
+      return el(
+        "tr",
+        { class: p.id === s.you ? "mine" : "" },
+        el("td", { text: String(k + 1) }),
+        el("td", { text: p.nick }),
+        el("td", { text: this.carName(p.car) }),
+        el("td", { text: state }),
+        el("td", { text: p.id === room.host ? "" : `${p.ping || "-"} ms` }),
+        el("td", {}, kick)
+      );
+    }));
+    this.carSel.disabled = !lobby;
+    if (me && me.car !== this.mineCar && lobby) this.carSel.value = String(me.car);
+    this.readyBtn.hidden = host;
+    this.readyBtn.textContent = me && me.ready ? "Toch niet klaar" : "Klaar";
+    this.readyBtn.disabled = !lobby;
+    this.startBtn.hidden = !host;
+    this.startBtn.disabled = !s.canStart();
+    const waiting = room.players.filter((p) => !p.ready && p.id !== room.host).length;
+    if (!lobby) this.status.textContent = "Er wordt nog geracet. De volgende race kan beginnen als iedereen terug is.";
+    else if (host) this.status.textContent = waiting ? `Wachten tot iedereen klaar is (${waiting}).` : room.players.length === 1 ? "Je kunt alleen starten, of wachten op anderen." : "Iedereen is klaar.";
+    else this.status.textContent = "De host start de race.";
+    const results = room.results || [];
+    this.results.hidden = !results.length;
+    if (results.length) {
+      this.results.replaceChildren(el("h3", { text: "Uitslag van de laatste race" }), el("ol", {}, ...results.map((x) => el(
+        "li",
+        {},
+        el("span", { text: x.nick }),
+        el("span", { text: this.carName(x.car) }),
+        el("b", { text: formatTime2(x.time) })
+      ))));
+    }
+  }
+};
+
+// source/net/race-files.js
+var MAX_RACER_SLOTS = 6;
+var CAR_CFG_LEAGUES = ["league0", "league1", "league2"];
+var EXTRA_CAR_NAME = "MP_EXTRA";
+function text2(vfs, name) {
+  const data = vfs.read(name);
+  return data ? latin1(data) : "";
+}
+function slotCars(localCar, count) {
+  const out = [];
+  for (let c = 0; out.length < count; c++) if (c !== localCar) out.push(c);
+  return out;
+}
+function opponentIni(source, count) {
+  let out = source;
+  for (let r = 4; r < count; r++) {
+    for (let level = 0; level < 3; level++) {
+      if (out.includes(`[Racer ${r} Level ${level}]`)) continue;
+      const head = `[Racer 3 Level ${level}]`;
+      const start = out.indexOf(head);
+      if (start < 0) continue;
+      const end = out.indexOf("\n[", start + head.length);
+      const body = out.slice(start + head.length, end < 0 ? out.length : end + 1).replace(/^;.*$/gm, "");
+      out += `\r
+[Racer ${r} Level ${level}]${body}`;
+    }
+  }
+  const ini = new IniFile(out);
+  for (let level = 0; level < 3; level++) {
+    for (let r = 5; r < count; r++) {
+      const key = `DISTANCE${r}${r + 1}`;
+      if (ini.get(`Level ${level}`, key) === null) ini.set(`Level ${level}`, key, "10");
+    }
+  }
+  return ini.serialize();
+}
+function append(ini, section, name) {
+  const names = ini.keys(section).map((k) => ini.get(section, k));
+  if (names.includes(name)) return;
+  const count = Number(ini.get(section, "COUNT"));
+  ini.set(section, String(count), name);
+  ini.set(section, "COUNT", String(count + 1));
+}
+function overlayIni(source, cars, faces) {
+  const ini = new IniFile(source);
+  for (let k = 6; k <= cars; k++) {
+    const name = `STRING_FINISH_POS_${k}`;
+    append(ini, "STRINGS", name);
+    if (!ini.sections().includes(name)) {
+      for (const [key, value] of [["Parent", "Screen"], ["Position", "0,0"], ["RGBA", "118,250,0,255"], ["Length", "14"], ["Font", "FONT1"], ["Type", "PROPORTIONAL"], ["Visible", "false"], ["Alignment", "left"]]) ini.set(name, key, value);
+    }
+  }
+  for (const [slotCar, face] of faces) {
+    const name = `MP_PLAYER_${slotCar}`;
+    append(ini, "ELEMENTS", name);
+    for (const [key, value] of [["Parent", "Portraits"], ["RGBA", "255,255,255,200"], ["Anim", `PLAYER_${face}_PORTRAIT`], ["Position", "25,25,10"], ["Visible", "false"]]) ini.set(name, key, value);
+  }
+  return ini.serialize();
+}
+function carCfgIni(source, slots2, wanted, extraCar) {
+  const ini = new IniFile(source);
+  for (const league of CAR_CFG_LEAGUES) {
+    const rows = /* @__PURE__ */ new Map();
+    for (const key of ini.keys(league)) {
+      if (key.toLowerCase() === "count") continue;
+      rows.set(Number(key), ini.get(league, key));
+    }
+    slots2.forEach((slotCar, k) => {
+      const from = rows.get(wanted[k]);
+      const own = rows.get(slotCar);
+      if (from === void 0 || own === void 0) return;
+      const fields = from.split(",");
+      fields[0] = own.split(",")[0];
+      ini.set(league, String(slotCar), fields.join(","));
+    });
+    const extra = extraCar === null || extraCar === void 0 ? void 0 : rows.get(extraCar);
+    if (extra !== void 0) {
+      const count = Number(ini.get(league, "Count"));
+      const fields = extra.split(",");
+      fields[0] = EXTRA_CAR_NAME;
+      ini.set(league, String(count), fields.join(","));
+      ini.set(league, "Count", String(count + 1));
+    }
+  }
+  return ini.serialize();
+}
+function prepareRaceFiles(vfs, { localCar, remoteCars }) {
+  const count = Math.min(MAX_RACER_SLOTS, remoteCars.length);
+  const extraCar = remoteCars.length > MAX_RACER_SLOTS ? remoteCars[MAX_RACER_SLOTS] : null;
+  const slots2 = slotCars(localCar, count);
+  const saved = /* @__PURE__ */ new Map();
+  const replace = (name, content) => {
+    if (!saved.has(name)) saved.set(name, vfs.read(name));
+    vfs.add(name, encodeLatin1(content));
+  };
+  const write = vfs.onWrite;
+  vfs.onWrite = null;
+  const portraits = /* @__PURE__ */ new Map();
+  try {
+    replace("intel.ini", (() => {
+      const ini = new IniFile(text2(vfs, "intel.ini"));
+      ini.set("GENERAL", "NrOpponents", String(count));
+      return ini.serialize();
+    })());
+    replace("opponent.ini", opponentIni(text2(vfs, "opponent.ini"), count));
+    const overlay = `overlay${localCar >= 0 && localCar <= 7 ? localCar : 5}.ini`;
+    replace(overlay, overlayIni(text2(vfs, overlay), count + 1, slots2.map((slotCar, k) => [slotCar, remoteCars[k]])));
+    replace("car_cfg.ini", carCfgIni(text2(vfs, "car_cfg.ini"), slots2, remoteCars, extraCar));
+    slots2.forEach((slotCar) => {
+      const key = String(slotCar);
+      portraits.set(key, vfs.iniGet("game.ini", "Portraits", key));
+      vfs.iniSet("game.ini", "Portraits", key, `MP_PLAYER_${slotCar}`);
+    });
+    vfs.iniSet("game.ini", "OPTIONS", "OPPONENTS", "1");
+  } finally {
+    vfs.onWrite = write;
+  }
+  const restore = () => {
+    const w = vfs.onWrite;
+    vfs.onWrite = null;
+    for (const [name, data] of saved) if (data) vfs.add(name, data);
+    vfs.onWrite = w;
+    for (const [key, value] of portraits) vfs.iniSet("game.ini", "Portraits", key, value ?? `PLAYER_${key}`);
+  };
+  return { slots: slots2, restore };
+}
+
+// source/net/puppets.js
+var A = {
+  CARS: 7429712,
+  OBJS: 7581904,
+  PLAYER_OBJ: 7322200,
+  NR_OPP: 6105776,
+  RACERS: 6089192,
+  PLAYER_CHUNKS: 7322292,
+  PLAYER_FINISHED: 7322264,
+  STARTED: 7322268,
+  PLAYER_POS: 7322276,
+  START_CHUNK: 7321772,
+  BRAKE: 7322304,
+  BRAKE_LIGHT: 7322156,
+  CHUNKS_PER_LAP: 7429892,
+  LAPS: 7321852,
+  DIR_A: 7321832,
+  DIR_B: 7321940,
+  PHYS_SCALE: 5960068,
+  VIEW: 7582772,
+  PROJ: 7582708
+};
+var RACER_STRIDE = 660;
+var RACER_CHUNKS = 80;
+var CAR_STRIDE = 240;
+var OBJ_STRIDE = 169;
+var HANDLER = 108;
+var ROUTE_FIELDS = [52, 56, 60, 80];
+var FN2 = {
+  WHEELS: 4412528,
+  FORMAT: 4841360,
+  CAR_ROW: 4343392,
+  CAR_LIST: 6108248,
+  WRAP_CHUNK: 4878816,
+  CREATE_CAR: 4367312,
+  COLLIDE: 4520304,
+  NOOP: 4382288,
+  CAR_PARTS: 4412384,
+  BEHIND: 4268336
+};
+var EXTRA_GRID = MAX_RACER_SLOTS + 1;
+var MAX_LEAD = 0.25;
+var STALE = 1;
+var FADE = 0.82;
+var SNAP = 60;
+var TURN2 = 0.35;
+var LEAD_BIAS = -75e-4;
+function quatFromRows(r) {
+  const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = r;
+  const t = m00 + m11 + m22;
+  let x, y, z, w;
+  if (t > 0) {
+    const s = Math.sqrt(t + 1) * 2;
+    w = 0.25 * s;
+    x = (m12 - m21) / s;
+    y = (m20 - m02) / s;
+    z = (m01 - m10) / s;
+  } else if (m00 > m11 && m00 > m22) {
+    const s = Math.sqrt(1 + m00 - m11 - m22) * 2;
+    w = (m12 - m21) / s;
+    x = 0.25 * s;
+    y = (m10 + m01) / s;
+    z = (m20 + m02) / s;
+  } else if (m11 > m22) {
+    const s = Math.sqrt(1 + m11 - m00 - m22) * 2;
+    w = (m20 - m02) / s;
+    x = (m10 + m01) / s;
+    y = 0.25 * s;
+    z = (m21 + m12) / s;
+  } else {
+    const s = Math.sqrt(1 + m22 - m00 - m11) * 2;
+    w = (m01 - m10) / s;
+    x = (m20 + m02) / s;
+    y = (m21 + m12) / s;
+    z = 0.25 * s;
+  }
+  return [x, y, z, w];
+}
+function rowsFromQuat([x, y, z, w]) {
+  return [
+    1 - 2 * (y * y + z * z),
+    2 * (x * y + z * w),
+    2 * (x * z - y * w),
+    2 * (x * y - z * w),
+    1 - 2 * (x * x + z * z),
+    2 * (y * z + x * w),
+    2 * (x * z + y * w),
+    2 * (y * z - x * w),
+    1 - 2 * (x * x + y * y)
+  ];
+}
+function slerp(a, b, t) {
+  let d = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+  const s = d < 0 ? -1 : 1;
+  d *= s;
+  if (d > 0.9995) {
+    const q = a.map((v, k) => v + (s * b[k] - v) * t);
+    const n = Math.hypot(...q);
+    return q.map((v) => v / n);
+  }
+  const th = Math.acos(d);
+  const sa = Math.sin((1 - t) * th) / Math.sin(th);
+  const sb = Math.sin(t * th) / Math.sin(th) * s;
+  return a.map((v, k) => v * sa + b[k] * sb);
+}
+var round = (v, k) => Math.round(v * k) / k;
+var NetRace = class {
+  /**
+   * setup: { me, players: [{ id, nick, car, grid }] } with grid 0..7, the same in every browser.
+   * clock(): the room's shared time in seconds.
+   */
+  constructor(setup, clock) {
+    this.setup = setup;
+    this.clock = clock;
+    this.me = setup.players.find((p) => p.id === setup.me);
+    this.remotes = setup.players.filter((p) => p.id !== setup.me).sort((a, b) => a.grid - b.grid);
+    this.puppets = /* @__PURE__ */ new Map();
+    this.byObj = /* @__PURE__ */ new Map();
+    this.finished = false;
+    this.tickCount = 0;
+  }
+  /** The cars of the race's files: which car each racer slot was made with. remoteCars order. */
+  get remoteCars() {
+    return this.remotes.map((p) => p.car);
+  }
+  get m() {
+    return this.race.m;
+  }
+  car(o) {
+    return this.m.u32[A.CARS >> 2] + o * CAR_STRIDE;
+  }
+  obj(o) {
+    return this.m.u32[A.OBJS >> 2] + this.m.view.getInt32(this.car(o) + 36, true) * OBJ_STRIDE;
+  }
+  phys(o) {
+    return this.m.u32[this.car(o) + 16 >> 2];
+  }
+  core(wrapper) {
+    return this.m.u32[this.m.u32[wrapper + 8 >> 2] + 164 >> 2];
+  }
+  /** Pose and route fields of car o: rows of its world matrix, position, chunk fields. */
+  read(o) {
+    const v = this.m.view;
+    const obj = this.obj(o);
+    const rows = [];
+    for (const k of [0, 1, 2, 4, 5, 6, 8, 9, 10]) rows.push(v.getFloat32(obj + 16 + k * 4, true));
+    const p = [12, 13, 14].map((k) => v.getFloat32(obj + 16 + k * 4, true));
+    const rec = this.car(o);
+    return { rows, p, route: ROUTE_FIELDS.map((f) => v.getInt32(rec + f, true)) };
+  }
+  /** Teleports car o: the reset key's vehicle teleport, then the body and wheel speeds. */
+  beam(o, p, rows, vel, rot) {
+    const { m } = this;
+    const v = m.view;
+    const s = this.scratch;
+    for (let k = 0; k < 3; k++) v.setFloat32(s + k * 4, p[k], true);
+    const mat = s + 16;
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) v.setFloat32(mat + (r * 4 + c) * 4, rows[r * 3 + c], true);
+      v.setFloat32(mat + (r * 4 + 3) * 4, 0, true);
+    }
+    for (let k = 0; k < 3; k++) v.setFloat32(mat + (12 + k) * 4, p[k], true);
+    v.setFloat32(mat + 15 * 4, 1, true);
+    const phys = this.phys(o);
+    m.call(m.u32[m.u32[phys >> 2] + 12 >> 2], [s, mat], phys);
+    const core = this.core(phys);
+    for (let k = 0; k < 3; k++) {
+      v.setFloat32(core + 164 + k * 4, vel ? vel[k] : 0, true);
+      v.setFloat32(core + 148 + k * 4, rot ? rot[k] : 0, true);
+    }
+    for (let w = 0; w < 4; w++) {
+      const wc = this.core(m.u32[phys + 52 + w * 4 >> 2]);
+      for (let k = 0; k < 3; k++) v.setFloat32(wc + 164 + k * 4, vel ? vel[k] : 0, true);
+    }
+  }
+  setRoute(o, route) {
+    const v = this.m.view;
+    const rec = this.car(o);
+    ROUTE_FIELDS.forEach((f, k) => v.setInt32(rec + f, route[k], true));
+  }
+  /** After Race.instantiate: nothing yet, the cars exist only after boot. */
+  attach(race) {
+    this.race = race;
+  }
+  /** After Race.boot: the grid, the puppets, the local car on its own grid place. */
+  boot() {
+    const { m } = this;
+    this.scratch = m.lowAlloc(128);
+    this.local = m.i32[A.PLAYER_OBJ >> 2];
+    this.nrOpp = m.i32[A.NR_OPP >> 2];
+    this.scale = m.f32[A.PHYS_SCALE >> 2] || 0.1;
+    this.chunksPerLap = m.i32[A.CHUNKS_PER_LAP >> 2];
+    this.laps = m.i32[A.LAPS >> 2];
+    const thunk = m.makeThunk("net!puppet", 0, (esp) => this.handle(m.u32[esp + 4 >> 2]));
+    const grid = /* @__PURE__ */ new Map();
+    const slots2 = [];
+    for (let r = 0; r < this.nrOpp; r++) {
+      const o = m.i32[A.RACERS + r * RACER_STRIDE >> 2];
+      slots2.push(o);
+      grid.set(r, this.read(o));
+    }
+    grid.set(this.nrOpp, this.read(this.local));
+    if (this.remotes.length > this.nrOpp) {
+      const extra = this.createCar(EXTRA_CAR_NAME, EXTRA_GRID, thunk);
+      slots2.push(extra);
+      grid.set(EXTRA_GRID, this.read(extra));
+    }
+    this.grid = grid;
+    this.remotes.forEach((p, k) => {
+      const o = slots2[k];
+      if (o === void 0) return;
+      const place = grid.get(p.grid) || grid.get(k);
+      const puppet = { player: p, obj: o, racer: k < this.nrOpp ? k : -1, place, sample: null, off: [0, 0, 0], q: quatFromRows(place.rows), pos: place.p.slice(), gone: false, braking: 0 };
+      this.puppets.set(p.id, puppet);
+      this.byObj.set(o, puppet);
+      if (k < this.nrOpp) m.u32[this.car(o) + HANDLER >> 2] = thunk;
+    });
+    const mine = grid.get(this.me.grid);
+    if (mine && this.me.grid !== this.nrOpp) {
+      this.beam(this.local, mine.p, mine.rows, null, null);
+      this.setRoute(this.local, mine.route);
+      m.i32[A.PLAYER_CHUNKS >> 2] = this.nrOpp - this.me.grid;
+    }
+    this.startChunks = this.nrOpp - this.me.grid;
+  }
+  /** FUN_0042de60's body for one car, outside the racer table: car_cfg row refName on grid place `place`. */
+  createCar(refName, place, handler) {
+    const { m } = this;
+    const name = m.lowAlloc(16);
+    const text3 = m.lowAlloc(refName.length + 1);
+    m.writeCStr(text3, refName);
+    m.call(FN2.FORMAT, [name, text3]);
+    const row = m.call(FN2.CAR_ROW, [name], FN2.CAR_LIST);
+    const carType = m.u32[row + 68 >> 2];
+    const chunk = m.call(FN2.WRAP_CHUNK, [m.i32[A.START_CHUNK >> 2] - place]);
+    const a = m.i32[A.DIR_A >> 2];
+    const b = m.i32[A.DIR_B >> 2];
+    const dir = a === 0 ? b !== 1 ? 1 : 0 : b === 1 ? 1 : 0;
+    const words = [0, 1, 2, 3].map((k) => m.u32[(name >> 2) + k]);
+    const o = m.call(FN2.CREATE_CAR, [...words, chunk, place & 1, dir, 1, handler, FN2.COLLIDE, 3, FN2.NOOP]);
+    const rec = this.car(o);
+    m.u32[rec + 96 >> 2] = 0;
+    m.u32[rec + 28 >> 2] |= 3;
+    m.call(FN2.CAR_PARTS, [carType, o]);
+    m.u32[rec + 104 >> 2] = 1;
+    return o;
+  }
+  /** The swapped handler: place the car, then the wheel and light visuals of FUN_00419600. */
+  handle(o) {
+    const p = this.byObj.get(o);
+    if (p) {
+      this.place(p);
+      this.m.call(FN2.WHEELS, [o, p.braking]);
+    }
+    return 1;
+  }
+  place(p) {
+    const now2 = this.clock();
+    if (p.gone) {
+      const at = p.place.p.slice();
+      at[1] -= 5e3;
+      this.beam(p.obj, at, p.place.rows, null, null);
+      return;
+    }
+    const s = p.sample;
+    if (!s) {
+      this.beam(p.obj, p.place.p, p.place.rows, null, null);
+      return;
+    }
+    const live = now2 - s.ts < STALE;
+    for (let k = 0; k < 3; k++) p.off[k] *= FADE;
+    const pred = this.predict(s, now2);
+    const pos = [0, 1, 2].map((k) => pred[k] + p.off[k]);
+    p.q = slerp(p.q, s.q, TURN2);
+    p.pos = pos;
+    this.beam(p.obj, pos, rowsFromQuat(p.q), live ? s.v : null, live ? s.w : null);
+    this.setRoute(p.obj, s.c);
+    if (p.racer >= 0) this.m.i32[A.RACERS + p.racer * RACER_STRIDE + RACER_CHUNKS >> 2] = s.d;
+    p.braking = s.b ? 1 : 0;
+  }
+  /** Where sample s puts its car at time t, carried on by its speed for at most MAX_LEAD. */
+  predict(s, t) {
+    const age = t - s.ts;
+    const lead = age < STALE ? Math.min(MAX_LEAD, Math.max(0, age)) + LEAD_BIAS : 0;
+    return [0, 1, 2].map((k) => s.p[k] + s.vw[k] * lead);
+  }
+  /** A sample from another browser. */
+  receive(id, s) {
+    const p = this.puppets.get(id);
+    if (!p || !s || !Array.isArray(s.p) || s.p.length !== 3) return;
+    if (p.sample && s.ts < p.sample.ts) return;
+    const k = 1 / this.scale;
+    s.vw = [s.v[0] * k, -s.v[1] * k, s.v[2] * k];
+    const t = this.clock();
+    const pred = this.predict(s, t);
+    const was = p.sample ? this.predict(p.sample, t).map((x, j) => x + p.off[j]) : null;
+    const off = was ? [0, 1, 2].map((j) => was[j] - pred[j]) : [0, 0, 0];
+    if (!was || Math.hypot(...off) > SNAP) {
+      p.off = [0, 0, 0];
+      p.q = s.q.slice();
+    } else {
+      p.off = off;
+    }
+    p.sample = s;
+    p.player.progress = s.d;
+    p.player.finished = Boolean(s.f);
+  }
+  /** The human left the race or the room. */
+  remove(id) {
+    const p = this.puppets.get(id);
+    if (p) p.gone = true;
+  }
+  /** The local car, for the others. */
+  sample() {
+    const { m } = this;
+    const v = m.view;
+    const s = this.read(this.local);
+    const core = this.core(this.phys(this.local));
+    const vel = [0, 1, 2].map((k) => round(v.getFloat32(core + 164 + k * 4, true), 1e3));
+    const rot = [0, 1, 2].map((k) => round(v.getFloat32(core + 148 + k * 4, true), 1e3));
+    const braking = v.getFloat32(A.BRAKE, true) > 0 || m.i32[A.BRAKE_LIGHT >> 2] ? 1 : 0;
+    return {
+      ts: round(this.clock(), 1e3),
+      p: s.p.map((x) => round(x, 100)),
+      q: quatFromRows(s.rows).map((x) => round(x, 1e4)),
+      v: vel,
+      w: rot,
+      c: s.route,
+      d: this.progress,
+      b: braking,
+      f: this.finishedNow ? 1 : 0
+    };
+  }
+  get progress() {
+    return this.m.i32[A.PLAYER_CHUNKS >> 2];
+  }
+  get finishedNow() {
+    return this.m.i32[A.PLAYER_FINISHED >> 2] !== 0;
+  }
+  /** Lap of a progress value, 1-based: chunks per lap from 0x715f04. */
+  lapOf(progress) {
+    if (!this.chunksPerLap) return 1;
+    return Math.max(1, Math.min(this.laps || 1, Math.floor((progress - this.startChunks) / this.chunksPerLap) + 1));
+  }
+  /**
+   * The HUD's position counts racers only: an eighth player's car is outside the table, so the
+   * position goes one down when that car is ahead. Called just before the HUD draws.
+   */
+  beforeHud() {
+    const { m } = this;
+    const raw = this.gamePosition();
+    const pos = this.position();
+    this.hudPos = pos;
+    this.rawPos = raw;
+    m.i32[A.PLAYER_POS >> 2] = pos;
+  }
+  /** What FUN_004128a0 left, before beforeHud added the extra car: once per tick only. */
+  gamePosition() {
+    const now2 = this.m.i32[A.PLAYER_POS >> 2];
+    return this.hudPos !== void 0 && now2 === this.hudPos ? this.rawPos : now2;
+  }
+  /** The local car's 0-based place: the game's, counting the extra car too. */
+  position() {
+    const { m } = this;
+    let pos = this.gamePosition();
+    if (m.i32[A.PLAYER_FINISHED >> 2]) return pos;
+    for (const p of this.puppets.values()) {
+      if (p.racer >= 0 || p.gone || !p.sample) continue;
+      const mine = this.progress;
+      if (p.sample.d > mine) pos += 1;
+      else if (p.sample.d === mine && this.behind(p.pos) === 0) pos += 1;
+    }
+    return pos;
+  }
+  behind(at) {
+    const bits = new Uint32Array(new Float32Array(at).buffer);
+    return this.m.call(FN2.BEHIND, [this.local, bits[0], bits[1], bits[2]]);
+  }
+  /** Screen positions of the other cars, for their name tags: [{ id, x, y, z }] in clip space. */
+  tags() {
+    const { m } = this;
+    const v = m.view;
+    const out = [];
+    const view = [];
+    const proj = [];
+    for (let k = 0; k < 16; k++) {
+      view.push(v.getFloat32(A.VIEW + k * 4, true));
+      proj.push(v.getFloat32(A.PROJ + k * 4, true));
+    }
+    for (const p of this.puppets.values()) {
+      if (p.gone || !p.sample) continue;
+      const w = [p.pos[0], p.pos[1] + 22, p.pos[2], 1];
+      const e = [0, 1, 2, 3].map((c2) => w[0] * view[c2] + w[1] * view[4 + c2] + w[2] * view[8 + c2] + w[3] * view[12 + c2]);
+      const c = [0, 1, 2, 3].map((j) => e[0] * proj[j] + e[1] * proj[4 + j] + e[2] * proj[8 + j] + e[3] * proj[12 + j]);
+      if (c[3] <= 1) continue;
+      out.push({ id: p.player.id, x: c[0] / c[3], y: c[1] / c[3], dist: e[2] });
+    }
+    return out;
   }
 };
 
@@ -38907,8 +45428,8 @@ var App = class {
     return this.masterGain;
   };
   /** The status line. With ms, a note that goes away by itself. */
-  say(text2, ms = 0) {
-    this.status.textContent = text2;
+  say(text3, ms = 0) {
+    this.status.textContent = text3;
     clearTimeout(this.sayTimer);
     if (ms) {
       this.sayTimer = setTimeout(() => {
@@ -38973,6 +45494,7 @@ var App = class {
     this.say("");
     const loop = () => {
       requestAnimationFrame(loop);
+      if (this.mode === "mp") this.menu.render();
       if (this.mode === "menu") {
         this.menu.render();
         this.menuPad.pollMenu((code, down) => {
@@ -39022,6 +45544,55 @@ var App = class {
     this.showMenu();
     if (!this.params.has("race")) await this.data.flow.afterRace(this.menu);
   }
+  /** Port: the network races' screens over the main menu. source/net/, docs/multiplayer.md. */
+  openMultiplayer() {
+    if (!this.lobby) this.lobby = new LobbyUI(this, document.getElementById("mp"));
+    this.mode = "mp";
+    this.lobby.show();
+    this.menu.dirty = true;
+    this.menu.render();
+    this.menu.active = false;
+  }
+  closeMultiplayer() {
+    this.mode = "menu";
+    this.menu.active = true;
+    this.menuPad.resync();
+  }
+  /**
+   * One network race: the menu's Quick Race files with the room's etappe, laps and difficulty,
+   * the files for the other humans' cars (source/net/race-files.js), then the race, then the room.
+   */
+  async startNetRace(setup) {
+    const session = this.lobby.session;
+    const me = setup.players.find((p) => p.id === session.you);
+    if (!me) return;
+    const data = this.data;
+    const track = data.static.tracks.find((t) => t.indexInGame === setup.etappe);
+    const mode = data.raceMode;
+    data.raceMode = 1;
+    data.writeToInis();
+    data.raceMode = mode;
+    const set = (section, key, value) => this.vfs.iniSet("game.ini", section, key, String(value));
+    set("ETAPPE", "ETAPPE", setup.etappe);
+    set("ETAPPE", "BRITISH", track && track.british ? 1 : 0);
+    set("OPTIONS", "NRLAPS", setup.laps);
+    set("LEAGUE", "LEAGUE", setup.difficulty ?? 1);
+    set("PLAYER", "CAR", me.car);
+    set("PLAYER", "DAMAGE", 0);
+    const net = new NetRace({ me: me.id, players: setup.players }, session.clock);
+    const files = prepareRaceFiles(this.vfs, { localCar: me.car, remoteCars: net.remoteCars });
+    this.showRace();
+    try {
+      await this.runner.run({ net, session, seed: setup.seed, cars: [...new Set(setup.players.map((p) => p.car))] });
+    } finally {
+      files.restore();
+      session.raceEnded();
+    }
+    this.menu.ignoreRepeat = true;
+    this.showMenu();
+    if (TfrmMainScreen) await this.menu.goTo(TfrmMainScreen);
+    this.openMultiplayer();
+  }
   /** The quit path: EXITCODE 255. The launcher would close; here the first screen returns. */
   async exitGame() {
     this.menu.hideAll();
@@ -39034,9 +45605,9 @@ var App = class {
    */
   applyFullscreen() {
     const root = document.documentElement;
-    const on = this.settings.get("fullscreen");
+    const on2 = this.settings.get("fullscreen");
     const inside = fullscreenElement();
-    if (on && !inside && !this.fullscreenPending && document.fullscreenEnabled !== false) {
+    if (on2 && !inside && !this.fullscreenPending && document.fullscreenEnabled !== false) {
       const request = root.requestFullscreen || root.webkitRequestFullscreen;
       if (!request) return;
       this.fullscreenPending = true;
@@ -39044,7 +45615,7 @@ var App = class {
       }).finally(() => {
         this.fullscreenPending = false;
       });
-    } else if (!on && inside) {
+    } else if (!on2 && inside) {
       const exit = document.exitFullscreen || document.webkitExitFullscreen;
       if (exit) Promise.resolve(exit.call(document)).catch(() => {
       });
@@ -39081,7 +45652,7 @@ var App = class {
     const dpr = window.devicePixelRatio || 1;
     const w = Math.max(1, Math.round(window.innerWidth * dpr));
     const h = Math.max(1, Math.round(window.innerHeight * dpr));
-    if (this.mode === "menu") {
+    if (this.mode === "menu" || this.mode === "mp") {
       this.canvasMenu.width = w;
       this.canvasMenu.height = h;
       this.menu.relayout();
