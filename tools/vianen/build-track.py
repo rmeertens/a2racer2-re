@@ -43,6 +43,7 @@ ROAD = 50.0           # half the road width
 WALK = 82.0           # from the centre line to the facades
 DEPTH = 95.0          # depth of a house
 LANE = 24.0           # waypoints right and left of the centre line
+DECK = 64.0           # half the width of a bridge deck
 START = 10            # start chunk; the grid takes the 8 chunks before it
 MIN_RADIUS = 260.0    # tightest bend of the centre line, world units
 LIMITS = {'road': 16, 'land': 24, 'extra': 12, 'rail': 12}
@@ -259,11 +260,22 @@ def gothic_window(d, x0, y0, x1, y1):
     d.line(((x0 + x1) / 2, y0 + w / 2, (x0 + x1) / 2, y1 - i), fill=(150, 145, 135), width=2)
 
 
-def railing_sprite(w, h):
-    """The white railings along the canals: posts and two rails on the key colour."""
+def bracing_sprite(w, h):
+    """The drawbridge's white cross-bracing between its posts, on the key colour."""
     im = Image.new('RGB', (w, h), KEY)
     d = ImageDraw.Draw(im)
-    white = (236, 238, 236)
+    for a, b in (((0, 0), (w, h)), ((w, 0), (0, h))):
+        d.line(a + b, fill=(238, 240, 238), width=8)
+    d.rectangle((0, 0, w, 10), fill=(238, 240, 238))
+    d.rectangle((0, h - 10, w, h), fill=(238, 240, 238))
+    return im
+
+
+def railing_sprite(w, h, colour=(236, 238, 236)):
+    """Railings along the canals (white) and the lock (dark green-grey): posts and rails on the key colour."""
+    im = Image.new('RGB', (w, h), KEY)
+    d = ImageDraw.Draw(im)
+    white = colour
     for y in (h * 0.30, h * 0.62):
         d.rectangle((0, y, w, y + h * 0.07), fill=white)
     for x in range(0, w, w // 4):
@@ -360,7 +372,8 @@ GEVEL = {key: ((k % 4) * 256, (k // 4) * 512, (k % 4) * 256 + 256, (k // 4) * 51
 OWN = {
     'lekpoort': ('1445', ((0.40, 0.20), (0.745, 0.20), (0.745, 0.73), (0.40, 0.73))),
     'stadhuis': ('1449', ((0.43, 0.17), (0.715, 0.39), (0.72, 0.73), (0.42, 0.775))),
-    'kerk': ('1457', ((0.0, 0.14), (0.37, 0.14), (0.37, 0.60), (0.0, 0.60))),
+    # The arched brick bridge over the canal: its three arches, side on.
+    'arches': ('1466', ((0.40, 0.495), (0.78, 0.495), (0.78, 0.575), (0.40, 0.575))),
     'kerk2': ('1457', ((0.375, 0.19), (0.50, 0.19), (0.50, 0.59), (0.375, 0.59))),
     'gevel1': ('1446', ((0.53, 0.36), (1.0, 0.30), (1.0, 0.64), (0.53, 0.62))),
     'gevel2': ('1446', ((0.0, 0.0), (0.30, 0.33), (0.30, 0.60), (0.0, 0.67))),
@@ -400,7 +413,8 @@ BOUW = {
     'brick': (0, 0, 256, 256), 'stone': (256, 0, 512, 256), 'railing': (512, 0, 768, 256), 'church': (768, 0, 1024, 256),
     'slate': (0, 256, 256, 512), 'tree': (256, 256, 512, 512), 'lamp': (512, 256, 640, 512), 'tower': (640, 256, 896, 512),
     'white': (896, 256, 1024, 512),
-    'lekpoort': (0, 512, 192, 1024), 'stadhuis': (192, 512, 512, 1024), 'kerk': (512, 512, 1024, 768),
+    'lekpoort': (0, 512, 192, 1024), 'stadhuis': (192, 512, 512, 1024),
+    'arches': (512, 512, 1024, 640), 'bracing': (512, 640, 640, 768), 'darkrail': (640, 640, 896, 768), 'steel': (896, 640, 1024, 768),
     'kerk2': (512, 768, 704, 1024), 'produce': (704, 768, 960, 1024),
 }
 ATLAS_SIZE = {'gevel': (1024, 1024), 'land': (512, 512), 'bouw': (1024, 1024)}
@@ -431,10 +445,14 @@ def build_textures():
     # Building materials and the sprites on the key colour.
     bouw = Image.new('RGB', ATLAS_SIZE['bouw'], KEY)
     big = BOUW
-    for name in ('lekpoort', 'stadhuis', 'kerk', 'kerk2'):
+    for name in ('lekpoort', 'stadhuis', 'kerk2', 'arches'):
         r = BOUW[name]
         bouw.paste(own(name, (r[2] - r[0], r[3] - r[1])), r[:2])
     bouw.paste(produce_texture(256, 256), BOUW['produce'][:2])
+    bouw.paste(bracing_sprite(128, 128), BOUW['bracing'][:2])
+    bouw.paste(railing_sprite(256, 128, colour=(52, 66, 62)), BOUW['darkrail'][:2])
+    steel = (np.full((128, 128, 3), (30, 32, 34), float) + noise(128, 128, 5, 21)).clip(0, 255).astype(np.uint8)
+    bouw.paste(Image.fromarray(steel), BOUW['steel'][:2])
     bouw.paste(own('brick', (256, 256)), big['brick'][:2])
     bouw.paste(masonry(256, 256, 8, 4, (168, 164, 154), (120, 116, 108), 5, jitter=12), big['stone'][:2])
     bouw.paste(railing_sprite(256, 256), big['railing'][:2])
@@ -504,6 +522,7 @@ class Town:
         self.chunks = Chunks(self.n)
         self.ground = [0.0] * self.n
         self.skip = set()  # (chunk, side) without houses
+        self.bridges = set()  # chunks over water: a narrower deck
         self.spans = []    # (chunk, side, t0, t1): houses on part of a skipped chunk
 
     def p(self, i, t, off, y=0.0):
@@ -555,7 +574,8 @@ class Town:
             for a, b in ((-ROAD, 0.0), (0.0, ROAD)):
                 vs = [self.p(i, 0, a), self.p(i, 1, a), self.p(i, 1, b), self.p(i, 0, b)]
                 self.chunks.add('road', i, quad(vs, [(0, 1), (0, 0), (1, 0), (1, 1)], grey, up))
-            for a, b in ((-WALK, -ROAD), (ROAD, WALK)):
+            edge = DECK if i in self.bridges else WALK
+            for a, b in ((-edge, -ROAD), (ROAD, edge)):
                 vs = [self.p(i, 0, a, 2), self.p(i, 1, a, 2), self.p(i, 1, b, 2), self.p(i, 0, b, 2)]
                 self.chunks.add('land', i, quad(vs, uv('land', 'pavement', 0, 0.5, 0, 1), grey, up))
             # Kerbs: the step from the road up to the pavement.
@@ -812,9 +832,8 @@ class Town:
                 continue
             self.sprite(i, 0.5, s * (WALK - 5), 12, 70, 'lamp')
 
-    def water_sides(self, water):
-        """Where the moat runs beside the road: a quay edge with white railings, a grass bank down
-        to the water, the water, the far bank and trees, instead of houses."""
+    def find_water(self, water):
+        """The chunk sides where an OSM water polygon lies beside the road."""
         sides = set()
         for i in range(self.n):
             for s in (-1, 1):
@@ -826,7 +845,14 @@ class Town:
             for s in (-1, 1):
                 if (i - 1) % self.n in {c for c, t in sides if t == s} and (i + 1) % self.n in {c for c, t in sides if t == s}:
                     sides.add((i, s))
+        return sides
+
+    def water_sides(self, sides):
+        """Where the moat runs beside the road: a quay edge with white railings, a grass bank down
+        to the water, the water, the far bank and trees, instead of houses."""
         for i, s in sorted(sides):
+            if i in self.bridges:
+                continue
             self.skip.add((i, s))
             inward = tuple(-s * x for x in self.right(i))
             g0 = self.p(i, 0, 0)[1]
@@ -842,7 +868,6 @@ class Town:
             self.chunks.add('land', i, quad([P(0, WALK + 420, low), P(1, WALK + 420, low), P(1, WALK + 520, -g0 + 4), P(0, WALK + 520, -g0 + 4)], uv('land', 'grass'), (225, 235, 215), norm((inward[0] * 0.3, 1, inward[2] * 0.3))))
             if i % 2 == 0:
                 self.sprite(i, 0.5, s * (WALK + 600), 130, 210, 'tree', base=-self.ground[i])
-        return sides
 
     def market(self, first, last):
         """Market stalls along Voorstraat, as in the owner's photos: a table of produce under a
@@ -870,31 +895,212 @@ class Town:
                 self.chunks.add('land', i, quad(canopy, uv('land', 'awning'), (255, 255, 255), norm((inward[0], 1.5, inward[2]))))
                 self.chunks.add('land', i, quad(canopy, uv('land', 'awning'), (200, 190, 190), (0, -1, 0)))
 
-    def drawbridge(self, i, s):
-        """A white drawbridge over the moat, as at the lock: a timber deck from the quay across the
-        water, two white portals on the near bank and the balance beams above them."""
-        g0 = self.p(i, 0, 0)[1]
-        f = self.fwd(i)
-        r = tuple(s * x for x in self.right(i))
-        o = self.p(i, 0.5, s * WALK)
-        P = lambda a, d, y: (o[0] + f[0] * a + r[0] * d, o[1] + y, o[2] + f[2] * a + r[2] * d)
-        deck_y = WATER_Y - g0 + 18
-        w = 28.0
-        self.chunks.add('land', i, quad([P(-w, 90, deck_y), P(w, 90, deck_y), P(w, 420, deck_y), P(-w, 420, deck_y)], uv('land', 'deck'), (240, 230, 215), (0, 1, 0)))
-        white = uv('bouw', 'white')
-        for a in (-w, w):
-            for d0 in (90, 150):
-                post = [P(a - 3, d0, deck_y), P(a + 3, d0, deck_y), P(a + 3, d0, deck_y + 150), P(a - 3, d0, deck_y + 150)]
-                self.chunks.add('rail', i, quad(post, white, (255, 255, 255), tuple(-x for x in r)))
-                self.chunks.add('rail', i, quad(post, white, (255, 255, 255), r))
-            # The balance beam: from behind the portal out over the water.
-            beam = [P(a - 3, 40, deck_y + 150), P(a + 3, 40, deck_y + 150), P(a + 3, 300, deck_y + 120), P(a - 3, 300, deck_y + 120)]
-            self.chunks.add('rail', i, quad(beam, white, (255, 255, 255), (0, 1, 0)))
-            self.chunks.add('rail', i, quad(beam, white, (230, 230, 230), (0, -1, 0)))
-        for d0 in (90, 150):
-            top = [P(-w, d0, deck_y + 140), P(w, d0, deck_y + 140), P(w, d0, deck_y + 150), P(-w, d0, deck_y + 150)]
-            self.chunks.add('rail', i, quad(top, white, (255, 255, 255), tuple(-x for x in r)))
-            self.chunks.add('rail', i, quad(top, white, (255, 255, 255), r))
+    def side_street(self, i, s):
+        """A narrow street off the route between house fronts, closed by a house at its end."""
+        t0, t1 = 0.32, 0.68
+        self.skip.add((i, s))
+        self.spans += [(i, s, 0.0, t0), (i, s, t1, 1.0)]
+        L = 260.0
+        fw = self.fwd(i)
+        inward = tuple(-s * x for x in self.right(i))
+        Q = lambda t, off, y: self.p(i, t, s * off, y)
+        self.chunks.add('road', i, quad([Q(t0, ROAD, 0), Q(t1, ROAD, 0), Q(t1, WALK + L, 0), Q(t0, WALK + L, 0)], [(0, 1), (1, 1), (1, 0), (0, 0)], (215, 215, 215), (0, 1, 0)))
+        rng = random.Random(i * 7 + s)
+        for t, facing in ((t0, fw), (t1, tuple(-x for x in fw))):
+            off = WALK + DEPTH
+            while off < WALK + L - 20:
+                step = min(70.0, WALK + L - off)
+                spec = rng.randrange(len(FACADES))
+                eave = rng.choice((84, 94, 104))
+                top = eave / HOUSE_TYPES[spec]['eave']
+                vs = [Q(t, off, 0), Q(t, off + step, 0), Q(t, off + step, top), Q(t, off, top)]
+                self.chunks.add('extra', i, quad(vs, uv('gevel', FACADES[spec]), (236, 236, 236), facing))
+                off += step
+        spec = rng.randrange(len(FACADES))
+        top = 100 / HOUSE_TYPES[spec]['eave']
+        vs = [Q(t0, WALK + L, 0), Q(t1, WALK + L, 0), Q(t1, WALK + L, top), Q(t0, WALK + L, top)]
+        self.chunks.add('extra', i, quad(vs, uv('gevel', FACADES[spec]), (236, 236, 236), inward))
+
+    def bridge(self, first, last):
+        """A stretch of road over water: no houses, water both sides below, a narrower deck."""
+        for i in range(first, last + 1):
+            i %= self.n
+            self.bridges.add(i)
+            for s in (-1, 1):
+                self.skip.add((i, s))
+                g0 = self.p(i, 0, 0)[1]
+                low = WATER_Y - g0
+                P = lambda t, off, y, i=i, s=s: self.p(i, t, s * off, y)
+                self.chunks.add('land', i, quad([P(0, DECK, low), P(1, DECK, low), P(1, DECK + 500, low), P(0, DECK + 500, low)], uv('land', 'water'), (230, 238, 245), (0, 1, 0)))
+
+    def parapets(self, i, rail):
+        """Both edges of a bridge deck: a low brick parapet with a stone cap, a railing on it."""
+        for s in (-1, 1):
+            inward = tuple(-s * x for x in self.right(i))
+            P = lambda t, off, y: self.p(i, t, s * off, y)
+            self.chunks.add('rail', i, quad([P(0, DECK, 0), P(1, DECK, 0), P(1, DECK, 16), P(0, DECK, 16)], uv('bouw', 'brick', 0, 1, 0, 0.12), (230, 215, 205), inward))
+            self.chunks.add('rail', i, quad([P(0, DECK, 16), P(1, DECK, 16), P(1, DECK + 6, 16), P(0, DECK + 6, 16)], uv('bouw', 'stone', 0, 1, 0, 0.1), (245, 245, 245), (0, 1, 0)))
+            if rail:
+                vs = [P(0, DECK, 16), P(1, DECK, 16), P(1, DECK, 40), P(0, DECK, 40)]
+                self.chunks.add('rail', i, quad(vs, uv('bouw', rail), (255, 255, 255), inward))
+                self.chunks.add('rail', i, quad(vs, uv('bouw', rail), (255, 255, 255), tuple(-x for x in inward)))
+
+    def arched_bridge(self, first, last):
+        """The hump on the dike as the brick bridge with three arches in the owner's photo: its
+        faces from the water up to the road, both sides, and parapets."""
+        self.bridge(first, last)
+        span = last - first + 1
+        for k, i in enumerate(range(first, last + 1)):
+            i %= self.n
+            for s in (-1, 1):
+                outward = tuple(s * x for x in self.right(i))
+                g0, g1 = self.p(i, 0, 0)[1], self.p(i, 1, 0)[1]
+                a, b = self.p(i, 0, s * (DECK + 6)), self.p(i, 1, s * (DECK + 6))
+                vs = [(a[0], WATER_Y - 4, a[2]), (b[0], WATER_Y - 4, b[2]), (b[0], g1, b[2]), (a[0], g0, a[2])]
+                u0, u1 = (k / span, (k + 1) / span) if s > 0 else (1 - k / span, 1 - (k + 1) / span)
+                self.chunks.add('rail', i, quad(vs, uv('bouw', 'arches', u0, u1), (255, 255, 255), outward))
+            self.parapets(i, 'darkrail')
+
+    def drawbridge(self, first, last):
+        """The black steel drawbridge of the owner's photos, across the road: two tall posts, a
+        boxed top beam with a white top, white cross-bracing above the cars, the balance arms on
+        top, lanterns at the corners, dark railings along the deck."""
+        self.bridge(first, last)
+        for i in range(first, last + 1):
+            self.parapets(i % self.n, 'darkrail')
+        i = (first + last) // 2 % self.n
+        f, r = self.fwd(i), self.right(i)
+        o = self.p(i, 0.5, 0)
+        X = DECK + 4
+        P = lambda x, a, y: (o[0] + r[0] * x + f[0] * a, o[1] + y, o[2] + r[2] * x + f[2] * a)
+        steel, white = uv('bouw', 'steel'), uv('bouw', 'white')
+        back, ahead = tuple(-c for c in f), f
+
+        def box(x0, x1, a0, a1, y0, y1, top=None):
+            for vs, facing in (
+                ([P(x0, a0, y0), P(x1, a0, y0), P(x1, a0, y1), P(x0, a0, y1)], back),
+                ([P(x0, a1, y0), P(x1, a1, y0), P(x1, a1, y1), P(x0, a1, y1)], ahead),
+                ([P(x0, a0, y0), P(x0, a1, y0), P(x0, a1, y1), P(x0, a0, y1)], tuple(-c for c in r)),
+                ([P(x1, a0, y0), P(x1, a1, y0), P(x1, a1, y1), P(x1, a0, y1)], r),
+            ):
+                self.chunks.add('rail', i, quad(vs, steel, (255, 255, 255), facing))
+            if top:
+                self.chunks.add('rail', i, quad([P(x0, a0, y1), P(x1, a0, y1), P(x1, a1, y1), P(x0, a1, y1)], top, (255, 255, 255), (0, 1, 0)))
+
+        for x in (-X - 8, X):
+            box(x, x + 8, -4, 4, 0, 190)
+        box(-X - 8, X + 8, -6, 6, 162, 182, white)
+        # Cross-bracing between the posts, high above the cars.
+        vs = [P(-X, 0, 108), P(X, 0, 108), P(X, 0, 162), P(-X, 0, 162)]
+        self.chunks.add('rail', i, quad(vs, uv('bouw', 'bracing'), (255, 255, 255), back))
+        self.chunks.add('rail', i, quad(vs, uv('bouw', 'bracing'), (255, 255, 255), ahead))
+        # Balance arms: from the top of the posts back over the road, rising.
+        for x in (-X - 6, X + 2):
+            vs = [P(x, -40, 196), P(x + 4, -40, 196), P(x + 4, 150, 214), P(x, 150, 214)]
+            self.chunks.add('rail', i, quad(vs, steel, (255, 255, 255), (0, 1, 0)))
+            vs = [P(x + 2, -40, 186), P(x + 2, 150, 204), P(x + 2, 150, 216), P(x + 2, -40, 198)]
+            self.chunks.add('rail', i, quad(vs, steel, (255, 255, 255), r))
+            self.chunks.add('rail', i, quad(vs, steel, (255, 255, 255), tuple(-c for c in r)))
+        for k in (first, last):
+            for s in (-1, 1):
+                self.sprite(k % self.n, 0.5 if k == first else 0.6, s * (DECK + 12), 10, 80, 'lamp')
+
+
+class Streets:
+    """Distance from points to OSM streets, and their directions; metres."""
+
+    def __init__(self, nodes, ways):
+        kinds = {'residential', 'unclassified', 'living_street', 'pedestrian', 'tertiary', 'service'}
+        self.segs = []
+        for w in ways:
+            if w.get('tags', {}).get('highway') not in kinds:
+                continue
+            ns = [nodes[k] for k in w['nodes'] if k in nodes]
+            self.segs += list(zip(ns, ns[1:]))
+
+    def nearest(self, pt):
+        best = (1e9, None)
+        for a, b in self.segs:
+            dx, dz = b[0] - a[0], b[1] - a[1]
+            L = dx * dx + dz * dz
+            if L == 0:
+                continue
+            t = max(0, min(1, ((pt[0] - a[0]) * dx + (pt[1] - a[1]) * dz) / L))
+            d = math.hypot(pt[0] - a[0] - t * dx, pt[1] - a[1] - t * dz)
+            if d < best[0]:
+                best = (d, (dx / math.sqrt(L), dz / math.sqrt(L)))
+        return best
+
+
+def side_streets(town, streets, water):
+    """Chunk sides where a real street leaves the route at about a right angle."""
+    found = []
+    for i in range(town.n):
+        for s in (-1, 1):
+            if (i, s) in town.skip or i in town.bridges or (i, s) in water:
+                continue
+            probe = town.p(i, 0.5, s * (WALK + 300))
+            d, direction = streets.nearest((probe[0] / UNITS, probe[2] / UNITS))
+            r = town.right(i)
+            if d < 7 and direction and abs(direction[0] * r[0] + direction[1] * r[2]) > 0.8:
+                if all(abs(i - j) > 4 or s != t for j, t in found):
+                    found.append((i, s))
+    return found
+
+
+def building_fronts(town, nodes, ways, limit=260):
+    """The real buildings behind the street rows, from OSM: their walls that face the road, as
+    drawn house fronts with gables, so the town rises behind its first row."""
+    centres = town.c
+    def nearest(pt):
+        best = (1e9, 0)
+        for i, c in enumerate(centres):
+            d = math.dist(pt, c)
+            if d < best[0]:
+                best = (d, i)
+        return best
+    rng = random.Random(1355)
+    fronts = []
+    for w in ways:
+        if 'building' not in w.get('tags', {}):
+            continue
+        poly = [(nodes[k][0] * UNITS, nodes[k][1] * UNITS) for k in w['nodes'] if k in nodes]
+        if len(poly) < 4:
+            continue
+        dists = [nearest(p) for p in poly]
+        closest = min(d for d, _ in dists)
+        if closest < WALK + DEPTH + 40 or closest > 1300:
+            continue
+        cx = sum(p[0] for p in poly) / len(poly)
+        cz = sum(p[1] for p in poly) / len(poly)
+        _, ci = nearest((cx, cz))
+        height = rng.choice((96, 110, 124, 140))
+        face = rng.randrange(len(FACADES))
+        for a, b in zip(poly, poly[1:]):
+            L = math.dist(a, b)
+            if L < 45:
+                continue
+            # The wall's outward normal, pointing away from the building's middle.
+            nx, nz = (b[1] - a[1]) / L, -(b[0] - a[0]) / L
+            if (a[0] + b[0]) / 2 * 0 + nx * ((a[0] + b[0]) / 2 - cx) + nz * ((a[1] + b[1]) / 2 - cz) < 0:
+                nx, nz = -nx, -nz
+            c = centres[ci]
+            to_road = (c[0] - (a[0] + b[0]) / 2, c[1] - (a[1] + b[1]) / 2)
+            tl = math.hypot(*to_road) or 1
+            if (nx * to_road[0] + nz * to_road[1]) / tl < 0.35:
+                continue
+            fronts.append((closest, ci, a, b, (nx, 0, nz), height, face))
+    fronts.sort(key=lambda f: f[0])
+    for closest, ci, a, b, normal, height, face in fronts[:limit]:
+        g = town.ground[ci]
+        # A long wall shows several houses' fronts side by side.
+        n = max(1, round(math.dist(a, b) / 70))
+        for k in range(n):
+            p0 = (a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n)
+            p1 = (a[0] + (b[0] - a[0]) * (k + 1) / n, a[1] + (b[1] - a[1]) * (k + 1) / n)
+            vs = [(p0[0], g, p0[1]), (p1[0], g, p1[1]), (p1[0], g + height, p1[1]), (p0[0], g + height, p0[1])]
+            town.chunks.add('extra', ci, quad(vs, uv('gevel', FACADES[(face + k) % len(FACADES)]), (232, 232, 232), normal))
+    return min(limit, len(fronts))
 
 
 def inside(pt, poly):
@@ -933,15 +1139,28 @@ def build():
     poort = min(range(poort - 6, poort + 1), key=lambda i: (turn(i % n) > 0.05, -i)) % n
     print('lekpoort on chunk', poort, 'turn', round(math.degrees(turn(poort)), 1))
     town.skip.update({(poort, -1), (poort, 1)})
+    hump = town.near(HUMPS[0][0])
+    town.arched_bridge(hump - 2, hump + 1)
+    nodes, ways = load_osm(os.path.join(SRC, 'osm.json'))
+    water = [[nodes[k] for k in w['nodes'] if k in nodes] for w in ways if w.get('tags', {}).get('natural') == 'water']
+    sides = town.find_water(water)
+    print('water sides', len(sides))
+    east = [i for i, s in sorted(sides) if s == -1 and centre[i][0] > 1800 and abs(centre[i][1]) < 1200 and abs(i - hump) > 6]
+    if east:
+        mid = east[len(east) // 2]
+        town.drawbridge(mid - 1, mid + 1)
+        print('drawbridge on chunks', mid - 1, mid + 1)
     town.street()
     town.stadhuis(st, town.side(st, STADHUIS))
     town.grote_kerk((kerk + 2) % n, town.side(kerk, GROTE_KERK))
     town.lekpoort(poort)
-    sides = town.water_sides(water)
-    print('water sides', len(sides), 'chunks', sorted({i for i, s in sides}))
-    east = [i for i, s in sorted(sides) if s == -1 and centre[i][0] > 1800 and abs(centre[i][1]) < 1200]
-    if east:
-        town.drawbridge(east[len(east) // 2], -1)
+    town.water_sides(sides)
+    streets = Streets(nodes, ways)
+    branches = side_streets(town, streets, sides)
+    for i, s_ in branches:
+        town.side_street(i, s_)
+    print('side streets', len(branches), branches)
+    print('buildings behind the rows', building_fronts(town, nodes, ways))
     town.market(st - 7, st - 1)
     town.market(st + 2, poort - 3)
     town.lamps()

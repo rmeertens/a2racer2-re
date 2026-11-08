@@ -42,6 +42,13 @@ The house fronts are drawn by `tools/vianen/facades.py`, not cut from photos: ei
 
 The owner's photos stay for the Lekpoort, the Stadhuis, the Grote Kerk, the paving, the brick, and the canal's water and grass. They now sit in the building atlas `vn_bouw`, drawn with the walls.
 
+## Bridges, side streets, the town behind
+
+- **The arched bridge.** The hump on the dike is the brick bridge with three arches from the owner's canal photo (`arched_bridge`). Its photo faces run from the water up to the road on both sides. It has water on both sides, a narrower deck, brick parapets with a stone cap, and the lock's dark railings.
+- **The drawbridge,** after the owner's photos of the one at the lock: black steel, not white (`drawbridge`). It stands across the road on a three-chunk crossing of the east moat. Two tall posts carry a boxed top beam with a white top, with white cross-bracing between them high above the cars. Balance arms run on top, lanterns stand at the corners, and dark railings line the deck.
+- **Side streets** where a real OSM street leaves the route at about a right angle (`side_streets`, `side_street`): twelve on this lap. Each is an opening in the house row and a narrow street 26 m deep between house fronts, closed by a house. A car can drive in.
+- **The town behind the rows** (`building_fronts`): the 260 OSM building walls nearest the route beyond the street rows, where they face the road, get drawn house fronts with gables. Vianen's own building plan rises behind the first row.
+
 ## Photos
 
 The facades, the Lekpoort, the Stadhuis, the Grote Kerk's tower and nave window, the herringbone road, the cobbled pavement and the brick come from the repository owner's own photos (`source/assets/vianen/own/`). `OWN` in `build-track.py` names a quad in a photo, and `own()` straightens it into its atlas cell with a perspective transform. The atlases are laid out at 1024×512 and 512×256 and saved stretched to squares, because the race samples non-square textures wrongly. Vianen therefore needs the middle texture memory setting, which `installVianen` sets for its race.
@@ -63,4 +70,5 @@ Checked on 2026-11-08 by counting the player handler's calls per second in a hea
 ## Known rough edges
 
 - The test bot is slow in bends; the AI racers lap at full pace.
+- `tools/vianen/check-walls.py` now reports the side streets as openings, on purpose.
 - Vianen is in the multiplayer screens and at `?race=1&etappe=vianen`, not in the menu's Quick Race list.
