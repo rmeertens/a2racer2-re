@@ -13,7 +13,7 @@ import { SettingsPanel } from './ui/settings-panel.js';
 import { safeAreaInsets } from './ui/safe-area.js';
 import { useTouch, fullscreenElement } from './settings.js';
 import { NetOverlay } from './net/overlay.js';
-import { VIANEN, WENEN, waitScreenBase, reskinWenenRace } from './host/vianen.js';
+import { VIANEN, waitScreenBase } from './host/vianen.js';
 
 // One pass of the original main loop per tick. docs/original-behavior.md, timing section.
 export const TICK_SECONDS = 1 / 60;
@@ -190,8 +190,6 @@ export class RaceRunner {
     await app.files.prepareRace(lists, car, (a, b) => this.showBar((a / b) * 90));
     // A network race also draws the other humans' cars.
     for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app.files.prepareRace(lists, other);
-    // Wenen races as Vianen: its textures, once its own files are in.
-    this.restoreReskin = etappe === WENEN ? await reskinWenenRace(app.vfs) : null;
     if (!this.renderer) this.renderer = new D3DRenderer(app.canvasRace, { staticTrack: !app.params.has('nostatic') });
     this.renderer.resetForRace();
     const audio = new GameAudio(app.getAudioContext(), app.getMasterOutput());
@@ -366,8 +364,6 @@ export class RaceRunner {
     for (const id of ['loading', 'dialog-keys', 'race-settings', 'race-stop', 'fps']) document.getElementById(id).hidden = true;
     if (this.netOverlay) this.netOverlay.stop();
     this.mp = null;
-    if (this.restoreReskin) this.restoreReskin();
-    this.restoreReskin = null;
     page.classList.remove('race-portrait', 'race-touch', 'race-results', 'actions-lifted');
     this.app.canvasRace.classList.remove('no-pointer');
     clearTimeout(this.pointerTimer);
