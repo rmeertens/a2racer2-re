@@ -24,6 +24,10 @@ Sources and licences: `public/assets/vianen/ATTRIBUTION.md`, `source/assets/vian
 - `node tools/vianen/shots.mjs`: screenshots at the start, the Stadhuis, the Lekpoort, the dike and the Grote Kerk, in headless Chromium with the bot at 4× speed. `evidence/vianen/`.
 - `node tools/check-multiplayer-browser.mjs --players 2 --seconds 10 --track vianen`: a network race on Vianen, all checks passed.
 
+## Photos
+
+The facades, the Lekpoort, the Stadhuis, the Grote Kerk's tower and nave window, the herringbone road, the cobbled pavement and the brick come from the repository owner's own photos (`source/assets/vianen/own/`). `OWN` in `build-track.py` names a quad in a photo, and `own()` straightens it into its atlas cell with a perspective transform. The atlases are laid out at 1024×512 and 512×256 and saved stretched to squares, because the race samples non-square textures wrongly. Vianen therefore needs the middle texture memory setting, which `installVianen` sets for its race.
+
 ## 3D buildings
 
 The track's planes now build the town in 3D. Houses have facades from the photos, gabled tile roofs, and end walls with gables. The Lekpoort is a tower over the road, with its passage and a slate spire with a white lantern. The Stadhuis is a stone block with battlements, and the Grote Kerk a nave with a steep slate roof and a tower with a spire behind a churchyard. Along the dike there is grass, a low stone edge and lime trees, and the straights have lamp posts. Trees and lamps are crossed quads on the key colour (255, 0, 127), which the game draws see-through. Textures: `vn_weg`, `vn_land`, `vn_gevel` and `vn_bouw` (`raser.ini [MAPS]` row 10). A chunk's lists are full at 16, 24, 12 and 12 planes, so a landmark's planes go to neighbouring chunks.

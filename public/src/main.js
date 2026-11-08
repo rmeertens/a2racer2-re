@@ -33222,7 +33222,7 @@ function installVianen(vfs, files) {
       vfs.onWrite = write;
     }
   }
-  vfs.iniSet("raser.ini", "MAPS", String(slot), `1,etappe${slot},vn_weg,vn_land,vn_bouw,vn_gevel,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
+  vfs.iniSet("raser.ini", "MAPS", String(slot), `1,etappe${slot},vn_weg,vn_land,vn_gevel,vn_bouw,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
 }
 function waitScreenBase() {
   return "assets/loading/";

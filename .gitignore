@@ -34,3 +34,7 @@ original-game-decompiled/extracted/disc*/
 INSTALL.LOG
 INSTTRCK.LOG
 original-game-decompiled/reach.pkl
+
+# Phone photos as taken: they carry GPS positions. source/assets/vianen/own/ holds stripped copies.
+/photos/
+.DS_Store

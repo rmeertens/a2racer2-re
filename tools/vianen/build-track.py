@@ -215,7 +215,8 @@ def masonry(w, h, rows, per_row, colour, mortar, seed, jitter=18, stagger=True):
         off = (bw / 2) if (stagger and r % 2) else 0
         for k in range(-1, per_row + 1):
             x0 = k * bw + off
-            c = tuple(max(0, min(255, v + rng.randint(-jitter, jitter))) for v in colour)
+            j = rng.randint(-jitter, jitter)
+            c = tuple(max(0, min(255, v + j)) for v in colour)
             d.rectangle((x0 + 1, r * rh + 1, x0 + bw - 2, (r + 1) * rh - 2), fill=c)
     a = np.asarray(im).astype(float) + noise(w, h, 6, seed)
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
@@ -283,23 +284,48 @@ def lamp_sprite(w, h):
     return im
 
 
-# Atlases: name -> pixel box. Sizes keep the textures inside the race's texture memory
-# (CTextureDetailManager.cpp, fatal when short): 1024 x 512, 512 x 512 and 512 x 512 besides the road.
+# Atlases: name -> pixel box in the layout sizes below. The files are stretched to squares (1024,
+# 512, 512): the race samples non-square textures wrongly. That needs the middle texture memory
+# setting (CTextureDetailManager.cpp is fatal when short), which source/host/vianen.js ensures.
 GEVEL = {'lekpoort': (0, 0, 128, 512), 'stadhuis': (128, 0, 384, 512), 'kerk': (384, 0, 640, 256), 'kerk2': (384, 256, 640, 512)}
 FACADES = [f'gevel{k}' for k in range(1, 9)]
 for _k, _key in enumerate(FACADES):
     GEVEL[_key] = (640 + (_k % 2) * 192, (_k // 2) * 128, 640 + (_k % 2) * 192 + 192, (_k // 2) * 128 + 128)
-GEVEL_CROPS = {
-    # The Lekpoort's brick body, below the spire the model builds itself.
-    'lekpoort': ('lekpoort1', (0.30, 0.33, 0.74, 0.97), False),
-    'stadhuis': ('stadhuis2', (0.14, 0.03, 0.93, 0.97), False),
-    'kerk': ('kerk2', (0.15, 0.12, 0.70, 0.52), False),
-    'kerk2': ('kerk2', (0.25, 0.05, 0.50, 0.50), False),
-    'gevel1': ('gevel1', (0.0, 0.03, 1.0, 0.55), True), 'gevel2': ('gevel2', (0.0, 0.0, 1.0, 0.55), True),
-    'gevel3': ('gevel3', (0.0, 0.05, 1.0, 0.60), True), 'gevel4': ('gevel4', (0.0, 0.10, 1.0, 0.62), True),
-    'gevel5': ('gevel5', (0.05, 0.0, 1.0, 0.55), True), 'gevel6': ('gevel6', (0.0, 0.0, 1.0, 0.55), True),
-    'gevel7': ('gevel7', (0.0, 0.05, 1.0, 0.58), True), 'gevel8': ('gevel8', (0.0, 0.05, 1.0, 0.58), True),
+# From the repository owner's own photos (source/assets/vianen/own/, location data stripped):
+# quads in fractions of the photo, top-left, top-right, bottom-right, bottom-left, straightened.
+OWN = {
+    'lekpoort': ('1445', ((0.40, 0.20), (0.745, 0.20), (0.745, 0.73), (0.40, 0.73))),
+    'stadhuis': ('1449', ((0.43, 0.17), (0.715, 0.39), (0.72, 0.73), (0.42, 0.775))),
+    'kerk': ('1457', ((0.0, 0.14), (0.37, 0.14), (0.37, 0.60), (0.0, 0.60))),
+    'kerk2': ('1457', ((0.375, 0.19), (0.50, 0.19), (0.50, 0.59), (0.375, 0.59))),
+    'gevel1': ('1446', ((0.53, 0.36), (1.0, 0.30), (1.0, 0.64), (0.53, 0.62))),
+    'gevel2': ('1446', ((0.0, 0.0), (0.30, 0.33), (0.30, 0.60), (0.0, 0.67))),
+    'gevel3': ('1450', ((0.0, 0.25), (0.35, 0.38), (0.35, 0.58), (0.0, 0.62))),
+    'gevel4': ('1450', ((0.70, 0.38), (1.0, 0.28), (1.0, 0.62), (0.70, 0.58))),
+    'gevel5': ('1454', ((0.70, 0.24), (0.84, 0.20), (0.84, 0.57), (0.70, 0.54))),
+    'gevel6': ('1454', ((0.85, 0.17), (1.0, 0.05), (1.0, 0.58), (0.85, 0.56))),
+    'gevel7': ('1444', ((0.60, 0.24), (1.0, 0.0), (1.0, 0.66), (0.60, 0.57))),
+    'gevel8': ('1444', ((0.0, 0.05), (0.20, 0.29), (0.20, 0.62), (0.0, 0.66))),
+    # Ground, seen from above: Voorstraat's herringbone klinkers and a cobbled pavement.
+    'road': ('1444', ((0.30, 0.66), (0.70, 0.66), (1.0, 1.0), (0.0, 1.0))),
+    'pavement': ('1446', ((0.2, 0.72), (0.8, 0.72), (1.0, 1.0), (0.0, 1.0))),
+    'church': ('1457', ((0.05, 0.30), (0.34, 0.30), (0.34, 0.60), (0.05, 0.60))),
+    'brick': ('1443', ((0.0, 0.25), (0.22, 0.25), (0.22, 0.75), (0.0, 0.75))),
 }
+
+
+def own(name, size):
+    """A quad of one of the owner's photos, straightened into a rectangle of size."""
+    key, q = OWN[name]
+    im = Image.open(os.path.join(SRC, 'own', key + '.jpg')).convert('RGB')
+    w, h = im.size
+    (tl, tr, br, bl) = [(x * w, y * h) for x, y in q]
+    # PIL's QUAD takes upper-left, lower-left, lower-right, upper-right.
+    data = (*tl, *bl, *br, *tr)
+    big = (size[0] * 2, size[1] * 2)
+    return im.transform(big, Image.Transform.QUAD, data, Image.Resampling.BICUBIC).resize(size, Image.Resampling.LANCZOS)
+
+
 LAND = {'pavement': (0, 0, 256, 256), 'tiles': (256, 0, 512, 256), 'slate': (0, 256, 256, 512), 'grass': (256, 256, 512, 512)}
 BOUW = {
     'brick': (0, 0, 128, 128), 'stone': (128, 0, 256, 128), 'plaster': (256, 0, 384, 128), 'church': (384, 0, 512, 128),
@@ -313,22 +339,16 @@ ATLASES = {'gevel': GEVEL, 'land': LAND, 'bouw': BOUW}
 def build_textures():
     # Facades from the photos.
     gevel = Image.new('RGB', ATLAS_SIZE['gevel'], (120, 90, 70))
-    for name, (key, box, bw) in GEVEL_CROPS.items():
+    for name in ['lekpoort', 'stadhuis', 'kerk', 'kerk2', *FACADES]:
         r = GEVEL[name]
-        im = crop(photo(key), box)
-        if bw:
-            im = warm(im)
-        gevel.paste(im.resize((r[2] - r[0], r[3] - r[1]), Image.Resampling.LANCZOS), r[:2])
-    save_tga(gevel, os.path.join(OUT, 'vn_gevel.tga'))
+        gevel.paste(own(name, (r[2] - r[0], r[3] - r[1])), r[:2])
+    # Square: the race samples a non-square texture wrongly. Fractions, and so the UVs, stay.
+    save_tga(gevel.resize((1024, 1024), Image.Resampling.LANCZOS), os.path.join(OUT, 'vn_gevel.tga'))
     # The road: the herringbone klinkers in front of the houses, tinted to red brick.
-    road = crop(photo('gevel2'), (0.15, 0.72, 0.85, 0.97))
-    road = ImageOps.colorize(ImageOps.autocontrast(ImageOps.grayscale(road)), black=(60, 32, 26), white=(196, 120, 96), mid=(132, 70, 56))
-    save_tga(road.resize((256, 256), Image.Resampling.LANCZOS), os.path.join(OUT, 'vn_weg.tga'))
+    save_tga(own('road', (256, 256)), os.path.join(OUT, 'vn_weg.tga'))
     # Land: pavement, roof tiles, slate, grass.
     land = Image.new('RGB', (512, 512))
-    walk = crop(photo('gevel6'), (0.05, 0.75, 0.75, 0.98))
-    walk = ImageOps.colorize(ImageOps.autocontrast(ImageOps.grayscale(walk)), black=(70, 66, 60), white=(214, 206, 192))
-    land.paste(walk.resize((256, 256), Image.Resampling.LANCZOS), LAND['pavement'][:2])
+    land.paste(own('pavement', (256, 256)), LAND['pavement'][:2])
     land.paste(roof_tiles(256, 256, (168, 72, 46), 1), LAND['tiles'][:2])
     land.paste(masonry(256, 256, 18, 9, (62, 68, 78), (40, 44, 50), 2, jitter=10), LAND['slate'][:2])
     grass = (np.full((256, 256, 3), (86, 132, 58), float) + noise(256, 256, 14, 3)).clip(0, 255).astype(np.uint8)
@@ -338,15 +358,11 @@ def build_textures():
     # Drawn at twice the size, then halved (nearest, so the key colour stays exact).
     bouw = Image.new('RGB', (1024, 512), KEY)
     big = {k: tuple(c * 2 for c in v) for k, v in BOUW.items()}
-    bouw.paste(masonry(256, 256, 32, 8, (150, 66, 48), (196, 182, 160), 4), big['brick'][:2])
+    bouw.paste(own('brick', (256, 256)), big['brick'][:2])
     bouw.paste(masonry(256, 256, 8, 4, (168, 164, 154), (120, 116, 108), 5, jitter=12), big['stone'][:2])
     plaster = (np.full((256, 256, 3), (232, 226, 210), float) + noise(256, 256, 5, 6)).clip(0, 255).astype(np.uint8)
     bouw.paste(Image.fromarray(plaster), big['plaster'][:2])
-    church = masonry(256, 256, 32, 8, (142, 70, 52), (190, 176, 150), 7)
-    cd = ImageDraw.Draw(church)
-    gothic_window(cd, 34, 40, 96, 230)
-    gothic_window(cd, 160, 40, 222, 230)
-    bouw.paste(church, big['church'][:2])
+    bouw.paste(own('church', (256, 256)), big['church'][:2])
     bouw.paste(masonry(256, 256, 18, 9, (58, 64, 74), (36, 40, 46), 8, jitter=10), big['slate'][:2])
     bouw.paste(tree_sprite(256, 256, 9), big['tree'][:2])
     bouw.paste(lamp_sprite(128, 256), big['lamp'][:2])
@@ -359,7 +375,7 @@ def build_textures():
     bouw.paste(tower, big['tower'][:2])
     white = (np.full((256, 128, 3), (238, 236, 228), float) + noise(128, 256, 4, 11)).clip(0, 255).astype(np.uint8)
     bouw.paste(Image.fromarray(white), big['white'][:2])
-    save_tga(bouw.resize(ATLAS_SIZE['bouw'], Image.Resampling.NEAREST), os.path.join(OUT, 'vn_bouw.tga'))
+    save_tga(bouw.resize((512, 512), Image.Resampling.NEAREST), os.path.join(OUT, 'vn_bouw.tga'))
 
 
 def uv(atlas, name, u0=0.0, u1=1.0, v0=0.0, v1=1.0):
@@ -769,20 +785,17 @@ def build():
 
 
 def write_attribution():
-    photos = json.load(open(os.path.join(SRC, 'photos.json'), encoding='utf-8'))
-    used = sorted({key for key, _, _ in GEVEL_CROPS.values()} | {'gevel2', 'gevel6', 'lekpoort3'})
     lines = [
         '# Vianen etappe: sources',
         '',
         'Streets and building positions: © OpenStreetMap contributors, ODbL 1.0, <https://www.openstreetmap.org/copyright>.',
         '',
-        '`vn_gevel.tga`, `vn_weg.tga`, the pavement in `vn_land.tga`, and the wait screen `../loading/e10.png` are cut, scaled and tinted from these photos on Wikimedia Commons, and are shared under the same licences:',
+        'The facades, the Lekpoort, the Stadhuis, the Grote Kerk, the road, the pavement and the brick are cut and straightened from photos of Vianen taken by the repository owner, Roland Meertens, in November 2026 (`source/assets/vianen/own/`).',
         '',
+        'The wait screen `../loading/e10.png` is cut from [Lekpoort - Vianen - Utrecht - (Bewerkt).jpg](https://commons.wikimedia.org/wiki/File:Lekpoort_-_Vianen_-_Utrecht_-_(Bewerkt).jpg), Frans Berkelaar, CC BY 2.0, on Wikimedia Commons.',
+        '',
+        'Roof tiles, slate, stone, plaster, grass, the tree and the lamp post are drawn by `tools/vianen/build-track.py`.',
     ]
-    for key in used:
-        p = photos[key]
-        lines.append(f"- [{p['title']}]({p['page']}), {p['artist'] or 'unknown author'}, {p['license']}")
-    lines += ['', 'The rest of `vn_land.tga` and all of `vn_bouw.tga` (brick, stone, slate, roof tiles, the tree, the lamp post) are drawn by `tools/vianen/build-track.py`.']
     open(os.path.join(OUT, 'ATTRIBUTION.md'), 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
 
 

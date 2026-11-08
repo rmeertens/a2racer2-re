@@ -74,7 +74,7 @@ export function installVianen(vfs, files) {
     }
   }
   // raser.ini is saved with the player's data, and the race writes it: the row stays, unused elsewhere.
-  vfs.iniSet('raser.ini', 'MAPS', String(slot), `1,etappe${slot},vn_weg,vn_land,vn_bouw,vn_gevel,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
+  vfs.iniSet('raser.ini', 'MAPS', String(slot), `1,etappe${slot},vn_weg,vn_land,vn_gevel,vn_bouw,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
 }
 
 /** The wait screen of a track: Vianen's own for etappe 10, made by tools/vianen/build-track.py. */
