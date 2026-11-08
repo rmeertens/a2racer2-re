@@ -22,5 +22,27 @@ for (const c of chunks) {
   await page.screenshot({ path: `${out}/${prefix}-${c}.png` });
   console.log('chunk', c, await page.evaluate(() => window.__bot.state.speed.toFixed(1)));
 }
+// --views views.json: [{name, chunk, eye: [x,y,z], at: [x,y,z]}], a fixed camera at each, once
+// the bot is near (the game draws only chunks near the car). Written by build-track.py with
+// VIANEN_VIEWS=path.
+const viewsFile = opt('views', '');
+if (viewsFile) {
+  const { readFileSync } = await import('node:fs');
+  for (const v of JSON.parse(readFileSync(viewsFile, 'utf8'))) {
+    await page.waitForFunction((c) => window.__bot.state && window.__bot.state.chunk === c, v.chunk, { timeout: 150000 }).catch(() => console.log('did not reach chunk', v.chunk));
+    await page.evaluate(({ eye, at }) => {
+      const sub = (a, b) => a.map((x, k) => x - b[k]);
+      const norm = (a) => { const l = Math.hypot(...a); return a.map((x) => x / l); };
+      const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+      const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+      const z = norm(sub(at, eye)), x = norm(cross([0, 1, 0], z)), y = cross(z, x);
+      globalThis.__viewOverride = new Float32Array([x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0, -dot(x, eye), -dot(y, eye), -dot(z, eye), 1]);
+    }, v);
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${out}/view-${v.name}.png` });
+    await page.evaluate(() => { globalThis.__viewOverride = null; });
+    console.log('view', v.name);
+  }
+}
 console.log('errors', errors.length ? errors : 'none');
 await browser.close();

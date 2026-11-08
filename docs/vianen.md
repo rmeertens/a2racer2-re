@@ -94,3 +94,9 @@ The Voorstraat, from past the Grote Kerk to before the Lekpoort (chunks 1 to 26)
 The square's furniture faces oncoming cars, so it shows whole down the long street. It is on the land list, as the rail lists (bouw atlas) are nearly full; the water texture was halved to make room in the land atlas. Lamps and trees elsewhere are now one plane each, facing the road, instead of four. The square is added last, so whatever finds no room is furniture, never a wall.
 
 The Lekpoort has the four corner turrets of the real gate. The Grote Kerk's tower has a low cap instead of a tall spire.
+
+## The landmarks, after the owner's photos
+
+- Stadhuis (photo 1449): the photo front in grey stone with battlements on the front and sides, a lower brick wing behind under a slate roof with its gable at the back, and a round stair turret with a slate cone (`Town.dome`).
+- Grote Kerk (photos 1457-1459): a steep gable with a little roof over each tall window along the nave, and a west gable behind the tower. The tower has the photo on all four faces (so the scaffolding of November 2026 too), a flat top behind a gallery, and a small white lantern with a cap and a vane.
+- `tools/vianen/shots.mjs --views views.json` shoots each landmark from a fixed camera (`VIANEN_VIEWS=path python3 tools/vianen/build-track.py` writes the file). The renderer takes the view matrix from `globalThis.__viewOverride` when it is set.

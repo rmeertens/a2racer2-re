@@ -605,7 +605,8 @@ export class D3DRenderer {
       this.worldPtr = p;
       this.worldDirty = true;
     } else if (type === 2) {
-      this.view.set(f32.subarray(p >> 2, (p >> 2) + 16));
+      // A fixed camera for screenshots (tools/vianen/shots.mjs --views): a 16-value D3D view matrix.
+      this.view.set(globalThis.__viewOverride || f32.subarray(p >> 2, (p >> 2) + 16));
       this.viewProjDirty = true;
     } else if (type === 3) {
       this.proj.set(f32.subarray(p >> 2, (p >> 2) + 16));

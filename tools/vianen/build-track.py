@@ -806,27 +806,53 @@ class Town:
                     self.chunks.add('rail', i, quad([a, b, (b[0], up, b[2]), (a[0], up, a[2])], uv('bouw', 'tower', 0, 0.2, 0, 0.3), (235, 225, 215), out))
                     self.chunks.add('rail', i, tri((a[0], up, a[2]), (b[0], up, b[2]), peak, uv_tri('bouw', 'slate'), (210, 210, 220), norm((out[0], 0.8, out[2]))))
 
+    def dome(self, i, c, r, y0, y1, cap, name, tint, n=8):
+        """A round turret: an n-sided prism of r around point c from y0 to y1 above it, and a cap of
+        slate cap high."""
+        ring = [(c[0] + r * math.cos(2 * math.pi * k / n), c[2] + r * math.sin(2 * math.pi * k / n)) for k in range(n)]
+        peak = (c[0], c[1] + y1 + cap, c[2])
+        for k in range(n):
+            (ax, az), (bx, bz) = ring[k], ring[(k + 1) % n]
+            out = norm(((ax + bx) / 2 - c[0], 0.0, (az + bz) / 2 - c[2]))
+            vs = [(ax, c[1] + y0, az), (bx, c[1] + y0, bz), (bx, c[1] + y1, bz), (ax, c[1] + y1, az)]
+            self.chunks.add('rail', i, quad(vs, uv('bouw', name, 0, 1.0 / n * 2, 0, 1), tint, out))
+            self.chunks.add('rail', i, tri((ax, c[1] + y1, az), (bx, c[1] + y1, bz), peak, uv_tri('bouw', 'slate'), (120, 120, 135), norm((out[0], 0.9, out[2]))))
+
     # -- the Stadhuis ---------------------------------------------------------------------
 
     def stadhuis(self, i, s):
-        """A tall block of grey stone with the photo's front and battlements."""
-        H, D = 235.0, 130.0
+        """As in the owner's photo 1449: a tall, narrow front of grey stone (the photo itself) with
+        battlements, a lower brick wing behind it under a slate roof, and a round stair turret with
+        a slate cone at the wing's far corner."""
+        H, SD, D, WH = 235.0, 48.0, 230.0, 175.0
         self.skip.add((i, s))
         inward = tuple(-s * x for x in self.right(i))
         fw = self.fwd(i)
-        F = lambda t, y, d=0.0: self.p(i, t, s * (self.at(i, s) + d), y)
-        vs = [F(0, 0), F(1, 0), F(1, H), F(0, H)]
-        self.chunks.add('rail', i, quad(vs, uv('bouw', 'stadhuis'), (255, 255, 255), inward))
+        L0 = self.at(i, s)
+        F = lambda t, y, d=0.0: self.p(i, t, s * (L0 + d), y)
+        # The stone front block.
+        self.chunks.add('rail', i, quad([F(0, 0), F(1, 0), F(1, H), F(0, H)], uv('bouw', 'stadhuis'), (255, 255, 255), inward))
         for t, facing in ((0, tuple(-x for x in fw)), (1, fw)):
-            vs = [F(t, 0), F(t, 0, D), F(t, H, D), F(t, H)]
-            self.chunks.add('rail', i, quad(vs, uv('bouw', 'stone'), (235, 235, 235), facing))
-        vs = [F(0, H), F(1, H), F(1, H, D), F(0, H, D)]
-        self.chunks.add('land', i, quad(vs, uv('land', 'slate'), (200, 200, 200), (0, 1, 0)))
-        # Battlements along the front: five merlons.
+            self.chunks.add('rail', i, quad([F(t, 0), F(t, 0, SD), F(t, H, SD), F(t, H)], uv('bouw', 'stone', 0, 0.4, 0, 1), (225, 225, 228), facing))
+        self.chunks.add('land', i, quad([F(0, H), F(1, H), F(1, H, SD), F(0, H, SD)], uv('land', 'slate'), (180, 180, 185), (0, 1, 0)))
+        # Battlements: five merlons along the front, two on each side.
         for k in range(5):
             t0, t1 = 0.04 + k * 0.2, 0.04 + k * 0.2 + 0.11
-            vs = [F(t0, H), F(t1, H), F(t1, H + 24), F(t0, H + 24)]
-            self.chunks.add('rail', i, quad(vs, uv('bouw', 'stone', 0, 0.3, 0, 0.3), (240, 240, 240), inward))
+            self.chunks.add('rail', i, quad([F(t0, H), F(t1, H), F(t1, H + 24), F(t0, H + 24)], uv('bouw', 'stone', 0, 0.3, 0, 0.3), (240, 240, 240), inward))
+        for t, facing in ((0, tuple(-x for x in fw)), (1, fw)):
+            for d0 in (4.0, 30.0):
+                self.chunks.add('rail', i, quad([F(t, H, d0), F(t, H, d0 + 14), F(t, H + 24, d0 + 14), F(t, H + 24, d0)], uv('bouw', 'stone', 0, 0.3, 0, 0.3), (240, 240, 240), facing))
+        # The brick wing behind, a little narrower, its gable to the street above the stone block.
+        a, b = 0.06, 0.94
+        for t, facing in ((a, tuple(-x for x in fw)), (b, fw)):
+            self.chunks.add('rail', i, quad([F(t, 0, SD), F(t, 0, D), F(t, WH, D), F(t, WH, SD)], uv('bouw', 'brick', 0, 1, 0, 0.9), (215, 200, 190), facing))
+        R = 70.0
+        self.chunks.add('land', i, quad([F(a, WH, SD), F(a, WH, D), F(0.5, WH + R, D), F(0.5, WH + R, SD)], uv('land', 'slate'), (205, 205, 215), norm((-fw[0], 1.0, -fw[2]))))
+        self.chunks.add('land', i, quad([F(0.5, WH + R, SD), F(0.5, WH + R, D), F(b, WH, D), F(b, WH, SD)], uv('land', 'slate'), (205, 205, 215), norm((fw[0], 1.0, fw[2]))))
+        out = tuple(s * x for x in self.right(i))
+        self.chunks.add('rail', i, tri(F(a, WH, D), F(b, WH, D), F(0.5, WH + R, D), uv_tri('bouw', 'brick'), (215, 200, 190), out))
+        # The stair turret on the wing's far corner, toward the cars that come.
+        self.dome(i, F(a, 0, D - 22), 20.0, 0.0, 215.0, 70.0, 'brick', (210, 190, 175))
 
     # -- the Grote Kerk ---------------------------------------------------------------------
 
@@ -860,13 +886,27 @@ class Town:
             M = lambda t, y, c=c: self.p(c, t, s * mid, y)
             inn = tuple(-s * x for x in self.right(c))
             out = tuple(s * x for x in self.right(c))
+            G = 78.0
+            Q = lambda t, y, c=c: self.p(c, t, s * (f0 + 45), y)
             for t0, t1 in ((0, 0.5), (0.5, 1)):
                 vs = [F(t0, 0), F(t1, 0), F(t1, H), F(t0, H)]
                 self.chunks.add('rail', c, quad(vs, uv('bouw', 'church'), (245, 235, 225), inn))
+                # A steep gable over each window, its little roof running back into the nave's.
+                tm = (t0 + t1) / 2
+                self.chunks.add('rail', c, tri(F(t0, H), F(t1, H), F(tm, H + G), uv_tri('bouw', 'brick'), (235, 215, 200), inn))
+                self.chunks.add('land', c, quad([F(t0, H), F(tm, H + G), Q(tm, H + G), Q(t0, H)], uv('land', 'slate'), (210, 210, 220), norm((-self.fwd(c)[0], 1.0, -self.fwd(c)[2]))))
+                self.chunks.add('land', c, quad([F(tm, H + G), F(t1, H), Q(t1, H), Q(tm, H + G)], uv('land', 'slate'), (210, 210, 220), norm((self.fwd(c)[0], 1.0, self.fwd(c)[2]))))
             vs = [F(0, H), F(1, H), M(1, H + R), M(0, H + R)]
             self.chunks.add('land', c, quad(vs, uv('land', 'slate'), (220, 220, 230), norm((inn[0], 1.0, inn[2]))))
             vs = [M(0, H + R), M(1, H + R), B(1, H), B(0, H)]
             self.chunks.add('land', c, quad(vs, uv('land', 'slate'), (220, 220, 230), norm((out[0], 1.0, out[2]))))
+        # West gable, behind the tower: closes the nave's roof at that end.
+        F = lambda y: self.p(i, 0, s * f0, y)
+        B = lambda y: self.p(i, 0, s * f1, y)
+        M = lambda y: self.p(i, 0, s * mid, y)
+        back = tuple(-x for x in self.fwd(i))
+        self.chunks.add('rail', i, quad([F(0), B(0), B(H), F(H)], uv('bouw', 'brick'), (225, 210, 200), back))
+        self.chunks.add('rail', i, tri(F(H), B(H), M(H + R), uv_tri('bouw', 'brick'), (225, 210, 200), back))
         # East gable.
         e = (i + 2) % self.n
         F = lambda y: self.p(e, 0, s * f0, y)
@@ -890,15 +930,25 @@ class Town:
             ([P(t1, o0, 0), P(t1, o1, 0), P(t1, o1, HT), P(t1, o0, HT)], self.fwd(c), 'rail'),
         ]
         for vs, facing, kind in faces:
-            mapping = uv('bouw', 'kerk2') if kind == 'extra' else uv('bouw', 'tower')
+            mapping = uv('bouw', 'kerk2')  # the photo's tower on every face: one brick, one scale
             kind = 'rail'
             self.chunks.add(kind, c, quad(vs, mapping, (240, 232, 222), facing))
-        apex = P((t0 + t1) / 2, (o0 + o1) / 2, HT + 120)  # a low cap, as the real tower has
+        # The top as in the owner's photos 1457-1459: a flat lead roof behind a stone gallery, and on
+        # it a small white lantern with a dark cap and a vane.
         corners = [P(t0, o0, HT), P(t1, o0, HT), P(t1, o1, HT), P(t0, o1, HT)]
+        self.chunks.add('land', c, quad(corners, uv('land', 'slate'), (170, 170, 180), (0, 1, 0)))
+        ctop = P((t0 + t1) / 2, (o0 + o1) / 2, HT)
         for k in range(4):
             a, b = corners[k], corners[(k + 1) % 4]
-            out = norm((a[0] + b[0] - 2 * apex[0], 0.0, a[2] + b[2] - 2 * apex[2]))
-            self.chunks.add('rail', c, tri(a, b, apex, uv_tri('bouw', 'slate'), (215, 215, 225), norm((out[0], 0.5, out[2]))))
+            out = norm((a[0] + b[0] - 2 * ctop[0], 0.0, a[2] + b[2] - 2 * ctop[2]))
+            g0, g1 = a[1], b[1]
+            vs = [a, b, (b[0], g1 + 22, b[2]), (a[0], g0 + 22, a[2])]
+            self.chunks.add('rail', c, quad(vs, uv('bouw', 'darkrail'), (215, 215, 210), out))
+            self.chunks.add('rail', c, quad(vs, uv('bouw', 'darkrail'), (215, 215, 210), tuple(-x for x in out)))
+        self.dome(c, ctop, 22.0, 0.0, 52.0, 30.0, 'white', (245, 245, 240))
+        top = (ctop[0], ctop[1] + 82, ctop[2])
+        r = self.right(c)
+        self.chunks.add('rail', c, quad([(top[0] - r[0] * 1.5, top[1], top[2] - r[2] * 1.5), (top[0] + r[0] * 1.5, top[1], top[2] + r[2] * 1.5), (top[0] + r[0] * 1.5, top[1] + 40, top[2] + r[2] * 1.5), (top[0] - r[0] * 1.5, top[1] + 40, top[2] - r[2] * 1.5)], uv('bouw', 'steel'), (90, 90, 90), tuple(-x for x in self.fwd(c))))
         # The churchyard: grass, and lime trees.
         for k in (0, 1):
             cc = (i + k) % self.n
@@ -1355,6 +1405,17 @@ def build():
     build_textures()
     build_loading()
     write_attribution()
+    if os.environ.get('VIANEN_VIEWS'):
+        # For tools/vianen/shots.mjs --views: a camera on each landmark, from the street.
+        ss, ks = town.side(st, STADHUIS), town.side(kerk, GROTE_KERK)
+        ki = (kerk + 2) % n
+        V = lambda name, chunk, eye, at: {'name': name, 'chunk': chunk % n, 'eye': list(eye), 'at': list(at)}
+        json.dump([
+            V('stadhuis', st - 2, town.p(st - 1, 0.3, -ss * 60, 40), town.p(st, 0.5, ss * (town.at(st, ss) + 40), 150)),
+            V('lekpoort', poort - 3, town.p(poort - 2, 0.2, 0, 35), town.p(poort, 0.6, 0, 170)),
+            V('kerktoren', ki - 4, town.p(ki - 4, 0.5, -ks * 20, 40), town.p(ki - 1, 0.6, ks * (WALK + 110), 380)),
+            V('kerk', ki - 3, town.p(ki - 1, 0.0, -ks * 40, 40), town.p(ki, 0.3, ks * (WALK + 110), 220)),
+        ], open(os.environ['VIANEN_VIEWS'], 'w'))
     if os.environ.get('VIANEN_SIDES'):
         # For checks: each side street's chunk, side, and points at its mouth and near its end.
         json.dump([[i, s_, town.p(i, 0.5, s_ * ROAD), town.p(i, 0.5, s_ * (WALK + 170)), town.p(i, 0.5, s_ * (WALK + 45)), town.p(i, 0.1, s_ * (WALK + 45)), town.p(i, 0.9, s_ * (WALK + 45))] for i, s_ in branches], open(os.environ['VIANEN_SIDES'], 'w'))
