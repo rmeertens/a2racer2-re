@@ -15,7 +15,7 @@ import * as forms from './menu/forms/index.js';
 import { LobbyUI } from './net/lobby-ui.js';
 import { NetRace } from './net/puppets.js';
 import { prepareRaceFiles } from './net/race-files.js';
-import { VIANEN, fetchVianen, installVianen } from './host/vianen.js';
+import { VIANEN, fetchVianen, installVianen, renameWenen } from './host/vianen.js';
 
 // Esc for the quit prompt. T, N and W are default turbo chords a browser would take: input.md H8.
 const LOCKED_KEYS = ['Escape', 'KeyT', 'KeyN', 'KeyW'];
@@ -73,6 +73,8 @@ export class App {
     this.vfs.onWrite = (path, data) => this.persist.save(path, data);
     const assets = new MenuAssets();
     await assets.init();
+    // Port: Wenen is re-skinned as Vianen, source/host/vianen.js.
+    renameWenen(this.vfs, assets);
     const sound = new MenuSound(this.getAudioContext, this.getMasterOutput);
     this.data = new GameData(this.vfs, { files: this.files });
     await this.data.load();

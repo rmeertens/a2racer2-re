@@ -16,7 +16,7 @@ Up to eight players, each in their own browser: main menu, `Internet`. One playe
 
 ## Vianen
 
-A sketch of a new track through the old town of Vianen, with the Lekpoort, the Stadhuis and the Grote Kerk. Choose it in the multiplayer screens, alone or with others, or open `?race=1&etappe=vianen`. How it is made: [`docs/vianen.md`](docs/vianen.md).
+Wenen is re-skinned as Vianen: the same chase through the same streets, with Vianen's name, brick road, facades and landmarks (the Lekpoort, the Stadhuis, the Grote Kerk) cut from openly licensed photos. There is also a sketch of a separate Vianen track, generated from OpenStreetMap, in the multiplayer screens and at `?race=1&etappe=vianen`. How both are made: [`docs/vianen.md`](docs/vianen.md).
 
 ## Downloads
 

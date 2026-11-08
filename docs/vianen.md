@@ -1,6 +1,29 @@
-# Vianen etappe (sketch)
+# Vianen
 
-A track the original never had: a loop through the old town of Vianen, an addition of the port and a first sketch. It is etappe 10, a slot the original reserves (`raser.ini [MAPS]` has rows 10 and 11) but never fills. It is offered in the multiplayer screens (`Vianen (schets)`), alone or with others, and directly with `?race=1&etappe=vianen`. The menu's own Tour and Quick Race do not list it.
+Two Vianen tracks, both additions of the port.
+
+## Wenen as Vianen
+
+Etappe 3, Wenen, keeps its track, its chase and its place in the Tour, and gets Vianen's looks. `python3 tools/vianen/reskin-wenen.py` writes `public/assets/vianen/wenen/`:
+
+- **Road:** the grey asphalt becomes red brick klinkers; the white markings stay.
+- **Walls:** each cell of the two facade atlases (`[texture2]` and `[texture3]` of `etappe3.ini`) gets a Vianen facade fitted to it. These are the Voorstraat rows, the Lekpoort and the Stadhuis.
+- **Landmark objects:** the textures of Wenen's opera, parliament, museums and stock exchange show the Stadhuis, the Grote Kerk and the Lekpoort.
+- **Unchanged:** cells with the magenta key colour (trees, lamps, statues), the grass texture, signs and the other objects.
+- **Menu:** the track name image, the six slideshow pictures (a map of Vianen with the route through Lekpoort, Stadhuis and Grote Kerk, then Vianen photos), and the wait screen.
+
+`source/host/vianen.js`:
+
+- `renameWenen` renames track 3 to Vianen in `static.ini`, story texts included, and points the menu's pictures at the new files. It runs at start and changes memory only.
+- `reskinWenenRace` runs before a race on track 3. It adds the textures and points `etappe3.ini`'s objects and the `raser.ini [MAPS]` row at them. After the race the row is put back, because `raser.ini` is saved.
+
+The voice that announces the track still says "Wenen".
+
+Checked on 2026-11-08: headless in Node, the race reads all eight new textures, drives, and puts the row back. In headless Chromium, the race and the Tour's track screen are in `evidence/vianen/wenen-*.png` and `menu-tour-track.png`.
+
+## Vianen etappe (sketch)
+
+A track the original never had, an earlier sketch: a loop through the old town of Vianen, an addition of the port and a first sketch. It is etappe 10, a slot the original reserves (`raser.ini [MAPS]` has rows 10 and 11) but never fills. It is offered in the multiplayer screens (`Vianen (schets)`), alone or with others, and directly with `?race=1&etappe=vianen`. The menu's own Tour and Quick Race do not list it.
 
 ## The route
 

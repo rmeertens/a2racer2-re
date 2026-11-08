@@ -33215,6 +33215,70 @@ function installVianen(vfs, files) {
   }
   vfs.iniSet("raser.ini", "MAPS", String(slot), `1,etappe${slot},vn_weg,vn_gras,vn_gevel,vn_gevel,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
 }
+var WENEN = 3;
+var RESKIN = "assets/vianen/wenen/";
+var RESKIN_TEXTURES = ["weg", "gra2", "vang", "oper", "pr2", "mus2", "bors", "mitt"];
+var MENU_PICTURES = /* @__PURE__ */ new Set(["trname03", ...["qtc03", "ttc03"].flatMap((p) => [0, 1, 2, 3, 4, 5].map((k) => `${p}_0${k}`))]);
+var reskinFiles = null;
+function renameWenen(vfs, assets) {
+  const ini = new IniFile(latin1(vfs.read("static.ini")));
+  const section = ini.sections().find((s) => s.toLowerCase() === `track${WENEN}`);
+  if (section) {
+    for (const key of ["NAME", "STORY", "WINTEXT", "LOSETEXT"]) {
+      const v = ini.get(section, key);
+      if (v) ini.set(section, key, v.replace(/Wenen/g, "Vianen"));
+    }
+    const write = vfs.onWrite;
+    vfs.onWrite = null;
+    vfs.add("static.ini", encodeLatin1(ini.serialize()));
+    vfs.onWrite = write;
+  }
+  if (assets && assets.index) {
+    for (const key of Object.keys(assets.index)) {
+      const base = key.replace(/\.[a-z0-9]+$/, "");
+      if (MENU_PICTURES.has(base)) assets.index[key] = `../vianen/wenen/${base}.png`;
+    }
+  }
+}
+function waitScreenBase(etappe) {
+  return etappe === WENEN ? RESKIN : "assets/loading/";
+}
+async function reskinWenenRace(vfs) {
+  if (!reskinFiles) {
+    reskinFiles = /* @__PURE__ */ new Map();
+    await Promise.all(RESKIN_TEXTURES.map(async (t) => {
+      const r = await fetch(`${RESKIN}vn3_${t}.tga`);
+      if (!r.ok) throw new Error(`Vianen: vn3_${t}.tga ${r.status}`);
+      reskinFiles.set(t, new Uint8Array(await r.arrayBuffer()));
+    }));
+  }
+  return applyWenenReskin(vfs, reskinFiles);
+}
+function applyWenenReskin(vfs, files) {
+  const write = vfs.onWrite;
+  vfs.onWrite = null;
+  let original = "";
+  try {
+    for (const [t, data] of files) {
+      vfs.add(`vn3_${t}.tga`, data);
+      vfs.add(`img/objects/etappes/etappe${WENEN}/textures/vn3_${t}.tga`, data);
+    }
+    const ini = latin1(vfs.read(`etappe${WENEN}.ini`));
+    const pattern = new RegExp(`e03_(${RESKIN_TEXTURES.join("|")})\\.tga`, "gi");
+    vfs.add(`etappe${WENEN}.ini`, encodeLatin1(ini.replace(pattern, (_, t) => `vn3_${t.toLowerCase()}.tga`)));
+    const raser = new IniFile(latin1(vfs.read("raser.ini")));
+    original = raser.get("MAPS", String(WENEN)) || "";
+    const row = original.split(",");
+    row[2] = "vn3_weg";
+    row[4] = "vn3_gra2";
+    row[5] = "vn3_vang";
+    raser.set("MAPS", String(WENEN), row.join(","));
+    vfs.add("raser.ini", encodeLatin1(raser.serialize()));
+  } finally {
+    vfs.onWrite = write;
+  }
+  return () => vfs.iniSet("raser.ini", "MAPS", String(WENEN), original);
+}
 
 // source/race-runner.js
 var TICK_SECONDS = 1 / 60;
@@ -33351,7 +33415,7 @@ var RaceRunner = class {
     const resolution = parseInt(app2.vfs.parsedIni("raser.ini").get("PROGRAM", "RESOLUTION"), 10);
     const eight = resolution === 0 || resolution === 1;
     const art = document.getElementById("loading-art");
-    art.src = `assets/loading/e${String(etappe).padStart(2, "0")}${eight ? resolution === 0 ? "-lo" : "-8" : ""}.png`;
+    art.src = `${waitScreenBase(etappe)}e${String(etappe).padStart(2, "0")}${eight ? resolution === 0 ? "-lo" : "-8" : ""}.png`;
     document.getElementById("loading-stage").classList.toggle("pixels", eight);
     document.getElementById("loading-bar").removeAttribute("src");
     document.getElementById("loading").hidden = false;
@@ -33368,6 +33432,7 @@ var RaceRunner = class {
     const lists = etappe === VIANEN.slot ? VIANEN.like : etappe;
     await app2.files.prepareRace(lists, car, (a, b) => this.showBar(a / b * 90));
     for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app2.files.prepareRace(lists, other);
+    this.restoreReskin = etappe === WENEN ? await reskinWenenRace(app2.vfs) : null;
     if (!this.renderer) this.renderer = new D3DRenderer(app2.canvasRace, { staticTrack: !app2.params.has("nostatic") });
     this.renderer.resetForRace();
     const audio = new GameAudio(app2.getAudioContext(), app2.getMasterOutput());
@@ -33532,6 +33597,8 @@ var RaceRunner = class {
     for (const id of ["loading", "dialog-keys", "race-settings", "race-stop", "fps"]) document.getElementById(id).hidden = true;
     if (this.netOverlay) this.netOverlay.stop();
     this.mp = null;
+    if (this.restoreReskin) this.restoreReskin();
+    this.restoreReskin = null;
     page.classList.remove("race-portrait", "race-touch", "race-results", "actions-lifted");
     this.app.canvasRace.classList.remove("no-pointer");
     clearTimeout(this.pointerTimer);
@@ -45702,6 +45769,7 @@ var App = class {
     this.vfs.onWrite = (path, data) => this.persist.save(path, data);
     const assets = new MenuAssets();
     await assets.init();
+    renameWenen(this.vfs, assets);
     const sound = new MenuSound(this.getAudioContext, this.getMasterOutput);
     this.data = new GameData(this.vfs, { files: this.files });
     await this.data.load();
