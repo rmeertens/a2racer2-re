@@ -32,9 +32,17 @@ The facades, the Lekpoort, the Stadhuis, the Grote Kerk's tower and nave window,
 
 The track's planes now build the town in 3D. Houses have facades from the photos, gabled tile roofs, and end walls with gables. The Lekpoort is a tower over the road, with its passage and a slate spire with a white lantern. The Stadhuis is a stone block with battlements, and the Grote Kerk a nave with a steep slate roof and a tower with a spire behind a churchyard. Along the dike there is grass, a low stone edge and lime trees, and the straights have lamp posts. Trees and lamps are crossed quads on the key colour (255, 0, 127), which the game draws see-through. Textures: `vn_weg`, `vn_land`, `vn_gevel` and `vn_bouw` (`raser.ini [MAPS]` row 10). A chunk's lists are full at 16, 24, 12 and 12 planes, so a landmark's planes go to neighbouring chunks.
 
+## A short lap and the view distance
+
+Each tick the race runs object handlers within 2 × VISIBLECHUNKS chunks of the player (`0x0044cbb9`, `FUN_004a9870`). `FUN_004af5a0` wraps that window around the lap, wrongly when the window reaches past both ends at once. That happens only on a lap shorter than 4 × VISIBLECHUNKS chunks. The original's laps are about 360 chunks; Vianen's 72 are not. With the shipped 25, chunks 22 to 49 left the player's own car outside the window. Its handler (`FUN_0044ea60`) did not run there, so the wheels went, steering stopped, the driven-chunk count and the reset chunk (`0x6fba7c`) froze, and the reset key sent the car back to chunk 21. `installVianen` sets VISIBLECHUNKS to 16 for a Vianen race (`VIANEN_VISIBLE_CHUNKS`), about 200 m of view, and its restore() puts the player's value back, since `game.ini` is saved.
+
+Checked on 2026-11-08 by counting the player handler's calls per second in a headless bot lap: 60 every second of the lap. The driven count rose all lap and the bot lapped without a reset. Against Amsterdam over the same kind of drive, the body's vertical speed averaged 0.084 m/s against 0.22.
+
+## Walls
+
+`python3 tools/vianen/check-walls.py` samples the building line on both sides of every chunk and reports where no upright plane stands. The houses run up to the Lekpoort's tower, and shallower houses fill tight inside bends. A low brick wall closes the churchyard, with a house before the church's tower. Run with a tolerance of 16 units for the tower's width, it reports no gaps. The dike's river side is a low stone edge on purpose.
+
 ## Known rough edges
 
-- The game's driven-chunk count (`0x6fbab4`) stops rising after chunk 21 and picks up again later in the lap. A lap still finishes, but the HUD position and the reset key use that count. Not yet understood.
-- The test bot gets stuck at some bends; the AI racers lap the track.
-
-A sketch: facades are flat walls with photos on them, without depth or roofs. The chunk count the HUD position uses stalls on parts of the lap. There is no traffic and no police path. In a race, the camera's start fly-by is off. Etappe 10's loading picture is the same for the 8-bit path. Only checked as above.
+- The test bot is slow in bends; the AI racers lap at full pace.
+- Vianen is in the multiplayer screens and at `?race=1&etappe=vianen`, not in the menu's Quick Race list.

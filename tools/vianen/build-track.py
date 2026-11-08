@@ -427,6 +427,7 @@ class Town:
         self.fr = frames(centre)
         self.chunks = Chunks(self.n)
         self.skip = set()  # (chunk, side) without houses
+        self.spans = []    # (chunk, side, t0, t1): houses on part of a skipped chunk
 
     def p(self, i, t, off, y=0.0):
         """A point t of the way along chunk i, off to the right of the centre line, y up."""
@@ -485,13 +486,20 @@ class Town:
         for s in (-1, 1):
             row = []
             for i in range(self.n):
-                if (i, s) in self.skip or self.bent(i, s, WALK + DEPTH):
+                # Inside a tight bend a full house's back folds over: shallower houses there.
+                depth = next((d for d in (DEPTH, 60.0, 30.0) if not self.bent(i, s, WALK + d)), None)
+                spans = [sp for sp in self.spans if sp[0] == i and sp[1] == s]
+                if (i, s) in self.skip and spans:
+                    pieces = [(sp[2], sp[3]) for sp in spans]
+                elif (i, s) in self.skip or depth is None:
                     row.append(None)
                     row.append(None)
                     continue
-                for k in range(2):
+                else:
+                    pieces = [(0.0, 0.5), (0.5, 1.0)]
+                for t0, t1 in pieces:
                     row.append({
-                        'i': i, 't0': k * 0.5, 't1': k * 0.5 + 0.5, 's': s,
+                        'i': i, 't0': t0, 't1': t1, 's': s, 'depth': depth or DEPTH,
                         'h': rng.choice((72, 84, 96, 108, 120)), 'roof': rng.choice((38, 48, 58)),
                         'face': rng.choice(FACADES), 'u': rng.uniform(0.0, 0.62),
                         'tint': rng.choice(((240, 230, 220), (230, 236, 240), (244, 226, 206), (236, 236, 230))),
@@ -506,7 +514,7 @@ class Town:
     def house(self, h, prev, nxt):
         i, s, t0, t1 = h['i'], h['s'], h['t0'], h['t1']
         H, R = h['h'], h['roof']
-        f0, f1 = WALK, WALK + DEPTH
+        f0, f1 = WALK, WALK + h['depth']
         mid = (f0 + f1) / 2
         inward = tuple(-s * x for x in self.right(i))
         outward = tuple(s * x for x in self.right(i))
@@ -543,6 +551,9 @@ class Town:
         GAP = ROAD + 14  # the passage, a little wider than the road
         f, r = self.fwd(i), self.right(i)
         o = self.p(i, 0.15, 0)
+        # The street's houses run up to the tower on both sides.
+        for s in (-1, 1):
+            self.spans += [(i, s, 0.0, 0.15), (i, s, 0.9, 1.0)]
         P = lambda x, a, y: (o[0] + r[0] * x + f[0] * a, y, o[2] + r[2] * x + f[2] * a)
         back, ahead = tuple(-x for x in f), f
         U = lambda x: (x + TW) / (2 * TW)
@@ -604,8 +615,17 @@ class Town:
 
     def grote_kerk(self, i, s):
         """The nave along the street, set back behind a churchyard, with a tower at its west end."""
-        for k in (-1, 0, 1, 2):
+        for k in (-1, 0, 1):
             self.skip.add(((i + k) % self.n, s))
+        # A house before the tower; a low brick wall closes the churchyard along the street.
+        self.spans.append(((i - 1) % self.n, s, 0.0, 0.22))
+        for k, (t0, t1) in ((-1, (0.22, 1.0)), (0, (0.0, 1.0)), (1, (0.0, 1.0))):
+            c = (i + k) % self.n
+            inn = tuple(-s * x for x in self.right(c))
+            vs = [self.p(c, t0, s * WALK, 0), self.p(c, t1, s * WALK, 0), self.p(c, t1, s * WALK, 36), self.p(c, t0, s * WALK, 36)]
+            self.chunks.add('rail', c, quad(vs, uv('bouw', 'brick', 0, 1, 0, 0.3), (230, 220, 210), inn))
+            vs = [self.p(c, t0, s * WALK, 36), self.p(c, t1, s * WALK, 36), self.p(c, t1, s * (WALK + 6), 36), self.p(c, t0, s * (WALK + 6), 36)]
+            self.chunks.add('rail', c, quad(vs, uv('bouw', 'stone', 0, 1, 0, 0.1), (240, 240, 240), (0, 1, 0)))
         set_back, W, H, R = 30.0, 170.0, 150.0, 165.0
         f0, f1 = WALK + set_back, WALK + set_back + W
         mid = (f0 + f1) / 2

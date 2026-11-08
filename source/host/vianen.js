@@ -33,7 +33,18 @@ export async function fetchVianen() {
   return files;
 }
 
-/** Makes etappe 10 Vianen. files: name to bytes. Can be called again: it changes nothing twice. */
+/**
+ * Object handlers run within 2 * VISIBLECHUNKS chunks of the player (0x0044cbb9, FUN_004a9870). On
+ * a lap shorter than 4 * VISIBLECHUNKS, FUN_004af5a0 wraps that window wrongly and leaves the
+ * player's own car out: its handler stops (no wheels, no steering, no progress, a reset far back).
+ * The original's laps are about 360 chunks; Vianen's 72 need VISIBLECHUNKS under 18.
+ */
+export const VIANEN_VISIBLE_CHUNKS = 16;
+
+/**
+ * Makes etappe 10 Vianen. files: name to bytes. Can be called again: it changes nothing twice.
+ * Returns restore(), for after the race: the view distance back, since game.ini is saved.
+ */
 export function installVianen(vfs, files) {
   const { slot, like } = VIANEN;
   const two = String(slot).padStart(2, '0');
@@ -75,6 +86,18 @@ export function installVianen(vfs, files) {
   }
   // raser.ini is saved with the player's data, and the race writes it: the row stays, unused elsewhere.
   vfs.iniSet('raser.ini', 'MAPS', String(slot), `1,etappe${slot},vn_weg,vn_land,vn_gevel,vn_bouw,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
+  const visible = vfs.iniGet('game.ini', 'OPTIONS', 'VISIBLECHUNKS');
+  if (!(Number(visible) > 0 && Number(visible) <= VIANEN_VISIBLE_CHUNKS)) {
+    vfs.onWrite = null;
+    try {
+      vfs.iniSet('game.ini', 'OPTIONS', 'VISIBLECHUNKS', String(VIANEN_VISIBLE_CHUNKS));
+    } finally {
+      vfs.onWrite = write;
+    }
+  }
+  return () => {
+    if (visible !== null && vfs.iniGet('game.ini', 'OPTIONS', 'VISIBLECHUNKS') !== visible) vfs.iniSet('game.ini', 'OPTIONS', 'VISIBLECHUNKS', visible);
+  };
 }
 
 /** The wait screen of a track: Vianen's own for etappe 10, made by tools/vianen/build-track.py. */

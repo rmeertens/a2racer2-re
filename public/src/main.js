@@ -33187,6 +33187,7 @@ async function fetchVianen() {
   }));
   return files;
 }
+var VIANEN_VISIBLE_CHUNKS = 16;
 function installVianen(vfs, files) {
   const { slot, like } = VIANEN;
   const two3 = String(slot).padStart(2, "0");
@@ -33223,6 +33224,18 @@ function installVianen(vfs, files) {
     }
   }
   vfs.iniSet("raser.ini", "MAPS", String(slot), `1,etappe${slot},vn_weg,vn_land,vn_gevel,vn_bouw,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
+  const visible = vfs.iniGet("game.ini", "OPTIONS", "VISIBLECHUNKS");
+  if (!(Number(visible) > 0 && Number(visible) <= VIANEN_VISIBLE_CHUNKS)) {
+    vfs.onWrite = null;
+    try {
+      vfs.iniSet("game.ini", "OPTIONS", "VISIBLECHUNKS", String(VIANEN_VISIBLE_CHUNKS));
+    } finally {
+      vfs.onWrite = write;
+    }
+  }
+  return () => {
+    if (visible !== null && vfs.iniGet("game.ini", "OPTIONS", "VISIBLECHUNKS") !== visible) vfs.iniSet("game.ini", "OPTIONS", "VISIBLECHUNKS", visible);
+  };
 }
 function waitScreenBase() {
   return "assets/loading/";
@@ -45865,15 +45878,21 @@ var App = class {
   }
   /** Runs fn with etappe 10 made Vianen: source/host/vianen.js. */
   async withVianen(fn) {
+    let restore = () => {
+    };
     try {
       if (!this.vianenFiles) this.vianenFiles = await fetchVianen();
-      installVianen(this.vfs, this.vianenFiles);
+      restore = installVianen(this.vfs, this.vianenFiles);
     } catch (e) {
       console.error(e);
       this.say("Vianen kon niet laden: " + e.message, 1e4);
       return void 0;
     }
-    return fn();
+    try {
+      return await fn();
+    } finally {
+      restore();
+    }
   }
   /** The quit path: EXITCODE 255. The launcher would close; here the first screen returns. */
   async exitGame() {

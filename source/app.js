@@ -234,15 +234,20 @@ export class App {
 
   /** Runs fn with etappe 10 made Vianen: source/host/vianen.js. */
   async withVianen(fn) {
+    let restore = () => {};
     try {
       if (!this.vianenFiles) this.vianenFiles = await fetchVianen();
-      installVianen(this.vfs, this.vianenFiles);
+      restore = installVianen(this.vfs, this.vianenFiles);
     } catch (e) {
       console.error(e);
       this.say('Vianen kon niet laden: ' + e.message, 10000);
       return undefined;
     }
-    return fn();
+    try {
+      return await fn();
+    } finally {
+      restore();
+    }
   }
 
   /** The quit path: EXITCODE 255. The launcher would close; here the first screen returns. */
