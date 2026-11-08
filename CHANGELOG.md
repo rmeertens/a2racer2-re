@@ -9,6 +9,7 @@ Network races for up to eight players. [docs/multiplayer.md](docs/multiplayer.md
 - The main menu's `Internet` button opens the multiplayer screens. One player names and hosts a server, the others join it from a list. The host picks etappe, laps and difficulty, everyone picks a car, and all start together.
 - Each browser runs its own race. The other humans drive the AI racer slots, with their AI switched off, and an eighth player gets an extra car. Standings and name tags are drawn over the race.
 - `tools/lobby.mjs`, the lobby and relay, served on `/lobby` by `npm start` (`--lan` for other machines), and on its own by `tools/lobby-server.mjs`. Without a lobby, as on a static site, the browsers meet through the public PeerJS broker and connect over WebRTC (dependency `peerjs` 1.5.4).
+- Without a lobby, the multiplayer list shows the servers on the same network: browsers that share a public address meet at a broker id derived from it.
 - `.github/workflows/pages.yml`: the site on GitHub Pages at a2racer.meertens.dev.
 - `tools/check-multiplayer.mjs` (Node, up to eight races in one process) and `tools/check-multiplayer-browser.mjs` (headless Chromium).
 

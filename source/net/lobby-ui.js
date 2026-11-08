@@ -102,7 +102,7 @@ export class LobbyUI {
         el('button', { class: 'mp-primary', text: 'Server maken', onclick: () => this.hostClick() })),
       el('div', { class: 'mp-box' },
         el('h2', { text: 'Meedoen met een server' }),
-        this.joinHint = el('p', { class: 'mp-empty', hidden: true, text: 'Typ de naam van de server, zoals de host hem noemde.' }),
+        this.joinHint = el('p', { class: 'mp-empty', hidden: true, text: 'Een server op een ander netwerk: typ zijn naam, zoals de host hem noemde.' }),
         this.roomList,
         el('div', { class: 'mp-row' }, this.joinName, el('button', { text: 'Meedoen', onclick: () => this.joinClick(this.joinName.value) }))));
 
@@ -187,8 +187,9 @@ export class LobbyUI {
     clearInterval(this.listTimer);
     try {
       await this.session.connect();
+      const peer = this.session.transport && this.session.transport.kind === 'peer';
       this.roomList.hidden = !this.session.lists;
-      this.joinHint.hidden = this.session.lists;
+      this.joinHint.hidden = !peer;
       if (this.session.lists) {
         this.session.list();
         this.listTimer = setInterval(() => this.session.list(), LIST_MS);
@@ -204,7 +205,13 @@ export class LobbyUI {
       el('span', { class: 'mp-room-name', text: r.name }),
       el('span', { class: 'mp-room-info', text: `${r.players}/${r.max}${r.track ? ' · ' + r.track : ''}${r.state === 'racing' ? ' · racet' : ''}` }),
       el('button', { text: 'Meedoen', disabled: r.players >= r.max || r.state === 'racing', onclick: () => this.joinClick(r.id) })));
-    if (!items.length) items.push(el('li', { class: 'mp-empty', text: 'Nog geen servers. Maak er zelf een.' }));
+    const peer = this.session.transport && this.session.transport.kind === 'peer';
+    const lan = peer ? this.session.transport.lan : null;
+    if (!items.length) {
+      let text = 'Nog geen servers. Maak er zelf een.';
+      if (peer) text = lan && lan.available ? 'Nog geen servers op je netwerk. Maak er zelf een.' : 'Servers op je netwerk zoeken lukt niet in deze browser. Typ hieronder de naam van een server.';
+      items.push(el('li', { class: 'mp-empty', text }));
+    }
     this.roomList.replaceChildren(...items);
   }
 

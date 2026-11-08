@@ -12,7 +12,7 @@ The game's content is in the port, with Davilex's two official updates, track 9 
 
 ## Multiplayer
 
-Up to eight players, each in their own browser: main menu, `Internet`. One player names and hosts a server, and the others join it. `npm start` also runs the lobby the browsers meet through; `npm start -- --lan` opens it to the local network. On a static site such as <https://a2racer.meertens.dev/> (GitHub Pages, `.github/workflows/pages.yml`) the browsers meet through the public PeerJS broker and connect over WebRTC; there the others join by typing the server's name. How it works, how to host the lobby next to a static site, and what was checked: [`docs/multiplayer.md`](docs/multiplayer.md).
+Up to eight players, each in their own browser: main menu, `Internet`. One player names and hosts a server, and the others join it. `npm start` also runs the lobby the browsers meet through; `npm start -- --lan` opens it to the local network. On a static site such as <https://a2racer.meertens.dev/> (GitHub Pages, `.github/workflows/pages.yml`) the browsers meet through the public PeerJS broker and connect over WebRTC; there the list shows the servers on the same network, and a server elsewhere is joined by typing its name. How it works, how to host the lobby next to a static site, and what was checked: [`docs/multiplayer.md`](docs/multiplayer.md).
 
 ## Downloads
 

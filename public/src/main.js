@@ -43789,7 +43789,11 @@ var $416260bce337df90$export$ecd1fc136c422448 = class _$416260bce337df90$export$
 // source/net/transports.js
 var MAX_PLAYERS = 8;
 var ID_PREFIX = "a2racer4-mp-";
+var LAN_PREFIX = "a2racer4-lan-";
 var CONNECT_MS = 4e3;
+var STUN = "stun:stun.l.google.com:19302";
+var ANNOUNCE_MS = 3e3;
+var ROOM_TTL_MS = 1e4;
 function roomPeerId(name) {
   const slug = String(name).trim().toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   return ID_PREFIX + (slug || "server");
@@ -43842,12 +43846,181 @@ var WsTransport = class {
     if (ws) ws.close();
   }
 };
+async function networkKey(timeoutMs = 3e3) {
+  if (typeof RTCPeerConnection === "undefined") return null;
+  const pc = new RTCPeerConnection({ iceServers: [{ urls: STUN }] });
+  const found = [];
+  try {
+    pc.createDataChannel("probe");
+    const done = new Promise((resolve) => {
+      pc.onicecandidate = (e) => {
+        if (!e.candidate) {
+          resolve();
+          return;
+        }
+        const parts = e.candidate.candidate.split(" ");
+        if (parts[7] === "srflx") found.push(e.candidate.address || parts[4]);
+      };
+      setTimeout(resolve, timeoutMs);
+    });
+    await pc.setLocalDescription(await pc.createOffer());
+    await done;
+  } catch {
+    return null;
+  } finally {
+    pc.close();
+  }
+  const v4 = found.find((a) => /^\d+\.\d+\.\d+\.\d+$/.test(a));
+  const raw = v4 || (found[0] ? found[0].split(":").slice(0, 4).join(":") : null);
+  if (!raw) return null;
+  const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("a2racer4|" + raw)));
+  return [...bytes.slice(0, 8)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+var LanDirectory = class {
+  constructor(options) {
+    this.options = options;
+    this.rooms = /* @__PURE__ */ new Map();
+    this.mine = null;
+    this.available = false;
+    this.stopped = false;
+    this.waiters = [];
+  }
+  async start() {
+    const key = await networkKey();
+    if (!key || this.stopped) return;
+    this.id = LAN_PREFIX + key;
+    this.available = true;
+    this.claim();
+    this.timer = setInterval(() => this.send(this.mine ? { t: "announce", room: this.mine } : null), ANNOUNCE_MS);
+  }
+  /** Takes the directory id, or connects to whoever has it. */
+  claim() {
+    if (this.stopped) return;
+    this.dropPeer();
+    const peer = new $416260bce337df90$export$ecd1fc136c422448(this.id, this.options);
+    this.peer = peer;
+    peer.on("open", () => {
+      if (this.peer !== peer) return;
+      this.role = "directory";
+      peer.on("connection", (conn) => this.serve(conn));
+    });
+    peer.on("error", (e) => {
+      if (this.peer !== peer) return;
+      if (e.type === "unavailable-id") this.follow();
+      else this.retry();
+    });
+    peer.on("disconnected", () => {
+      if (this.peer === peer && !this.stopped) peer.reconnect();
+    });
+  }
+  follow() {
+    this.dropPeer();
+    const peer = new $416260bce337df90$export$ecd1fc136c422448(this.options);
+    this.peer = peer;
+    peer.on("open", () => {
+      if (this.peer !== peer) return;
+      const conn = peer.connect(this.id, { reliable: true, serialization: "json" });
+      conn.on("open", () => {
+        if (this.peer !== peer) return;
+        this.role = "follower";
+        this.conn = conn;
+        if (this.mine) conn.send({ t: "announce", room: this.mine });
+      });
+      conn.on("data", (m) => {
+        if (m && m.t === "rooms" && Array.isArray(m.rooms)) {
+          this.last = m.rooms;
+          for (const w of this.waiters.splice(0)) w(m.rooms);
+        }
+      });
+      const gone = () => {
+        if (this.conn === conn) this.conn = null;
+        if (this.peer === peer) this.retry();
+      };
+      conn.on("close", gone);
+      conn.on("iceStateChanged", (state) => {
+        if (state === "failed" || state === "closed") gone();
+      });
+    });
+    peer.on("error", () => {
+      if (this.peer === peer) this.retry();
+    });
+  }
+  /** The directory went or could not be reached: try to become it, at a random moment. */
+  retry() {
+    if (this.stopped) return;
+    this.dropPeer();
+    clearTimeout(this.retryTimer);
+    this.retryTimer = setTimeout(() => this.claim(), 500 + Math.random() * 2500);
+  }
+  serve(conn) {
+    conn.on("data", (m) => {
+      if (!m) return;
+      if (m.t === "announce" && m.room && typeof m.room.name === "string") {
+        this.rooms.set(conn.peer, { ...clean(m.room), seen: Date.now() });
+      } else if (m.t === "unannounce") {
+        this.rooms.delete(conn.peer);
+      } else if (m.t === "list") {
+        conn.send({ t: "rooms", rooms: this.listing() });
+      }
+    });
+    conn.on("close", () => this.rooms.delete(conn.peer));
+  }
+  listing() {
+    const now2 = Date.now();
+    const out = [];
+    for (const [k, r] of this.rooms) {
+      if (now2 - r.seen > ROOM_TTL_MS) this.rooms.delete(k);
+      else out.push(r);
+    }
+    if (this.mine) out.push(clean(this.mine));
+    return out.map(({ seen, ...r }) => r);
+  }
+  send(msg) {
+    if (this.role === "follower" && this.conn && this.conn.open && msg) this.conn.send(msg);
+  }
+  /** This browser's server, or null when it hosts none. */
+  announce(room) {
+    this.mine = room ? clean(room) : null;
+    this.send(room ? { t: "announce", room: this.mine } : { t: "unannounce" });
+  }
+  list() {
+    if (this.role === "directory") return Promise.resolve(this.listing());
+    if (this.role === "follower" && this.conn && this.conn.open) {
+      return new Promise((resolve) => {
+        this.waiters.push(resolve);
+        this.conn.send({ t: "list" });
+        setTimeout(() => resolve(this.last || []), 2e3);
+      });
+    }
+    return Promise.resolve(this.mine ? [clean(this.mine)] : []);
+  }
+  dropPeer() {
+    if (this.peer) {
+      const p = this.peer;
+      this.peer = null;
+      p.destroy();
+    }
+    this.conn = null;
+    this.role = null;
+  }
+  stop() {
+    this.stopped = true;
+    clearInterval(this.timer);
+    clearTimeout(this.retryTimer);
+    this.dropPeer();
+    for (const w of this.waiters.splice(0)) w([]);
+  }
+};
+function clean(r) {
+  const name = String(r.name ?? "").slice(0, 24);
+  return { id: name, name, players: Math.max(0, Math.min(MAX_PLAYERS, Number(r.players) || 0)), max: MAX_PLAYERS, state: r.state === "racing" ? "racing" : "lobby", track: String(r.track ?? "").slice(0, 40) };
+}
 var PeerTransport = class {
   /** options: PeerJS options, for another broker; none for the public one. */
   constructor(options = {}) {
     this.options = { debug: 0, ...options };
     this.kind = "peer";
-    this.lists = false;
+    this.lists = true;
     this.peer = null;
     this.members = /* @__PURE__ */ new Map();
     this.hostConn = null;
@@ -43857,7 +44030,18 @@ var PeerTransport = class {
     this.emit = onMessage;
     this.onClose = onClose;
     this.emit({ t: "welcome", you: null, max: MAX_PLAYERS });
+    this.lan = new LanDirectory(this.options);
+    this.lan.start();
     return Promise.resolve();
+  }
+  /** What the network's list shows of this browser's server. */
+  announce() {
+    if (!this.lan) return;
+    if (this.role !== "host") {
+      this.lan.announce(null);
+      return;
+    }
+    this.lan.announce({ name: this.roomName, players: this.members.size + 1, state: this.racing ? "racing" : "lobby", track: this.track || "" });
   }
   /** A fresh broker connection: under the room's id for a host, any id for a member. */
   newPeer(id) {
@@ -43899,11 +44083,13 @@ var PeerTransport = class {
     }
     this.role = null;
     this.racing = false;
+    if (this.lan) this.lan.announce(null);
   }
   send(msg) {
     switch (msg.t) {
       case "list":
-        this.emit({ t: "rooms", rooms: [], unlisted: true });
+        if (this.lan) this.lan.list().then((rooms) => this.emit({ t: "rooms", rooms, lan: true, available: this.lan.available }));
+        else this.emit({ t: "rooms", rooms: [] });
         break;
       case "host":
         this.host(msg.name);
@@ -43913,6 +44099,8 @@ var PeerTransport = class {
         break;
       case "meta":
         this.racing = msg.state === "racing";
+        if (typeof msg.track === "string") this.track = msg.track;
+        this.announce();
         break;
       case "kick": {
         const c = this.members.get(msg.id);
@@ -43966,6 +44154,7 @@ var PeerTransport = class {
         }
         this.members.set(conn.peer, conn);
         this.emit({ t: "peer", id: conn.peer, event: "join" });
+        this.announce();
       });
       conn.on("data", (m) => {
         if (m && m.t === "to" && this.members.get(conn.peer) === conn) this.relay(conn.peer, m.to, m.d);
@@ -43974,6 +44163,7 @@ var PeerTransport = class {
         if (this.members.get(conn.peer) !== conn) return;
         this.members.delete(conn.peer);
         this.emit({ t: "peer", id: conn.peer, event: "leave" });
+        this.announce();
       };
       conn.on("close", gone);
       conn.on("error", gone);
@@ -43981,7 +44171,9 @@ var PeerTransport = class {
         if (state === "failed" || state === "closed") gone();
       });
     });
-    this.emit({ t: "hosted", room: this.you, name: String(name).trim() || "Server" });
+    this.roomName = String(name).trim() || "Server";
+    this.emit({ t: "hosted", room: this.you, name: this.roomName });
+    this.announce();
   }
   async join(name) {
     let peer;
@@ -44029,6 +44221,8 @@ var PeerTransport = class {
   }
   close() {
     this.drop();
+    if (this.lan) this.lan.stop();
+    this.lan = null;
   }
 };
 
@@ -44605,7 +44799,7 @@ var LobbyUI = class {
         "div",
         { class: "mp-box" },
         el("h2", { text: "Meedoen met een server" }),
-        this.joinHint = el("p", { class: "mp-empty", hidden: true, text: "Typ de naam van de server, zoals de host hem noemde." }),
+        this.joinHint = el("p", { class: "mp-empty", hidden: true, text: "Een server op een ander netwerk: typ zijn naam, zoals de host hem noemde." }),
         this.roomList,
         el("div", { class: "mp-row" }, this.joinName, el("button", { text: "Meedoen", onclick: () => this.joinClick(this.joinName.value) }))
       )
@@ -44705,8 +44899,9 @@ var LobbyUI = class {
     clearInterval(this.listTimer);
     try {
       await this.session.connect();
+      const peer = this.session.transport && this.session.transport.kind === "peer";
       this.roomList.hidden = !this.session.lists;
-      this.joinHint.hidden = this.session.lists;
+      this.joinHint.hidden = !peer;
       if (this.session.lists) {
         this.session.list();
         this.listTimer = setInterval(() => this.session.list(), LIST_MS);
@@ -44724,7 +44919,13 @@ var LobbyUI = class {
       el("span", { class: "mp-room-info", text: `${r.players}/${r.max}${r.track ? " \xB7 " + r.track : ""}${r.state === "racing" ? " \xB7 racet" : ""}` }),
       el("button", { text: "Meedoen", disabled: r.players >= r.max || r.state === "racing", onclick: () => this.joinClick(r.id) })
     ));
-    if (!items.length) items.push(el("li", { class: "mp-empty", text: "Nog geen servers. Maak er zelf een." }));
+    const peer = this.session.transport && this.session.transport.kind === "peer";
+    const lan = peer ? this.session.transport.lan : null;
+    if (!items.length) {
+      let text3 = "Nog geen servers. Maak er zelf een.";
+      if (peer) text3 = lan && lan.available ? "Nog geen servers op je netwerk. Maak er zelf een." : "Servers op je netwerk zoeken lukt niet in deze browser. Typ hieronder de naam van een server.";
+      items.push(el("li", { class: "mp-empty", text: text3 }));
+    }
     this.roomList.replaceChildren(...items);
   }
   me() {

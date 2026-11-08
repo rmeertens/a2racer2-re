@@ -12,7 +12,7 @@ Up to eight players race each other, each in their own browser. The original has
 6. All browsers load the race and wait for each other. The countdown starts at the same moment in all of them.
 7. After the finish, or Esc and J, the player is back in the room, with the result list once players have finished. The host can start the next race when everyone is back.
 
-Where the site has no lobby server, as on GitHub Pages, there is no server list: the others type the server's name under `Meedoen met een server`. The host can remove a player with `Weg`. If the host leaves, the server closes. Chase etappes (Rotterdam, Wenen, Berlijn) are not offered: they have no opponents, so no places for other players.
+Where the site has no lobby server, as on GitHub Pages, the list shows the servers on the same network (the same router), and a server elsewhere is joined by typing its name under `Meedoen met een server`. The host can remove a player with `Weg`. If the host leaves, the server closes. Chase etappes (Rotterdam, Wenen, Berlijn) are not offered: they have no opponents, so no places for other players.
 
 In a network race there is no pause key, since the others drive on. The race also runs on when the window loses focus but stays visible. A hidden tab stops, as browsers stop drawing hidden pages. That player's car then stands still for the others.
 
@@ -23,7 +23,7 @@ The race and the room run in the browsers, the host's browser keeping the room: 
 | Way | When | Server list | Traffic |
 |---|---|---|---|
 | Lobby server, `tools/lobby.mjs` | A lobby answers on `lobby` next to the page, as with `npm start`. Or `?lobby=wss://...` | Yes | Through the lobby, which relays within a room |
-| WebRTC through the public PeerJS broker | No lobby answers, as on a static site such as GitHub Pages. Or `?lobby=peer` | No: join by typing the server name | Directly between each member and the host's browser, which relays to the others |
+| WebRTC through the public PeerJS broker | No lobby answers, as on a static site such as GitHub Pages. Or `?lobby=peer` | The servers on the same network; any other by typing its name | Directly between each member and the host's browser, which relays to the others |
 
 **The lobby server** keeps no game state. It lists the named servers and relays messages within a room. It has no dependencies.
 
@@ -45,7 +45,9 @@ location = /a2racer4/lobby {
 }
 ```
 
-**The PeerJS broker** (`0.peerjs.com`, run by the PeerJS project, free and public) only introduces the browsers. A host registers its server name as an id, `a2racer4-mp-` and the name in lower case. A member asks the broker for that id, and the two then talk over a WebRTC data channel (`source/net/transports.js`, PeerJS 1.5.4). The broker cannot list ids, so there is no server list: players type the name the host gave. PeerJS's default STUN and TURN servers are used. A network that blocks WebRTC can still keep a player out. Every message between members passes through the host's browser, so the host's upload carries the most.
+**The PeerJS broker** (`0.peerjs.com`, run by the PeerJS project, free and public) only introduces the browsers. A host registers its server name as an id, `a2racer4-mp-` and the name in lower case. A member asks the broker for that id, and the two then talk over a WebRTC data channel (`source/net/transports.js`, PeerJS 1.5.4).
+
+The broker cannot list ids, so `LanDirectory` lists the servers on the same network. Browsers cannot broadcast on a network. Instead each browser asks a STUN server (`stun.l.google.com`) for its public address, which the machines behind one router share; for IPv6 it takes the /64 prefix. It hashes that address into a broker id, `a2racer4-lan-` and 16 hex digits. The first browser to ask for the id holds it and keeps the list. Hosts announce their server to it every 3 seconds, an entry lapses after 10 seconds, and everyone asks it for the list. When that browser closes, the next to notice takes the id. Two networks behind one carrier address (CGNAT, some mobile networks) see each other's servers. A browser that blocks WebRTC or gets no STUN answer sees no list. A server on another network is joined by typing its name. PeerJS's default STUN and TURN servers are used. A network that blocks WebRTC can still keep a player out. Every message between members passes through the host's browser, so the host's upload carries the most.
 
 The site at `a2racer.meertens.dev` is GitHub Pages, so it uses the broker. `.github/workflows/pages.yml` builds and publishes it on every push to `main`.
 
@@ -72,12 +74,12 @@ Room (`source/net/session.js`), in the payload: `hello`, `set`, `ping`, `pong`, 
 | Command | What it does |
 |---|---|
 | `node tools/check-multiplayer.mjs --players 8 --seconds 20` | Node, no renderer. N races in one process, the bot on each car, samples passed with 4 ticks of delay. Prints each race's position and how far each puppet is from the car it stands for. About 300 MB per player |
-| `node tools/check-multiplayer-browser.mjs --players 3 --seconds 30` | Headless Chromium, needs `npm start` and a fresh bundle. Hosts a named server, joins from the list, marks everyone ready, starts, lets the bots drive, leaves with Esc and J, checks the room and console errors. Writes `evidence/multiplayer/`. `--peer` goes through the PeerJS broker instead and joins by name |
+| `node tools/check-multiplayer-browser.mjs --players 3 --seconds 30` | Headless Chromium, needs `npm start` and a fresh bundle. Hosts a named server, joins from the list, marks everyone ready, starts, lets the bots drive, leaves with Esc and J, checks the room and console errors. Writes `evidence/multiplayer/`. `--peer` goes through the PeerJS broker instead and joins from the network's list, `--byname` by typing the name |
 
 Run on 2026-11-08 on an Apple Silicon Mac, Amsterdam:
 
 - `check-multiplayer.mjs`, 3 players, 30 s: puppets within 0.3 m of their car. With 8 players, 20 to 25 s: within 0.5 m, positions 1 to 8 consistent across all eight races.
-- `check-multiplayer-browser.mjs`, 3 pages, 20 to 30 s: all checks passed, with no console errors, both through the lobby and with `--peer` through the public PeerJS broker. All three pages ran in one browser on one machine.
+- `check-multiplayer-browser.mjs`, 3 pages, 20 to 30 s: all checks passed, with no console errors, both through the lobby and with `--peer` through the public PeerJS broker, by name and from the network's list. All three pages ran in one browser on one machine.
 - `check-multiplayer-browser.mjs`, 8 pages: joining, the shared start, 7 puppets per page, samples, the return to the room and no console errors all passed. The position check failed twice and was fixed both times: once for the HUD adjustment counted twice in a tick, once for the tie test. After the tie fix the check passed in the 8-race Node run, but the 8-page browser run was not repeated.
 
 Eight pages in one headless Chromium share a CPU with software WebGL, so each runs slower than real time and the pages drift apart. The puppet gaps such a run prints are not the error players would see.

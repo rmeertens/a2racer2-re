@@ -3,7 +3,7 @@
 // list and join, all say ready, the host starts, and the bot drives every car. Checks that each
 // page runs the race with the others as puppets that follow them, then that all come back to the
 // room with results. Needs `npm start` running and a fresh bundle, like the other browser checks.
-//   node tools/check-multiplayer-browser.mjs [--peer] [--players 3] [--seconds 40] [--laps 1] [--url http://127.0.0.1:4180/] [--out evidence/multiplayer]
+//   node tools/check-multiplayer-browser.mjs [--peer] [--byname] [--players 3] [--seconds 40] [--laps 1] [--url http://127.0.0.1:4180/] [--out evidence/multiplayer]
 import { chromium } from 'playwright';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -65,13 +65,15 @@ check('host: room open', true, serverName);
 for (let k = 1; k < N; k++) {
   const page = pages[k];
   await open(page, `Speler${k}`, CARS[k % CARS.length]);
-  if (PEER) {
+  // From the list: through the lobby, or with --peer the servers on this network (LanDirectory).
+  // --byname types the name instead, as for a server on another network.
+  if (process.argv.includes('--byname')) {
     await page.waitForSelector('#mp-join');
     await page.fill('#mp-join', serverName);
     await page.click('.mp-browse .mp-row button:has-text("Meedoen")');
   } else {
     const row = page.locator('.mp-rooms li', { hasText: serverName });
-    await row.waitFor({ timeout: 10000 });
+    await row.waitFor({ timeout: 30000 });
     await row.locator('button').click();
   }
   await page.waitForSelector('.mp-room:not([hidden])');
