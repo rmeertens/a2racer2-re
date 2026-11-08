@@ -41,6 +41,7 @@ UNITS = 10.0          # world units per metre
 CHUNK = 128.0         # chunk length in world units, as on the original tracks
 ROAD = 50.0           # half the road width
 WALK = 82.0           # from the centre line to the facades
+VOOR = 170.0  # the Voorstraat's house line
 DEPTH = 95.0          # depth of a house
 LANE = 24.0           # waypoints right and left of the centre line
 DECK = 64.0           # half the width of a bridge deck
@@ -180,6 +181,7 @@ class Chunks:
         self.n = n
         self.lists = [{k: [] for k in LIMITS} for _ in range(n)]
         self.dropped = 0
+        self.lost = {}
 
     def add(self, kind, chunk, plane):
         for step in range(0, 12):
@@ -188,6 +190,7 @@ class Chunks:
                     self.lists[c][kind].append(plane)
                     return
         self.dropped += 1
+        self.lost[kind] = self.lost.get(kind, 0) + 1
 
 
 # --- textures -------------------------------------------------------------------------------
@@ -304,6 +307,17 @@ def sign_texture(w, h, bg, fg):
             x0, y0, x1, y1 = d.textbbox((0, 0), text, font=f)
         d.text(((w * k - (x1 - x0)) / 2 - x0, y * h * k - (y1 - y0) / 2 - y0), text, font=f, fill=fg)
     return im.resize((w, h), Image.Resampling.LANCZOS)
+
+
+def bollard_sprite(w, h):
+    """The red and white posts along the Voorstraat (owner's photo 1453), on the key colour."""
+    im = Image.new('RGB', (w, h), KEY)
+    d = ImageDraw.Draw(im)
+    x0, x1 = w * 0.3, w * 0.7
+    for k in range(4):
+        d.rectangle((x0, h * (0.2 + k * 0.2), x1, h * (0.4 + k * 0.2)), fill=(200, 30, 36) if k % 2 == 0 else (245, 245, 240))
+    d.ellipse((x0, h * 0.14, x1, h * 0.26), fill=(200, 30, 36))
+    return im
 
 
 def produce_texture(w, h):
@@ -429,7 +443,8 @@ def own(name, size):
     return im.transform(big, Image.Transform.QUAD, data, Image.Resampling.BICUBIC).resize(size, Image.Resampling.LANCZOS)
 
 
-LAND = {'pavement': (0, 0, 256, 256), 'water': (256, 0, 512, 256), 'grass': (0, 256, 256, 512), 'tiles': (256, 256, 384, 384),
+LAND = {'pavement': (0, 0, 256, 256), 'water': (256, 0, 384, 128),
+        'bollard': (384, 0, 416, 128), 'lamp': (416, 0, 448, 128), 'crown': (256, 128, 384, 256), 'grass': (0, 256, 256, 512), 'tiles': (256, 256, 384, 384),
         'slate': (384, 256, 512, 384), 'deck': (256, 384, 384, 512), 'awning': (384, 384, 512, 512)}
 # Materials, sprites, and the landmarks from the owner's photos.
 BOUW = {
@@ -457,7 +472,12 @@ def build_textures():
     land.paste(own('pavement', (256, 256)), LAND['pavement'][:2])
     land.paste(roof_tiles(256, 256, (168, 72, 46), 1).resize((128, 128), Image.Resampling.LANCZOS), LAND['tiles'][:2])
     land.paste(masonry(256, 256, 18, 9, (62, 68, 78), (40, 44, 50), 2, jitter=10).resize((128, 128), Image.Resampling.LANCZOS), LAND['slate'][:2])
-    land.paste(own('water', (256, 256)), LAND['water'][:2])
+    land.paste(own('water', (128, 128)), LAND['water'][:2])
+    # The Voorstraat's furniture: a lime's crown, a lamp, a red and white post.
+    land.paste(KEY, LAND['bollard'][:2] + (512, 256))
+    land.paste(tree_sprite(128, 188, 21).crop((0, 0, 128, 128)), LAND['crown'][:2])
+    land.paste(lamp_sprite(32, 128), LAND['lamp'][:2])
+    land.paste(bollard_sprite(32, 128), LAND['bollard'][:2])
     land.paste(own('grass', (256, 256)), LAND['grass'][:2])
     land.paste(masonry(256, 256, 1, 9, (150, 112, 74), (70, 52, 36), 12, jitter=16, stagger=False).rotate(90).resize((128, 128)), LAND['deck'][:2])
     awning = Image.new('RGB', (128, 128), (240, 238, 232))
@@ -551,7 +571,12 @@ class Town:
         self.skip = set()  # (chunk, side) without houses
         self.bridges = set()  # chunks over water: a narrower deck
         self.gaps = set()  # (chunk, side, t): a house's side at a side street's mouth
+        self.line = {}     # (chunk, side): the house fronts' distance from the centre, WALK by default
         self.spans = []    # (chunk, side, t0, t1): houses on part of a skipped chunk
+
+    def at(self, i, s):
+        """Where the house fronts stand on this side of chunk i: wide on the Voorstraat."""
+        return self.line.get((i % self.n, s), WALK)
 
     def p(self, i, t, off, y=0.0):
         """A point t of the way along chunk i, off to the right of the centre line, y up."""
@@ -602,10 +627,13 @@ class Town:
             for a, b in ((-ROAD, 0.0), (0.0, ROAD)):
                 vs = [self.p(i, 0, a), self.p(i, 1, a), self.p(i, 1, b), self.p(i, 0, b)]
                 self.chunks.add('road', i, quad(vs, [(0, 1), (0, 0), (1, 0), (1, 1)], grey, up))
-            edge = DECK if i in self.bridges else WALK
-            for a, b in ((-edge, -ROAD), (ROAD, edge)):
-                vs = [self.p(i, 0, a, 2), self.p(i, 1, a, 2), self.p(i, 1, b, 2), self.p(i, 0, b, 2)]
-                self.chunks.add('land', i, quad(vs, uv('land', 'pavement', 0, 0.5, 0, 1), grey, up))
+            for s in (-1, 1):
+                edge = DECK if i in self.bridges else self.at(i, s)
+                k = max(1, round((edge - ROAD) / 60))
+                for j in range(k):
+                    a, b = ROAD + (edge - ROAD) * j / k, ROAD + (edge - ROAD) * (j + 1) / k
+                    vs = [self.p(i, 0, s * a, 2), self.p(i, 1, s * a, 2), self.p(i, 1, s * b, 2), self.p(i, 0, s * b, 2)]
+                    self.chunks.add('land', i, quad(vs, uv('land', 'pavement', 0, 0.5, 0, 1), grey, up))
             # Kerbs: the step from the road up to the pavement.
             for s in (-1, 1):
                 vs = [self.p(i, 0, s * ROAD, 0), self.p(i, 1, s * ROAD, 0), self.p(i, 1, s * ROAD, 2), self.p(i, 0, s * ROAD, 2)]
@@ -621,7 +649,7 @@ class Town:
             row = []
             for i in range(self.n):
                 # Inside a tight bend a full house's back folds over: shallower houses there.
-                depth = next((d for d in (DEPTH, 60.0, 30.0) if not self.bent(i, s, WALK + d)), None)
+                depth = next((d for d in (DEPTH, 60.0, 30.0) if not self.bent(i, s, self.at(i, s) + d)), None)
                 spans = [sp for sp in self.spans if sp[0] == i and sp[1] == s]
                 if (i, s) in self.skip and spans:
                     pieces = [(sp[2], sp[3]) for sp in spans]
@@ -668,7 +696,8 @@ class Town:
         front has it along the street."""
         i, s, t0, t1 = h['i'], h['s'], h['t0'], h['t1']
         E, T = h['eave'], h['top']
-        f0, f1 = WALK, WALK + h['depth']
+        f0 = self.at(i, s)
+        f1 = f0 + h['depth']
         mid = (f0 + f1) / 2
         tm = (t0 + t1) / 2
         inward = tuple(-s * x for x in self.right(i))
@@ -703,9 +732,11 @@ class Town:
                 # A side street's corner: the wall closed down to the ground, and on to where the
                 # street's own fronts begin, so nothing leads behind the row (no ground there).
                 other = None
-                if f1 < WALK + DEPTH:
-                    vs = [B(t, 0), self.p(i, t, s * (WALK + DEPTH), 0), self.p(i, t, s * (WALK + DEPTH), top_wall), B(t, top_wall)]
+                if f1 < f0 + DEPTH:
+                    vs = [B(t, 0), self.p(i, t, s * (f0 + DEPTH), 0), self.p(i, t, s * (f0 + DEPTH), top_wall), B(t, top_wall)]
                     self.chunks.add('rail', i, quad(vs, uv('bouw', 'brick', 0, 1, 0, 0.6), (226, 214, 206), facing))
+            if other is not None and self.at(other['i'], s) != f0:
+                other = None  # the line steps here: the side shows from the ground up
             if other is not None and self.height(other) >= self.height(h) and other['eave'] >= top_wall:
                 continue
             base = 0 if other is None else min(top_wall, other['eave'])
@@ -760,6 +791,20 @@ class Town:
             self.chunks.add('rail', i, quad(vs, uv('bouw', 'white'), (255, 255, 255), out))
             needle = (apex[0], H + 250, apex[2])
             self.chunks.add('rail', i, tri((a[0], top, a[2]), (b[0], top, b[2]), needle, uv_tri('bouw', 'slate'), (210, 210, 220), norm((out[0], 0.6, out[2]))))
+        # Corner turrets with slate caps, as on the gate's town and river faces (photos 1441, 1442).
+        tw = 13.0
+        for x in (-TW, TW):
+            for a0 in (0.0, L):
+                cx, ca = x - (tw if x > 0 else -tw) * 0.4, a0 + (tw if a0 == 0 else -tw) * 0.4
+                ring = [P(cx - tw, ca - tw, 0), P(cx + tw, ca - tw, 0), P(cx + tw, ca + tw, 0), P(cx - tw, ca + tw, 0)]
+                ring = [(v[0], o[1] + H - 40, v[2]) for v in ring]
+                peak = P(cx, ca, H + 75)
+                for k in range(4):
+                    a, b = ring[k], ring[(k + 1) % 4]
+                    out = norm((a[0] + b[0] - 2 * peak[0], 0.0, a[2] + b[2] - 2 * peak[2]))
+                    up = o[1] + H + 22
+                    self.chunks.add('rail', i, quad([a, b, (b[0], up, b[2]), (a[0], up, a[2])], uv('bouw', 'tower', 0, 0.2, 0, 0.3), (235, 225, 215), out))
+                    self.chunks.add('rail', i, tri((a[0], up, a[2]), (b[0], up, b[2]), peak, uv_tri('bouw', 'slate'), (210, 210, 220), norm((out[0], 0.8, out[2]))))
 
     # -- the Stadhuis ---------------------------------------------------------------------
 
@@ -769,7 +814,7 @@ class Town:
         self.skip.add((i, s))
         inward = tuple(-s * x for x in self.right(i))
         fw = self.fwd(i)
-        F = lambda t, y, d=0.0: self.p(i, t, s * (WALK + d), y)
+        F = lambda t, y, d=0.0: self.p(i, t, s * (self.at(i, s) + d), y)
         vs = [F(0, 0), F(1, 0), F(1, H), F(0, H)]
         self.chunks.add('rail', i, quad(vs, uv('bouw', 'stadhuis'), (255, 255, 255), inward))
         for t, facing in ((0, tuple(-x for x in fw)), (1, fw)):
@@ -798,6 +843,12 @@ class Town:
             self.chunks.add('rail', c, quad(vs, uv('bouw', 'brick', 0, 1, 0, 0.3), (230, 220, 210), inn))
             vs = [self.p(c, t0, s * WALK, 36), self.p(c, t1, s * WALK, 36), self.p(c, t1, s * (WALK + 6), 36), self.p(c, t0, s * (WALK + 6), 36)]
             self.chunks.add('rail', c, quad(vs, uv('bouw', 'stone', 0, 1, 0, 0.1), (240, 240, 240), (0, 1, 0)))
+        # Its ends: a garden wall back from the street, so no gap opens beside the next house.
+        for c, t in (((i - 1) % self.n, 0.22), ((i + 1) % self.n, 1.0)):
+            fwc = self.fwd(c)
+            vs = [self.p(c, t, s * WALK, 0), self.p(c, t, s * (WALK + DEPTH), 0), self.p(c, t, s * (WALK + DEPTH), 36), self.p(c, t, s * WALK, 36)]
+            for face in (fwc, tuple(-x for x in fwc)):
+                self.chunks.add('rail', c, quad(vs, uv('bouw', 'brick', 0, 1, 0, 0.3), (230, 220, 210), face))
         set_back, W, H, R = 30.0, 170.0, 150.0, 165.0
         f0, f1 = WALK + set_back, WALK + set_back + W
         mid = (f0 + f1) / 2
@@ -842,7 +893,7 @@ class Town:
             mapping = uv('bouw', 'kerk2') if kind == 'extra' else uv('bouw', 'tower')
             kind = 'rail'
             self.chunks.add(kind, c, quad(vs, mapping, (240, 232, 222), facing))
-        apex = P((t0 + t1) / 2, (o0 + o1) / 2, HT + 260)
+        apex = P((t0 + t1) / 2, (o0 + o1) / 2, HT + 120)  # a low cap, as the real tower has
         corners = [P(t0, o0, HT), P(t1, o0, HT), P(t1, o1, HT), P(t0, o1, HT)]
         for k in range(4):
             a, b = corners[k], corners[(k + 1) % 4]
@@ -856,18 +907,35 @@ class Town:
 
     # -- trees, lamps, the dike ----------------------------------------------------------------
 
-    def sprite(self, i, t, off, w, h, name, base=0.0):
-        """Two crossed upright quads with a sprite on the key colour."""
+    def sprite(self, i, t, off, w, h, name, base=0.0, atlas='bouw', kind='rail', y0=0.0, uvs=None, tint=(255, 255, 255), across=False):
+        """An upright quad with a sprite on the key colour, along the road and facing it: one plane,
+        as a driver only ever sees that side."""
         c = self.p(i, t, off, base)
         f, r = self.fwd(i), self.right(i)
-        for d in (f, r):
-            a = (c[0] - d[0] * w / 2, c[1], c[2] - d[2] * w / 2)
-            b = (c[0] + d[0] * w / 2, c[1], c[2] + d[2] * w / 2)
-            n = (d[2], 0, -d[0])
-            vs = [a, b, (b[0], c[1] + h, b[2]), (a[0], c[1] + h, a[2])]
-            self.chunks.add('rail', i, quad(vs, uv('bouw', name), (255, 255, 255), n))
-            # The other side too, so the sprite shows from both.
-            self.chunks.add('rail', i, quad(vs, uv('bouw', name), (255, 255, 255), tuple(-x for x in n)))
+        side = 1 if off > 0 else -1
+        # across: square to the road, facing the cars that come (seen whole down a long street).
+        d = r if across else f
+        a = (c[0] - d[0] * w / 2, c[1] + y0, c[2] - d[2] * w / 2)
+        b = (c[0] + d[0] * w / 2, c[1] + y0, c[2] + d[2] * w / 2)
+        vs = [a, b, (b[0], c[1] + h, b[2]), (a[0], c[1] + h, a[2])]
+        facing = tuple(-x for x in f) if across else tuple(-side * x for x in r)
+        self.chunks.add(kind, i, quad(vs, uvs or uv(atlas, name), tint, facing))
+
+    def square(self, chunks):
+        """The Voorstraat as in the owner's photos: a wide klinker square between road and houses,
+        a row of lime trees, lamps between them, red and white posts along the kerb. All on the
+        land list (its atlas has them), as the rail lists are full."""
+        for i in chunks:
+            for s in (-1, 1):
+                if self.at(i, s) == WALK:
+                    continue
+                # A lime: a trunk the car can hit, the crown above the cars.
+                self.sprite(i, 0.5, s * (ROAD + 40), 7, 62, None, atlas='land', kind='land', across=True, uvs=uv('land', 'deck', 0.4, 0.6, 0, 1), tint=(110, 90, 75))
+                self.sprite(i, 0.5, s * (ROAD + 40), 120, 205, 'crown', atlas='land', kind='land', across=True, y0=55)
+                if i % 2 == 0:
+                    self.sprite(i, 0.0, s * (ROAD + 40), 10, 80, 'lamp', atlas='land', kind='land', across=True)
+                for t in (0.25, 0.75):
+                    self.sprite(i, t, s * (ROAD + 7), 5, 17, 'bollard', atlas='land', kind='land', across=True)
 
     def lamps(self):
         """Against the facades, on the straights: in a bend a car cuts over the pavement."""
@@ -876,7 +944,7 @@ class Town:
             if abs(math.atan2(a[0] * b[1] - a[1] * b[0], a[0] * b[0] + a[1] * b[1])) > 0.06:
                 continue
             s = 1 if (i // 2) % 2 else -1
-            if (i, s) in self.skip:
+            if (i, s) in self.skip or self.at(i, s) != WALK:
                 continue
             self.sprite(i, 0.5, s * (WALK - 5), 12, 70, 'lamp')
 
@@ -928,7 +996,7 @@ class Town:
                 inward = tuple(-s * x for x in self.right(i))
                 t0, t1 = 0.1, 0.9
                 F = lambda t, off, y: self.p(i, t, s * off, y)
-                front, back = WALK - 28, WALK - 4
+                front, back = self.at(i, s) - 28, self.at(i, s) - 4
                 # The table: its front and its top of crates.
                 self.chunks.add('land', i, quad([F(t0, front + 4, 2), F(t1, front + 4, 2), F(t1, front + 4, 16), F(t0, front + 4, 16)], uv('land', 'deck'), (230, 220, 205), inward))
                 self.chunks.add('rail', i, quad([F(t0, front + 4, 16), F(t1, front + 4, 16), F(t1, back, 18), F(t0, back, 18)], uv('bouw', 'produce'), (255, 255, 255), (0, 1, 0)))
@@ -953,12 +1021,13 @@ class Town:
         fw = self.fwd(i)
         inward = tuple(-s * x for x in self.right(i))
         Q = lambda t, off, y: self.p(i, t, s * off, y)
-        self.chunks.add('road', i, quad([Q(t0, ROAD, 0), Q(t1, ROAD, 0), Q(t1, WALK + L, 0), Q(t0, WALK + L, 0)], [(0, 1), (1, 1), (1, 0), (0, 0)], (215, 215, 215), (0, 1, 0)))
+        WL = self.at(i, s)
+        self.chunks.add('road', i, quad([Q(t0, ROAD, 0), Q(t1, ROAD, 0), Q(t1, WL + L, 0), Q(t0, WL + L, 0)], [(0, 1), (1, 1), (1, 0), (0, 0)], (215, 215, 215), (0, 1, 0)))
         rng = random.Random(i * 7 + s)
         for t, facing in ((t0, fw), (t1, tuple(-x for x in fw))):
-            off = WALK + DEPTH
-            while off < WALK + L - 20:
-                step = min(70.0, WALK + L - off)
+            off = WL + DEPTH
+            while off < WL + L - 20:
+                step = min(70.0, WL + L - off)
                 spec = rng.randrange(len(FACADES))
                 eave = rng.choice((84, 94, 104))
                 top = eave / HOUSE_TYPES[spec]['eave']
@@ -967,7 +1036,7 @@ class Town:
                 off += step
         spec = rng.randrange(len(FACADES))
         top = 100 / HOUSE_TYPES[spec]['eave']
-        vs = [Q(t0, WALK + L, 0), Q(t1, WALK + L, 0), Q(t1, WALK + L, top), Q(t0, WALK + L, top)]
+        vs = [Q(t0, WL + L, 0), Q(t1, WL + L, 0), Q(t1, WL + L, top), Q(t0, WL + L, top)]
         self.chunks.add('extra', i, quad(vs, uv('gevel', FACADES[spec]), (236, 236, 236), inward))
 
     def bridge(self, first, last):
@@ -1128,7 +1197,8 @@ def building_fronts(town, nodes, ways, limit=260):
             continue
         dists = [nearest(p) for p in poly]
         closest = min(d for d, _ in dists)
-        if closest < WALK + DEPTH + 40 or closest > 1300:
+        near_i = min(dists)[1]
+        if closest < max(town.at(near_i, -1), town.at(near_i, 1)) + DEPTH + 40 or closest > 1300:
             continue
         cx = sum(p[0] for p in poly) / len(poly)
         cz = sum(p[1] for p in poly) / len(poly)
@@ -1209,6 +1279,14 @@ def build():
         mid = east[len(east) // 2]
         town.drawbridge(mid - 1, mid + 1)
         print('drawbridge on chunks', mid - 1, mid + 1)
+    # The Voorstraat, from past the Grote Kerk to before the Lekpoort: the houses stand far back
+    # (about 34 m front to front, as in the town) behind a wide square.
+    voorstraat = [k % n for k in range(kerk + 4, poort - 1 + (n if poort < kerk else 0))]
+    for k in voorstraat:
+        for s_ in (-1, 1):
+            if (k, s_) not in sides and k not in town.bridges:
+                town.line[(k, s_)] = VOOR
+    print('voorstraat chunks', voorstraat[0], '..', voorstraat[-1])
     town.street()
     town.stadhuis(st, town.side(st, STADHUIS))
     town.grote_kerk((kerk + 2) % n, town.side(kerk, GROTE_KERK))
@@ -1224,9 +1302,11 @@ def build():
     town.market(st + 2, poort - 3)
     town.lamps()
     town.houses()
+    # Last: what has no room left is furniture, never a wall.
+    town.square(voorstraat)
     print('Jody Bernal signs on', town.signs)
     if town.chunks.dropped:
-        print('planes that found no room:', town.chunks.dropped)
+        print('planes that found no room:', town.chunks.dropped, town.chunks.lost)
 
     chunks = [[c[k] for k in ('road', 'land', 'extra', 'rail')] for c in town.chunks.lists]
     total = sum(len(l) for c in chunks for l in c)

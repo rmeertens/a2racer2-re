@@ -82,3 +82,15 @@ Checked on 2026-11-08 by counting the player handler's calls per second in a hea
 ## Signs
 
 Six houses carry a shop sign for Vianen's singer Jody Bernal (`sign_blue`, `sign_red` in the bouw atlas). The signs are text only, drawn by `sign_texture` in the build script.
+
+## The Voorstraat
+
+The Voorstraat, from past the Grote Kerk to before the Lekpoort (chunks 1 to 26), is wide as in the town: its house fronts stand at `VOOR` = 170 from the centre instead of `WALK` = 82, about 34 m front to front. Each chunk side has its own building line (`Town.at`). Where the line steps, the houses' side walls stand down to the ground. Between road and houses is a klinker square with:
+- a row of lime trees: a trunk the car can hit, the crown above the cars;
+- lamps between the trees;
+- red and white posts along the kerb (owner's photo 1453);
+- the market against the fronts.
+
+The square's furniture faces oncoming cars, so it shows whole down the long street. It is on the land list, as the rail lists (bouw atlas) are nearly full; the water texture was halved to make room in the land atlas. Lamps and trees elsewhere are now one plane each, facing the road, instead of four. The square is added last, so whatever finds no room is furniture, never a wall.
+
+The Lekpoort has the four corner turrets of the real gate. The Grote Kerk's tower has a low cap instead of a tall spire.
