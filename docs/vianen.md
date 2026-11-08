@@ -24,6 +24,13 @@ Sources and licences: `public/assets/vianen/ATTRIBUTION.md`, `source/assets/vian
 - `node tools/vianen/shots.mjs`: screenshots at the start, the Stadhuis, the Lekpoort, the dike and the Grote Kerk, in headless Chromium with the bot at 4× speed. `evidence/vianen/`.
 - `node tools/check-multiplayer-browser.mjs --players 2 --seconds 10 --track vianen`: a network race on Vianen, all checks passed.
 
+## 3D buildings
+
+The track's planes now build the town in 3D. Houses have facades from the photos, gabled tile roofs, and end walls with gables. The Lekpoort is a tower over the road, with its passage and a slate spire with a white lantern. The Stadhuis is a stone block with battlements, and the Grote Kerk a nave with a steep slate roof and a tower with a spire behind a churchyard. Along the dike there is grass, a low stone edge and lime trees, and the straights have lamp posts. Trees and lamps are crossed quads on the key colour (255, 0, 127), which the game draws see-through. Textures: `vn_weg`, `vn_land`, `vn_gevel` and `vn_bouw` (`raser.ini [MAPS]` row 10). A chunk's lists are full at 16, 24, 12 and 12 planes, so a landmark's planes go to neighbouring chunks.
+
 ## Known rough edges
+
+- The game's driven-chunk count (`0x6fbab4`) stops rising after chunk 21 and picks up again later in the lap. A lap still finishes, but the HUD position and the reset key use that count. Not yet understood.
+- The test bot gets stuck at some bends; the AI racers lap the track.
 
 A sketch: facades are flat walls with photos on them, without depth or roofs. The chunk count the HUD position uses stalls on parts of the lap. There is no traffic and no police path. In a race, the camera's start fly-by is off. Etappe 10's loading picture is the same for the 8-bit path. Only checked as above.

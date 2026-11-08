@@ -33169,7 +33169,7 @@ var NetOverlay = class {
 // source/host/vianen.js
 var VIANEN = { key: "vianen", name: "Vianen", type: "Stadsrace", slot: 10, laps: 2, like: 0 };
 var TRACK = ["rmp", "pmp", "dmp", "cmp", "omp", "pth"];
-var TEXTURES = ["vn_weg.tga", "vn_gras.tga", "vn_gevel.tga"];
+var TEXTURES = ["vn_weg.tga", "vn_land.tga", "vn_gevel.tga", "vn_bouw.tga"];
 var BASE = "assets/vianen/";
 function vianenFiles() {
   return [...TRACK.map((ext) => `vianen.${ext}`), ...TEXTURES];
@@ -33213,7 +33213,16 @@ function installVianen(vfs, files) {
   } finally {
     vfs.onWrite = write;
   }
-  vfs.iniSet("raser.ini", "MAPS", String(slot), `1,etappe${slot},vn_weg,vn_gras,vn_gevel,vn_gevel,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
+  const mem = Number(vfs.iniGet("game.ini", "GFX OPTIONS", "CUSTOM_TEXTURE_MEMORY")) || 0;
+  if (mem < 8388608) {
+    vfs.onWrite = null;
+    try {
+      vfs.iniSet("game.ini", "GFX OPTIONS", "CUSTOM_TEXTURE_MEMORY", String(8388608));
+    } finally {
+      vfs.onWrite = write;
+    }
+  }
+  vfs.iniSet("raser.ini", "MAPS", String(slot), `1,etappe${slot},vn_weg,vn_land,vn_bouw,vn_gevel,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
 }
 function waitScreenBase() {
   return "assets/loading/";

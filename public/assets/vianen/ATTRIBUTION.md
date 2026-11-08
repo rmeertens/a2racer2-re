@@ -2,7 +2,7 @@
 
 Streets and building positions: © OpenStreetMap contributors, ODbL 1.0, <https://www.openstreetmap.org/copyright>.
 
-The textures `vn_gevel.tga`, `vn_weg.tga` and `vn_gras.tga`, and the wait screen `../loading/e10.png`, are cut, scaled and tinted from these photos on Wikimedia Commons, and are shared under the same licences:
+`vn_gevel.tga`, `vn_weg.tga`, the pavement in `vn_land.tga`, and the wait screen `../loading/e10.png` are cut, scaled and tinted from these photos on Wikimedia Commons, and are shared under the same licences:
 
 - [Exterieur VOORGEVELS - Vianen - 20300562 - RCE.jpg](https://commons.wikimedia.org/wiki/File:Exterieur_VOORGEVELS_-_Vianen_-_20300562_-_RCE.jpg), Gerard Dukker, CC BY-SA 4.0
 - [Exterieur VOORGEVELS - Vianen - 20300565 - RCE.jpg](https://commons.wikimedia.org/wiki/File:Exterieur_VOORGEVELS_-_Vianen_-_20300565_-_RCE.jpg), Gerard Dukker, CC BY-SA 4.0
@@ -16,3 +16,5 @@ The textures `vn_gevel.tga`, `vn_weg.tga` and `vn_gras.tga`, and the wait screen
 - [Lekpoort te Vianen.jpg](https://commons.wikimedia.org/wiki/File:Lekpoort_te_Vianen.jpg), Otto Hansen85, CC BY-SA 4.0
 - [Lekpoort - Vianen - Utrecht - (Bewerkt).jpg](https://commons.wikimedia.org/wiki/File:Lekpoort_-_Vianen_-_Utrecht_-_(Bewerkt).jpg), Frans Berkelaar, CC BY 2.0
 - [Stadhuis Vianen DSCF8606.jpg](https://commons.wikimedia.org/wiki/File:Stadhuis_Vianen_DSCF8606.jpg), G.Lanting, CC BY-SA 4.0
+
+The rest of `vn_land.tga` and all of `vn_bouw.tga` (brick, stone, slate, roof tiles, the tree, the lamp post) are drawn by `tools/vianen/build-track.py`.

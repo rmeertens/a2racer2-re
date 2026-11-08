@@ -8,7 +8,7 @@ import { IniFile, encodeLatin1, latin1 } from './vfs.js';
 
 export const VIANEN = { key: 'vianen', name: 'Vianen', type: 'Stadsrace', slot: 10, laps: 2, like: 0 };
 const TRACK = ['rmp', 'pmp', 'dmp', 'cmp', 'omp', 'pth'];
-const TEXTURES = ['vn_weg.tga', 'vn_gras.tga', 'vn_gevel.tga'];
+const TEXTURES = ['vn_weg.tga', 'vn_land.tga', 'vn_gevel.tga', 'vn_bouw.tga'];
 const BASE = 'assets/vianen/';
 
 /** All files the etappe needs, by name. */
@@ -62,8 +62,19 @@ export function installVianen(vfs, files) {
   } finally {
     vfs.onWrite = write;
   }
+  // Its textures need more than the lowest texture memory setting (2 MB, CTextureDetailManager.cpp
+  // stops the race when short): at least the middle one for this race, not saved.
+  const mem = Number(vfs.iniGet('game.ini', 'GFX OPTIONS', 'CUSTOM_TEXTURE_MEMORY')) || 0;
+  if (mem < 0x800000) {
+    vfs.onWrite = null;
+    try {
+      vfs.iniSet('game.ini', 'GFX OPTIONS', 'CUSTOM_TEXTURE_MEMORY', String(0x800000));
+    } finally {
+      vfs.onWrite = write;
+    }
+  }
   // raser.ini is saved with the player's data, and the race writes it: the row stays, unused elsewhere.
-  vfs.iniSet('raser.ini', 'MAPS', String(slot), `1,etappe${slot},vn_weg,vn_gras,vn_gevel,vn_gevel,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
+  vfs.iniSet('raser.ini', 'MAPS', String(slot), `1,etappe${slot},vn_weg,vn_land,vn_bouw,vn_gevel,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
 }
 
 /** The wait screen of a track: Vianen's own for etappe 10, made by tools/vianen/build-track.py. */
