@@ -30627,7 +30627,7 @@ var D3DRenderer = class {
       this.worldPtr = p;
       this.worldDirty = true;
     } else if (type === 2) {
-      this.view.set(f32.subarray(p >> 2, (p >> 2) + 16));
+      this.view.set(globalThis.__viewOverride || f32.subarray(p >> 2, (p >> 2) + 16));
       this.viewProjDirty = true;
     } else if (type === 3) {
       this.proj.set(f32.subarray(p >> 2, (p >> 2) + 16));
@@ -33168,6 +33168,29 @@ var NetOverlay = class {
 
 // source/host/vianen.js
 var VIANEN = { key: "vianen", name: "Vianen", type: "Stadsrace", slot: 10, laps: 2, like: 0 };
+function vianenTrack(index) {
+  return {
+    index,
+    vianen: true,
+    name: VIANEN.name,
+    story: "Door het oude Vianen: van de Grote Kerk over de brede Voorstraat met zijn linden, langs het Stadhuis, onder de Lekpoort door, over de dijk en de boogbrug, langs de gracht met de ophaalbrug en weer terug.",
+    type: VIANEN.type,
+    nrLaps: VIANEN.laps,
+    british: false,
+    winText: "Je bent de snelste van Vianen!",
+    qualifyText: "Goed gereden door Vianen.",
+    loseText: "Vianen was je te snel af.",
+    indexInGame: VIANEN.slot,
+    qualifyPosition: [0, 0, 0],
+    chaseTime: [0, 0, 0],
+    isChase: false
+  };
+}
+function vianenMenuImages(index) {
+  const out = { [`trname${String(index).padStart(2, "0")}.tga`]: "../vianen/menu/trname10.png" };
+  for (let k = 0; k < 6; k++) out[`qtc0${VIANEN.slot}_0${k}.tga`] = `../vianen/menu/qtc010_0${k}.png`;
+  return out;
+}
 var TRACK = ["rmp", "pmp", "dmp", "cmp", "omp", "pth"];
 var TEXTURES = ["vn_weg.tga", "vn_land.tga", "vn_gevel.tga", "vn_bouw.tga"];
 var BASE = "assets/vianen/";
@@ -38960,6 +38983,9 @@ function readStatic(vfs) {
   const charCount = ini.int("GENERAL", "charcount", 0);
   for (let n = 0; n < charCount; n++) chars.push(readCharacter(ini, n));
   const quickRace = new RaceList(ini, "QUICKRACE", tracks, chars);
+  const vianen = vianenTrack(tracks.length);
+  tracks.push(vianen);
+  quickRace.trackIx.push(vianen.index);
   quickRace.downloadSection = ini.str("QUICKRACE", "DOWNLOADSECTION", "DOWNLOADCAR");
   quickRace.downloadCharIx = ini.int("QUICKRACE", "DOWNLOADCHARIX", 0);
   quickRace.lockedCharText = ini.str("QUICKRACE", "LOCKEDCHARTEXT", "locked!");
@@ -39482,6 +39508,7 @@ var GameData = class {
   // --- what the screens ask ---------------------------------------------------------------
   /** TTrack availability 0x461a4c. Track files load per race, so the file list counts as well as the VFS. */
   trackFilesExist(track) {
+    if (track.vianen) return true;
     return TRACK_EXTENSIONS.every((ext) => this.fileExists("etappe" + track.indexInGame + ext));
   }
   fileExists(name) {
@@ -44851,7 +44878,7 @@ var LobbyUI = class {
   }
   /** Races, not chases: a chase has no opponents (FUN_0042de60), so no slots for others. */
   tracks() {
-    const own = this.data.static.tracks.filter((t) => !t.isChase && this.data.trackFilesExist(t));
+    const own = this.data.static.tracks.filter((t) => !t.isChase && !t.vianen && this.data.trackFilesExist(t));
     return [...own, { indexInGame: VIANEN.key, name: VIANEN.name, type: "schets", nrLaps: VIANEN.laps }];
   }
   carName(c) {
@@ -45734,6 +45761,8 @@ var App = class {
     const sound = new MenuSound(this.getAudioContext, this.getMasterOutput);
     this.data = new GameData(this.vfs, { files: this.files });
     await this.data.load();
+    const vianen = this.data.static.tracks.find((t) => t.vianen);
+    if (vianen) Object.assign(assets.index, vianenMenuImages(vianen.index));
     this.menu = new MenuRuntime({ canvas: this.canvasMenu, overlay: this.overlay, assets, data: this.data, sound });
     this.menu.forms = await (await fetch("assets/menu/forms.json")).json();
     this.data.app = this;
@@ -45822,6 +45851,7 @@ var App = class {
   }
   /** Called by the menu's DoExit with a race configured in game.ini and raser.ini. */
   async startRace() {
+    if (!this.inVianen && Number(this.vfs.iniGet("game.ini", "ETAPPE", "ETAPPE")) === VIANEN.slot) return this.withVianen(() => this.startRace());
     this.showRace();
     await this.runner.run();
     this.menu.ignoreRepeat = true;
@@ -45892,9 +45922,11 @@ var App = class {
       this.say("Vianen kon niet laden: " + e.message, 1e4);
       return void 0;
     }
+    this.inVianen = true;
     try {
       return await fn();
     } finally {
+      this.inVianen = false;
       restore();
     }
   }

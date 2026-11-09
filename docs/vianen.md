@@ -100,3 +100,29 @@ The Lekpoort has the four corner turrets of the real gate. The Grote Kerk's towe
 - Stadhuis (photo 1449): the photo front in grey stone with battlements on the front and sides, a lower brick wing behind under a slate roof with its gable at the back, and a round stair turret with a slate cone (`Town.dome`).
 - Grote Kerk (photos 1457-1459): a steep gable with a little roof over each tall window along the nave, and a west gable behind the tower. The tower has the photo on all four faces (so the scaffolding of November 2026 too), a flat top behind a gallery, and a small white lantern with a cap and a vane.
 - `tools/vianen/shots.mjs --views views.json` shoots each landmark from a fixed camera (`VIANEN_VIEWS=path python3 tools/vianen/build-track.py` writes the file). The renderer takes the view matrix from `globalThis.__viewOverride` when it is set.
+
+## In Quick Race
+
+Vianen is the eleventh Quick Race track, after the original's ten. It is not in the Tour.
+- `vianenTrack(index)` in `source/host/vianen.js` is its track record. `readStatic` in `source/menu/data.js` adds it to the tracks and to the Quick Race list.
+- `trackFilesExist` passes for it, since its files are fetched when its race starts.
+- `App.startRace` wraps a race on etappe 10 in `withVianen`, as the URL route and the network race do.
+- The menu pictures come from `tools/vianen/menu-images.py`, in `public/assets/vianen/menu/`:
+  - a round slideshow: frame 0 a map of the lap with its landmarks, frames 1–5 views of the track;
+  - the `trname10` name banner.
+
+  `App.start` adds them to the menu's image index.
+- The network lobby keeps its own Vianen entry and leaves this record out.
+
+## More of the town
+
+- **Street name signs:** blue Dutch signs with the real names from OSM. One where the route enters a street, and one at each side street's corner with that street's name. The eight commonest names get atlas slots.
+- **Bicycles:** parked against house fronts on the narrow streets, and by every third tree on the Voorstraat.
+- **Road dashes:** white dashes along the road edges outside the Voorstraat, as by the Grote Kerk.
+- **Plant tubs:** wooden tubs with shrubs between the Voorstraat's limes, where there is no lamp.
+- **Shop awnings:** striped sun awnings over the shop fronts on the narrow streets. They are left off the Voorstraat, where the market stands.
+- **AI Report ads:** six text-only boards for aireport.nl, apart from the Jody Bernal signs.
+
+Decoration (awnings, bicycles, dashes) is added after all buildings, so it never takes a roof's or a wall's place in a full list.
+
+A Lek bridge on the horizon was tried and dropped. The route runs between house fronts the whole way, and the game draws only the chunks ahead of the car, so it was never in view while driving.

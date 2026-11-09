@@ -78,6 +78,7 @@
 // Dialogs with a text box get { name } in args and must store their text back into this.args.name before they close.
 // Test route ?form=TfrmX: mode=1 or 2 (default 2) sets raceMode and prevState, flags=<n> sets resultFlags.
 import { encodeLatin1 } from '../host/vfs.js';
+import { vianenTrack } from '../host/vianen.js';
 import { startUp, afterRace, closeRequested, askPlayerName, startInfoThenRace, showNote, helpRequested, unexpectedError } from './flow.js';
 
 export const RR = { CHASE: 0x01, QUALIFY: 0x02, WINRACE: 0x04, WINTRACK: 0x08, BESTLAP: 0x20 };
@@ -415,6 +416,10 @@ function readStatic(vfs) {
   const charCount = ini.int('GENERAL', 'charcount', 0);
   for (let n = 0; n < charCount; n++) chars.push(readCharacter(ini, n));
   const quickRace = new RaceList(ini, 'QUICKRACE', tracks, chars);
+  // Port: Vianen as the last Quick Race track, source/host/vianen.js. Not in the Tour.
+  const vianen = vianenTrack(tracks.length);
+  tracks.push(vianen);
+  quickRace.trackIx.push(vianen.index);
   quickRace.downloadSection = ini.str('QUICKRACE', 'DOWNLOADSECTION', 'DOWNLOADCAR');
   quickRace.downloadCharIx = ini.int('QUICKRACE', 'DOWNLOADCHARIX', 0);
   quickRace.lockedCharText = ini.str('QUICKRACE', 'LOCKEDCHARTEXT', 'locked!');
@@ -1028,6 +1033,8 @@ export class GameData {
 
   /** TTrack availability 0x461a4c. Track files load per race, so the file list counts as well as the VFS. */
   trackFilesExist(track) {
+    // Port: Vianen's files load when its race starts (App.withVianen).
+    if (track.vianen) return true;
     return TRACK_EXTENSIONS.every((ext) => this.fileExists('etappe' + track.indexInGame + ext));
   }
 

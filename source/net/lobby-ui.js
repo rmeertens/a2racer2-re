@@ -80,7 +80,7 @@ export class LobbyUI {
 
   /** Races, not chases: a chase has no opponents (FUN_0042de60), so no slots for others. */
   tracks() {
-    const own = this.data.static.tracks.filter((t) => !t.isChase && this.data.trackFilesExist(t));
+    const own = this.data.static.tracks.filter((t) => !t.isChase && !t.vianen && this.data.trackFilesExist(t));
     // The port's Vianen sketch races in Amsterdam's slot: source/host/vianen.js.
     return [...own, { indexInGame: VIANEN.key, name: VIANEN.name, type: 'schets', nrLaps: VIANEN.laps }];
   }

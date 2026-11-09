@@ -15,7 +15,7 @@ import * as forms from './menu/forms/index.js';
 import { LobbyUI } from './net/lobby-ui.js';
 import { NetRace } from './net/puppets.js';
 import { prepareRaceFiles } from './net/race-files.js';
-import { VIANEN, fetchVianen, installVianen } from './host/vianen.js';
+import { VIANEN, fetchVianen, installVianen, vianenMenuImages } from './host/vianen.js';
 
 // Esc for the quit prompt. T, N and W are default turbo chords a browser would take: input.md H8.
 const LOCKED_KEYS = ['Escape', 'KeyT', 'KeyN', 'KeyW'];
@@ -76,6 +76,9 @@ export class App {
     const sound = new MenuSound(this.getAudioContext, this.getMasterOutput);
     this.data = new GameData(this.vfs, { files: this.files });
     await this.data.load();
+    // Port: Vianen's Quick Race pictures, as the last track (source/host/vianen.js).
+    const vianen = this.data.static.tracks.find((t) => t.vianen);
+    if (vianen) Object.assign(assets.index, vianenMenuImages(vianen.index));
     this.menu = new MenuRuntime({ canvas: this.canvasMenu, overlay: this.overlay, assets, data: this.data, sound });
     this.menu.forms = await (await fetch('assets/menu/forms.json')).json();
     this.data.app = this;
@@ -168,6 +171,8 @@ export class App {
 
   /** Called by the menu's DoExit with a race configured in game.ini and raser.ini. */
   async startRace() {
+    // A race the menu set up on Vianen (etappe 10): its files first, as the network race does.
+    if (!this.inVianen && Number(this.vfs.iniGet('game.ini', 'ETAPPE', 'ETAPPE')) === VIANEN.slot) return this.withVianen(() => this.startRace());
     this.showRace();
     await this.runner.run();
     // A key still held auto-repeats into the menu: 0x0043ac80 left that to a new process.
@@ -243,9 +248,11 @@ export class App {
       this.say('Vianen kon niet laden: ' + e.message, 10000);
       return undefined;
     }
+    this.inVianen = true;
     try {
       return await fn();
     } finally {
+      this.inVianen = false;
       restore();
     }
   }

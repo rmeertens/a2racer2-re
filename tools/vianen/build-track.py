@@ -320,6 +320,87 @@ def bollard_sprite(w, h):
     return im
 
 
+def ad_texture(w, h, bg, fg, accent):
+    """An advertising board for AI Report (aireport.nl): the name big, the address below. Text
+    only, drawn here."""
+    k = 4
+    im = Image.new('RGB', (w * k, h * k), bg)
+    d = ImageDraw.Draw(im)
+    def font(name, size):
+        try:
+            return ImageFont.truetype('/System/Library/Fonts/Supplemental/' + name, size)
+        except OSError:
+            return ImageFont.load_default()
+    d.rectangle((0, 0, 10 * k, h * k), fill=accent)
+    d.rectangle((w * k - 10 * k, 0, w * k, h * k), fill=accent)
+    big, small = font('Arial Black.ttf', 26 * k), font('Arial Bold.ttf', 12 * k)
+    for text, f, y, colour in (('AI REPORT', big, 0.42, fg), ('aireport.nl', small, 0.8, accent)):
+        x0, y0, x1, y1 = d.textbbox((0, 0), text, font=f)
+        d.text(((w * k - (x1 - x0)) / 2 - x0, y * h * k - (y1 - y0) / 2 - y0), text, font=f, fill=colour)
+    return im.resize((w, h), Image.Resampling.LANCZOS)
+
+
+def bike_sprite(w, h):
+    """A Dutch town bike from the side, black, on the key colour."""
+    k = 4
+    im = Image.new('RGB', (w * k, h * k), KEY)
+    d = ImageDraw.Draw(im)
+    W, H = w * k, h * k
+    r = H * 0.3
+    back, front = (W * 0.24, H - r - 2 * k), (W * 0.76, H - r - 2 * k)
+    dark, lw = (24, 24, 26), 3 * k
+    for c in (back, front):
+        d.ellipse((c[0] - r, c[1] - r, c[0] + r, c[1] + r), outline=dark, width=lw)
+        d.ellipse((c[0] - r * 0.2, c[1] - r * 0.2, c[0] + r * 0.2, c[1] + r * 0.2), outline=(120, 120, 120), width=k)
+    seat, bar, crank = (W * 0.38, H * 0.18), (W * 0.68, H * 0.12), (W * 0.46, back[1])
+    for a, b in ((back, crank), (crank, seat), (seat, back), (crank, (W * 0.66, H * 0.28)), (seat, (W * 0.66, H * 0.28)), ((W * 0.66, H * 0.28), front), (bar, front)):
+        d.line((a, b), fill=dark, width=lw)
+    d.line(((W * 0.33, seat[1]), (W * 0.43, seat[1])), fill=(70, 50, 40), width=4 * k)
+    d.line(((W * 0.62, bar[1]), (W * 0.74, bar[1])), fill=dark, width=lw)
+    d.rectangle((back[0] - r * 0.9, back[1] - r * 1.15, back[0] + r * 0.5, back[1] - r * 1.0), fill=dark)
+    return im.resize((w, h), Image.Resampling.NEAREST)
+
+
+def planter_sprite(w, h):
+    """A big wooden tub with a shrub, as on the Voorstraat (owner's photo 1453), on the key colour."""
+    rng = random.Random(5)
+    im = Image.new('RGB', (w, h), KEY)
+    d = ImageDraw.Draw(im)
+    d.rectangle((w * 0.12, h * 0.55, w * 0.88, h), fill=(92, 70, 50))
+    for x in range(int(w * 0.12), int(w * 0.88), 6):
+        d.line((x, h * 0.55, x, h), fill=(70, 52, 38))
+    d.rectangle((w * 0.1, h * 0.52, w * 0.9, h * 0.6), fill=(60, 60, 62))
+    for _ in range(160):
+        cx, cy = rng.uniform(w * 0.14, w * 0.86), rng.uniform(h * 0.08, h * 0.56)
+        if ((cx - w / 2) / (w * 0.38)) ** 2 + ((cy - h * 0.34) / (h * 0.28)) ** 2 > 1:
+            continue
+        r = rng.uniform(2, 4)
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=rng.choice([(52, 96, 40), (74, 120, 50), (40, 80, 34), (196, 60, 70)]))
+    return im
+
+
+def street_sign(w, h, name):
+    """A Dutch street name sign: white letters on dark blue, a white edge."""
+    k = 4
+    im = Image.new('RGB', (w * k, h * k), (16, 40, 120))
+    d = ImageDraw.Draw(im)
+    d.rectangle((3 * k, 3 * k, w * k - 3 * k, h * k - 3 * k), outline=(255, 255, 255), width=2 * k)
+    size = 20 * k
+    while True:
+        try:
+            f = ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial Bold.ttf', size)
+        except OSError:
+            f = ImageFont.load_default()
+            break
+        x0, y0, x1, y1 = d.textbbox((0, 0), name, font=f)
+        if x1 - x0 < (w - 14) * k or size < 8 * k:
+            break
+        size -= k
+    x0, y0, x1, y1 = d.textbbox((0, 0), name, font=f)
+    d.text(((w * k - (x1 - x0)) / 2 - x0, (h * k - (y1 - y0)) / 2 - y0), name, font=f, fill=(255, 255, 255))
+    return im.resize((w, h), Image.Resampling.LANCZOS)
+
+
 def produce_texture(w, h):
     """A market table seen from above: crates of fruit, vegetables and flowers."""
     rng = random.Random(77)
@@ -444,7 +525,9 @@ def own(name, size):
 
 
 LAND = {'pavement': (0, 0, 256, 256), 'water': (256, 0, 384, 128),
-        'bollard': (384, 0, 416, 128), 'lamp': (416, 0, 448, 128), 'crown': (256, 128, 384, 256), 'grass': (0, 256, 256, 512), 'tiles': (256, 256, 384, 384),
+        'bollard': (384, 0, 416, 128), 'lamp': (416, 0, 448, 128), 'crown': (256, 128, 384, 256),
+        'bike': (384, 128, 512, 192), 'planter': (384, 192, 448, 256),
+        **{f'street{k}': (128, 256 + 32 * k, 256, 288 + 32 * k) for k in range(8)}, 'grass': (0, 256, 128, 384), 'tiles': (256, 256, 384, 384),
         'slate': (384, 256, 512, 384), 'deck': (256, 384, 384, 512), 'awning': (384, 384, 512, 512)}
 # Materials, sprites, and the landmarks from the owner's photos.
 BOUW = {
@@ -455,7 +538,9 @@ BOUW = {
     'arches': (512, 512, 1024, 640), 'bracing': (512, 640, 640, 768), 'darkrail': (640, 640, 896, 768), 'steel': (896, 640, 1024, 768),
     'kerk2': (512, 768, 704, 1024), 'produce': (704, 768, 832, 1024),
     'sign_blue': (832, 768, 1024, 832), 'sign_red': (832, 832, 1024, 896),
+    'ad_dark': (832, 896, 1024, 960), 'ad_light': (832, 960, 1024, 1024),
 }
+STREET_NAMES = []  # filled by build() from OSM before the textures: the signs' names
 ATLAS_SIZE = {'gevel': (1024, 1024), 'land': (512, 512), 'bouw': (1024, 1024)}
 ATLASES = {'gevel': GEVEL, 'land': LAND, 'bouw': BOUW}
 
@@ -478,7 +563,11 @@ def build_textures():
     land.paste(tree_sprite(128, 188, 21).crop((0, 0, 128, 128)), LAND['crown'][:2])
     land.paste(lamp_sprite(32, 128), LAND['lamp'][:2])
     land.paste(bollard_sprite(32, 128), LAND['bollard'][:2])
-    land.paste(own('grass', (256, 256)), LAND['grass'][:2])
+    land.paste(own('grass', (128, 128)), LAND['grass'][:2])
+    land.paste(bike_sprite(128, 64), LAND['bike'][:2])
+    land.paste(planter_sprite(64, 64), LAND['planter'][:2])
+    for k, name in enumerate(STREET_NAMES[:8]):
+        land.paste(street_sign(128, 32, name), LAND[f'street{k}'][:2])
     land.paste(masonry(256, 256, 1, 9, (150, 112, 74), (70, 52, 36), 12, jitter=16, stagger=False).rotate(90).resize((128, 128)), LAND['deck'][:2])
     awning = Image.new('RGB', (128, 128), (240, 238, 232))
     ad = ImageDraw.Draw(awning)
@@ -496,6 +585,9 @@ def build_textures():
     for name, bg, fg in (('sign_blue', (18, 34, 92), (255, 204, 40)), ('sign_red', (170, 24, 32), (255, 255, 255))):
         box = BOUW[name]
         bouw.paste(sign_texture(box[2] - box[0], box[3] - box[1], bg, fg), box[:2])
+    for name, bg, fg, accent in (('ad_dark', (20, 22, 30), (255, 255, 255), (64, 200, 220)), ('ad_light', (245, 245, 240), (20, 22, 30), (220, 60, 60))):
+        box = BOUW[name]
+        bouw.paste(ad_texture(box[2] - box[0], box[3] - box[1], bg, fg, accent), box[:2])
     bouw.paste(bracing_sprite(128, 128), BOUW['bracing'][:2])
     bouw.paste(railing_sprite(256, 128, colour=(52, 66, 62)), BOUW['darkrail'][:2])
     steel = (np.full((128, 128, 3), (30, 32, 34), float) + noise(128, 128, 5, 21)).clip(0, 255).astype(np.uint8)
@@ -572,6 +664,8 @@ class Town:
         self.bridges = set()  # chunks over water: a narrower deck
         self.gaps = set()  # (chunk, side, t): a house's side at a side street's mouth
         self.line = {}     # (chunk, side): the house fronts' distance from the centre, WALK by default
+        self.market_chunks = set()  # chunks with stalls: their awnings are the shops'
+        self.later = []    # (list, chunk, plane): decoration, added after the buildings
         self.spans = []    # (chunk, side, t0, t1): houses on part of a skipped chunk
 
     def at(self, i, s):
@@ -680,6 +774,14 @@ class Town:
                 h['sign'] = ('sign_blue', 'sign_red')[len(chosen) % 2]
                 chosen.append(h)
         self.signs = sorted((h['i'], h['s']) for h in chosen)
+        # And six for AI Report (aireport.nl), apart from each other and from the singer's.
+        ads = []
+        for h in pick.sample([h for row in rows.values() for h in row if h and h['t1'] - h['t0'] == 0.5 and not h.get('sign')], 80):
+            gap = lambda a, b: min(abs(a - b), self.n - abs(a - b))
+            if len(ads) < 6 and all(gap(h['i'], c['i']) > 12 for c in ads) and all(gap(h['i'], c['i']) > 2 for c in chosen):
+                h['sign'] = ('ad_dark', 'ad_light')[len(ads) % 2]
+                ads.append(h)
+        self.ads = sorted((h['i'], h['s']) for h in ads)
         for s, row in rows.items():
             m = len(row)
             for k, h in enumerate(row):
@@ -711,6 +813,16 @@ class Town:
         rtint = (225, 225, 230) if h['roofs'] == 'slate' else (236, 226, 220)
         vs = [F(t0, 0), F(t1, 0), F(t1, T), F(t0, T)]
         self.chunks.add('extra', i, quad(vs, uv('gevel', FACADES[h['type']]), h['tint'], inward))
+        if HOUSE_TYPES[h['type']]['ground'] == 'shop' and (i * 3 + (s > 0) + int(t0 * 4)) % 3 != 0 and i not in self.market_chunks and f0 == WALK:
+            # A striped sun awning over the shop window, under its name band, sloping out over
+            # the pavement; seen from above and from below.
+            ya = 0.26 * E
+            A = lambda t, d, y: self.p(i, t, s * (f0 - d), y)
+            a0, a1 = t0 + (t1 - t0) * 0.06, t1 - (t1 - t0) * 0.06
+            vs = [A(a0, 0.5, ya), A(a1, 0.5, ya), A(a1, 14, ya - 7), A(a0, 14, ya - 7)]
+            # Added after all buildings (Town.later): decoration never takes a roof's place.
+            self.later.append(('land', i, quad(vs, uv('land', 'awning'), (255, 255, 255), norm((inward[0], 2.0, inward[2])))))
+            self.later.append(('land', i, quad(vs, uv('land', 'awning'), (190, 180, 180), (0, -1, 0))))
         if h.get('sign'):
             # A board over the ground floor, a little in front of the wall.
             a, b = t0 + (t1 - t0) * 0.12, t1 - (t1 - t0) * 0.12
@@ -984,8 +1096,43 @@ class Town:
                 self.sprite(i, 0.5, s * (ROAD + 40), 120, 205, 'crown', atlas='land', kind='land', across=True, y0=55)
                 if i % 2 == 0:
                     self.sprite(i, 0.0, s * (ROAD + 40), 10, 80, 'lamp', atlas='land', kind='land', across=True)
+                else:
+                    self.sprite(i, 0.0, s * (ROAD + 40), 30, 28, 'planter', atlas='land', kind='land', across=True)
+                if (i + (s > 0)) % 3 == 0:
+                    self.sprite(i, 0.62, s * (ROAD + 44), 19, 11, 'bike', atlas='land', kind='land')
                 for t in (0.25, 0.75):
                     self.sprite(i, t, s * (ROAD + 7), 5, 17, 'bollard', atlas='land', kind='land', across=True)
+
+    def bikes(self):
+        """Bicycles parked against the house fronts here and there, as in every Dutch street."""
+        rng = random.Random(1870)
+        for i in range(self.n):
+            for s in (-1, 1):
+                if (i, s) in self.skip or self.at(i, s) != WALK or rng.random() > 0.28:
+                    continue
+                t = rng.choice((0.2, 0.45, 0.7))
+                self.sprite(i, t, s * (WALK - 5), 19, 11, 'bike', atlas='land', kind='land')
+                if rng.random() < 0.4:
+                    self.sprite(i, t + 0.12, s * (WALK - 6), 19, 11, 'bike', atlas='land', kind='land')
+
+    def road_dashes(self):
+        """White dashes along both road edges, as by the Grote Kerk (photos 1457-1459)."""
+        white = uv('land', 'bollard', 0.42, 0.58, 0.45, 0.55)
+        for i in range(self.n):
+            if i in self.bridges or self.at(i, -1) != WALK or self.at(i, 1) != WALK:
+                continue
+            for s in (-1, 1):
+                a, b = s * (ROAD - 9), s * (ROAD - 6)
+                for t0 in (0.3,):
+                    vs = [self.p(i, t0, a, 0.8), self.p(i, t0 + 0.3, a, 0.8), self.p(i, t0 + 0.22, b, 0.8), self.p(i, t0, b, 0.8)]
+                    self.chunks.add('land', i, quad(vs, white, (255, 255, 255), (0, 1, 0)))
+
+    def sign(self, i, t, s, k, y=46.0):
+        """Street name sign k on the house front at t, high on the wall, facing the road."""
+        L0 = self.at(i, s) - 1.2
+        a, b = self.p(i, t - 0.1, s * L0, y), self.p(i, t + 0.1, s * L0, y)
+        vs = [a, b, (b[0], b[1] + 6.5, b[2]), (a[0], a[1] + 6.5, a[2])]
+        self.chunks.add('land', i, quad(vs, uv('land', f'street{k}'), (255, 255, 255), tuple(-s * x for x in self.right(i))))
 
     def lamps(self):
         """Against the facades, on the straights: in a bend a car cuts over the pavement."""
@@ -1039,6 +1186,7 @@ class Town:
         """Market stalls along Voorstraat, as in the owner's photos: a table of produce under a
         striped awning on two white poles, against the houses."""
         rng = random.Random(1452)
+        self.market_chunks.update(k % self.n for k in range(first, last + 1))
         for i in range(first, last + 1):
             for s in (-1, 1):
                 if (i, s) in self.skip or rng.random() < 0.3:
@@ -1195,6 +1343,8 @@ class Streets:
                 continue
             ns = [nodes[k] for k in w['nodes'] if k in nodes]
             self.segs += list(zip(ns, ns[1:]))
+            self.named = getattr(self, 'named', [])
+            self.named += [(a, b, w['tags'].get('name')) for a, b in zip(ns, ns[1:]) if w['tags'].get('name')]
 
     def nearest(self, pt):
         best = (1e9, None)
@@ -1208,6 +1358,21 @@ class Streets:
             if d < best[0]:
                 best = (d, (dx / math.sqrt(L), dz / math.sqrt(L)))
         return best
+
+
+def street_name(streets, pt):
+    """The name of the nearest named street to pt (metres), and how far it is."""
+    best = (1e9, None)
+    for a, b, name in streets.named:
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        L = dx * dx + dz * dz
+        if L == 0:
+            continue
+        t = max(0, min(1, ((pt[0] - a[0]) * dx + (pt[1] - a[1]) * dz) / L))
+        d = math.hypot(pt[0] - a[0] - t * dx, pt[1] - a[1] - t * dz)
+        if d < best[0]:
+            best = (d, name)
+    return best
 
 
 def side_streets(town, streets, water):
@@ -1343,6 +1508,8 @@ def build():
     town.lekpoort(poort)
     town.water_sides(sides)
     streets = Streets(nodes, ways)
+    # Street names: the route's own per chunk, and each side street's.
+    route_names = [street_name(streets, (c[0] / UNITS, c[1] / UNITS)) for c in centre]
     branches = side_streets(town, streets, sides)
     for i, s_ in branches:
         town.side_street(i, s_)
@@ -1352,9 +1519,36 @@ def build():
     town.market(st + 2, poort - 3)
     town.lamps()
     town.houses()
-    # Last: what has no room left is furniture, never a wall.
+    # Street name signs: where the route enters a street (both sides), and at each side street's
+    # corner its own name. The commonest names get the eight slots.
+    wanted = []
+    for i in range(n):
+        d, name = route_names[i]
+        if d < 12 and name and (i == 0 or route_names[i - 1][1] != name):
+            for s_ in (-1, 1):
+                if (i, s_) not in town.skip:
+                    wanted.append((i, 0.3, s_, name))
+    for i, s_ in branches:
+        pr = town.p(i, 0.5, s_ * (town.at(i, s_) + 120))
+        d, name = street_name(streets, (pr[0] / UNITS, pr[2] / UNITS))
+        if d < 12 and name:
+            wanted.append((i, 0.2, s_, name))
+    from collections import Counter
+    STREET_NAMES[:] = [nm for nm, _ in Counter(w[3] for w in wanted).most_common(8)]
+    placed = 0
+    for i, t, s_, name in wanted:
+        if name in STREET_NAMES:
+            town.sign(i, t, s_, STREET_NAMES.index(name))
+            placed += 1
+    print('street signs', placed, STREET_NAMES)
+    # Last: what has no room left is furniture, never a wall or a roof.
     town.square(voorstraat)
+    for kind, c, plane in town.later:
+        town.chunks.add(kind, c, plane)
+    town.bikes()
+    town.road_dashes()
     print('Jody Bernal signs on', town.signs)
+    print('AI Report boards on', town.ads)
     if town.chunks.dropped:
         print('planes that found no room:', town.chunks.dropped, town.chunks.lost)
 

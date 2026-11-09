@@ -7,6 +7,36 @@
 import { IniFile, encodeLatin1, latin1 } from './vfs.js';
 
 export const VIANEN = { key: 'vianen', name: 'Vianen', type: 'Stadsrace', slot: 10, laps: 2, like: 0 };
+/**
+ * Vianen in Quick Race, an addition of the port: a track record after the original's (static.ini
+ * has ten), with its menu pictures (tools/vianen/menu-images.py). index is set when it is added.
+ */
+export function vianenTrack(index) {
+  return {
+    index,
+    vianen: true,
+    name: VIANEN.name,
+    story: 'Door het oude Vianen: van de Grote Kerk over de brede Voorstraat met zijn linden, langs het Stadhuis, onder de Lekpoort door, over de dijk en de boogbrug, langs de gracht met de ophaalbrug en weer terug.',
+    type: VIANEN.type,
+    nrLaps: VIANEN.laps,
+    british: false,
+    winText: 'Je bent de snelste van Vianen!',
+    qualifyText: 'Goed gereden door Vianen.',
+    loseText: 'Vianen was je te snel af.',
+    indexInGame: VIANEN.slot,
+    qualifyPosition: [0, 0, 0],
+    chaseTime: [0, 0, 0],
+    isChase: false,
+  };
+}
+
+/** Its pictures for the menu's image index (paths from assets/menu/). */
+export function vianenMenuImages(index) {
+  const out = { [`trname${String(index).padStart(2, '0')}.tga`]: '../vianen/menu/trname10.png' };
+  for (let k = 0; k < 6; k++) out[`qtc0${VIANEN.slot}_0${k}.tga`] = `../vianen/menu/qtc010_0${k}.png`;
+  return out;
+}
+
 const TRACK = ['rmp', 'pmp', 'dmp', 'cmp', 'omp', 'pth'];
 const TEXTURES = ['vn_weg.tga', 'vn_land.tga', 'vn_gevel.tga', 'vn_bouw.tga'];
 const BASE = 'assets/vianen/';
