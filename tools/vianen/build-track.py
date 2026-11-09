@@ -665,6 +665,9 @@ class Town:
         self.gaps = set()  # (chunk, side, t): a house's side at a side street's mouth
         self.line = {}     # (chunk, side): the house fronts' distance from the centre, WALK by default
         self.market_chunks = set()  # chunks with stalls: their awnings are the shops'
+        self.open_square = set()  # (chunk, side) of the square kept free of trees, lamps and tubs
+        self.near_water = set()  # chunks whose houses show their backs across water
+        self.backs = []    # the backs of the buildings behind the rows, near water: after the rows' own
         self.later = []    # (list, chunk, plane): decoration, added after the buildings
         self.spans = []    # (chunk, side, t0, t1): houses on part of a skipped chunk
 
@@ -823,6 +826,10 @@ class Town:
             # Added after all buildings (Town.later): decoration never takes a roof's place.
             self.later.append(('land', i, quad(vs, uv('land', 'awning'), (255, 255, 255), norm((inward[0], 2.0, inward[2])))))
             self.later.append(('land', i, quad(vs, uv('land', 'awning'), (190, 180, 180), (0, -1, 0))))
+        if (i, s) in self.near_water:
+            # The back of the house, which shows across the water: another front, a little darker.
+            back_face = FACADES[(h['type'] + 3) % len(FACADES)]
+            self.later.append(('extra', i, quad([B(t1, 0), B(t0, 0), B(t0, T), B(t1, T)], uv('gevel', back_face), (210, 210, 210), outward)))
         if h.get('sign'):
             # A board over the ground floor, a little in front of the wall.
             a, b = t0 + (t1 - t0) * 0.12, t1 - (t1 - t0) * 0.12
@@ -938,6 +945,7 @@ class Town:
         a slate cone at the wing's far corner."""
         H, SD, D, WH = 235.0, 48.0, 230.0, 175.0
         self.skip.add((i, s))
+        self.open_square |= {((i + k) % self.n, s) for k in (-2, -1, 0, 1)}
         inward = tuple(-s * x for x in self.right(i))
         fw = self.fwd(i)
         L0 = self.at(i, s)
@@ -1091,6 +1099,9 @@ class Town:
             for s in (-1, 1):
                 if self.at(i, s) == WALK:
                     continue
+                # Nothing in front of the Stadhuis: its square stays open, so it shows down the street.
+                if (i, s) in self.open_square:
+                    continue
                 # A lime: a trunk the car can hit, the crown above the cars.
                 self.sprite(i, 0.5, s * (ROAD + 40), 7, 62, None, atlas='land', kind='land', across=True, uvs=uv('land', 'deck', 0.4, 0.6, 0, 1), tint=(110, 90, 75))
                 self.sprite(i, 0.5, s * (ROAD + 40), 120, 205, 'crown', atlas='land', kind='land', across=True, y0=55)
@@ -1179,6 +1190,8 @@ class Town:
             self.chunks.add('land', i, quad([P(0, WALK, 2), P(1, WALK, 2), P(1, WALK + 90, low), P(0, WALK + 90, low)], uv('land', 'grass'), (235, 240, 225), norm((-inward[0] * 0.3, 1, -inward[2] * 0.3))))
             self.chunks.add('land', i, quad([P(0, WALK + 90, low), P(1, WALK + 90, low), P(1, WALK + 420, low), P(0, WALK + 420, low)], uv('land', 'water'), (230, 238, 245), (0, 1, 0)))
             self.chunks.add('land', i, quad([P(0, WALK + 420, low), P(1, WALK + 420, low), P(1, WALK + 520, -g0 + 4), P(0, WALK + 520, -g0 + 4)], uv('land', 'grass'), (225, 235, 215), norm((inward[0] * 0.3, 1, inward[2] * 0.3))))
+            # The land beyond, out to the buildings across the water: they stand on ground.
+            self.later.append(('land', i, quad([P(0, WALK + 520, -g0 + 4), P(1, WALK + 520, -g0 + 4), P(1, WALK + 1600, -g0 + 4), P(0, WALK + 1600, -g0 + 4)], uv('land', 'grass'), (205, 215, 195), (0, 1, 0))))
             if i % 2 == 0:
                 self.sprite(i, 0.5, s * (WALK + 600), 130, 210, 'tree', base=-self.ground[i])
 
@@ -1444,6 +1457,11 @@ def building_fronts(town, nodes, ways, limit=260):
             p1 = (a[0] + (b[0] - a[0]) * (k + 1) / n, a[1] + (b[1] - a[1]) * (k + 1) / n)
             vs = [(p0[0], g, p0[1]), (p1[0], g, p1[1]), (p1[0], g + height, p1[1]), (p0[0], g + height, p0[1])]
             town.chunks.add('extra', ci, quad(vs, uv('gevel', FACADES[(face + k) % len(FACADES)]), (232, 232, 232), normal))
+            # Its back as well: seen across the gracht a one-sided wall would be see-through.
+            mid = ((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2)
+            water = min(town.water_points, key=lambda w: math.dist(w, mid))
+            if math.dist(water, mid) < 1500 and (water[0] - mid[0]) * -normal[0] + (water[1] - mid[1]) * -normal[2] > 0:
+                town.backs.append(('extra', ci, quad(vs, uv('gevel', FACADES[(face + k + 3) % len(FACADES)]), (205, 205, 205), tuple(-x for x in normal))))
     return min(limit, len(fronts))
 
 
@@ -1507,6 +1525,9 @@ def build():
     town.grote_kerk((kerk + 2) % n, town.side(kerk, GROTE_KERK))
     town.lekpoort(poort)
     town.water_sides(sides)
+    # (chunk, side) near water on that side: the houses there show their backs across it.
+    town.near_water = {((c + d) % n, s_) for c, s_ in sides for d in range(-8, 9)}
+    town.water_points = [town.p(c, 0.5, s_ * (WALK + 250))[::2] for c, s_ in sides]
     streets = Streets(nodes, ways)
     # Street names: the route's own per chunk, and each side street's.
     route_names = [street_name(streets, (c[0] / UNITS, c[1] / UNITS)) for c in centre]
@@ -1543,7 +1564,7 @@ def build():
     print('street signs', placed, STREET_NAMES)
     # Last: what has no room left is furniture, never a wall or a roof.
     town.square(voorstraat)
-    for kind, c, plane in town.later:
+    for kind, c, plane in town.later + town.backs:
         town.chunks.add(kind, c, plane)
     town.bikes()
     town.road_dashes()

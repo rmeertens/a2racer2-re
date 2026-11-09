@@ -126,3 +126,13 @@ Vianen is the eleventh Quick Race track, after the original's ten. It is not in 
 Decoration (awnings, bicycles, dashes) is added after all buildings, so it never takes a roof's or a wall's place in a full list.
 
 A Lek bridge on the horizon was tried and dropped. The route runs between house fronts the whole way, and the game draws only the chunks ahead of the car, so it was never in view while driving.
+
+## The Stadhuis in view, no see-through backs
+
+- The square stays empty in front of the Stadhuis (`Town.open_square`, two chunks before it to one after): no trees, lamps, tubs or bicycles, so it shows down the Voorstraat.
+- The houses were one-sided planes, so across the gracht their backs were see-through. Backs are now drawn where they face water:
+  - each street house near water on its own side of the road gets a back wall (`Town.near_water`);
+  - each building behind the rows gets a back face when it turns toward a water stretch within 150 m (`Town.backs`).
+
+  Both use house-front textures and are added after the buildings.
+- The land beyond each far bank now reaches 160 m out, so the buildings across the water stand on grass.
