@@ -50,3 +50,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # GitHub's side can take longer than the default 10 minutes for a site this size
+          # (rcs.img alone is over 100 MB); twice it timed out on 9 and 10 November 2026.
+          timeout: 1800000
