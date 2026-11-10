@@ -1,0 +1,35 @@
+{
+  "lanterns": 38,
+  "oldStaticLanternColliders": 0,
+  "nativeType": 3,
+  "massKg": 50,
+  "rebound": 0.2,
+  "mesh": "vn_lamp.d3d; closed base, shaft, framed glass panes and cap",
+  "streetImpact": {
+    "propName": "VN_LAMP_ANIM",
+    "posts": 38,
+    "bakedColliders": 0,
+    "minUp": 0.0105092478916049,
+    "movedWorldUnits": 98.51634394917727,
+    "carPastBaseWorldUnits": 54.17914603901416,
+    "carSpeed": -0.03064810298383236,
+    "missing": []
+  },
+  "bridgeImpact": {
+    "propName": "VN_LAMP_ANIM",
+    "posts": 38,
+    "bakedColliders": 0,
+    "minUp": 0.4555693566799164,
+    "movedWorldUnits": 894.0839676357166,
+    "carPastBaseWorldUnits": -60.820557131736535,
+    "carSpeed": 19.49114418029785,
+    "missing": []
+  },
+  "bridgeFeet": "All four bases fully on the deck",
+  "scenery": "Previous house and roof allocation preserved",
+  "groundChecks": "212 bevels and six isolated pavement/crossing probes passed",
+  "nativeLap": "completed by simulated second 95",
+  "boundaryLeaks": 0,
+  "renderer": "231 two-sided sprites and all four live static pools; forward/rear/reverse passed",
+  "viewer": "asset and source picker verified, no console errors"
+}

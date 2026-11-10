@@ -2526,6 +2526,52 @@ function describeThrow(m, type, obj) {
   return "";
 }
 
+// source/host/vianen-impacts.js
+var VIANEN_IMPACT_SOUNDS = ["card", "wood", "rubber", "metal"].map((material) => ({
+  name: `VN_HIT_${material.toUpperCase()}`,
+  file: `vn_${material}.wav`
+}));
+var VIANEN_IMPACTS = {
+  VN_BOX_ANIM: { material: "card", handler: 4540272, paper: true },
+  VN_CRATE_ANIM: { material: "wood", handler: 4545376, paper: false },
+  VN_SIGN_ANIM: { material: "wood", handler: 4545376, paper: false },
+  VN_CONE_ANIM: { material: "rubber", handler: 4540816, paper: false },
+  VN_PAAL_ANIM: { material: "wood", handler: 4545376, paper: false },
+  VN_BIKE_ANIM: { material: "metal", handler: 4545376, paper: false },
+  VN_LAMP_ANIM: { material: "metal", handler: 4545376, paper: false }
+};
+function installVianenImpacts(m, vfs) {
+  if (Number(vfs.iniGet("game.ini", "ETAPPE", "ETAPPE")) !== 10 || !vfs.exists("vn_fun.tga")) return [];
+  const bytes = vfs.read("etappe10.omp");
+  const data = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const props = [];
+  for (let i = 0; i < data.getInt32(0, true); i++) {
+    const at = 4 + i * 68;
+    const name = String.fromCharCode(...bytes.subarray(at + 32, at + 64)).split("\0")[0];
+    if (VIANEN_IMPACTS[name]) props.push({ name, position: [8, 12, 16].map((k) => data.getFloat32(at + k, true)) });
+  }
+  const base = m.u32[7429712 >> 2], objects = m.u32[7581904 >> 2];
+  const sounds = new Map(VIANEN_IMPACT_SOUNDS.map(({ name }) => {
+    const address = m.lowAlloc(name.length + 1);
+    m.writeCStr(address, name);
+    return [name, address];
+  }));
+  const configured = [];
+  for (let i = 0; i < 512; i++) {
+    const car = base + i * 240, handler = m.u32[car + 108 >> 2];
+    if (![4540272, 4540816, 4545376].includes(handler)) continue;
+    const object = objects + m.i32[car + 36 >> 2] * 169;
+    const position = [0, 4, 8].map((k) => m.view.getFloat32(object + 80 + k, true));
+    const prop = props.find((p) => Math.hypot(...position.map((x, k) => x - p.position[k])) < 0.05);
+    if (!prop) continue;
+    const profile = VIANEN_IMPACTS[prop.name], sound = `VN_HIT_${profile.material.toUpperCase()}`;
+    m.u32[car + 108 >> 2] = profile.handler;
+    m.call(4524800, [i, sounds.get(sound)]);
+    configured.push({ index: i, name: prop.name, sound, ...profile });
+  }
+  return configured;
+}
+
 // source/host/race.js
 var BootDone = class extends Error {
 };
@@ -2701,6 +2747,7 @@ var Race = class {
     m.call(FN.INIT_MAIN, this.winMain);
     m.call(FN.START_GAME);
     this.m.esp = m.layout.STACK_TOP - 256;
+    this.vianenImpacts = installVianenImpacts(m, this.host.vfs);
   }
   /** One pass of the original main loop. dt is game time in seconds. */
   tick(dt) {
@@ -30066,6 +30113,83 @@ var Settings = class {
   }
 };
 
+// source/dev/track-model.js
+var LIMITS = [16, 24, 12, 12];
+var SURVEY_VIEWS = [
+  ...[0, 45, 90, 135, 180, -135, -90, -45].map((yaw) => ({
+    name: `Street ${yaw}\xB0`,
+    yaw,
+    height: 2,
+    offset: 0,
+    pitch: 0
+  })),
+  ...[45, 135, -135, -45].map((yaw) => ({
+    name: `Elevated ${yaw}\xB0`,
+    yaw,
+    height: 16,
+    offset: 0,
+    pitch: -25
+  })),
+  ...[-1, 1].flatMap((side) => [
+    { name: `${side < 0 ? "Left" : "Right"} rear walls`, yaw: -side * 90, height: 9, offset: side * 38, pitch: -10 },
+    { name: `${side < 0 ? "Left" : "Right"} roofline`, yaw: -side * 90, height: 25, offset: side * 38, pitch: -30 }
+  ])
+];
+function readPlanes(buffer) {
+  const d = new DataView(buffer);
+  const count = d.getInt32(4, true), chunks = d.getInt32(8, true);
+  if (d.getInt32(0, true) !== -1 || chunks < 3 || chunks > 1e4) throw new Error("Invalid RMP header");
+  let offset = 12;
+  const passes = [[], [], [], []];
+  for (let chunk = 0; chunk < chunks; chunk++) {
+    for (let pass = 0; pass < 4; pass++) {
+      const size = d.getInt32(offset, true);
+      offset += 4;
+      if (size < 0 || size > LIMITS[pass]) throw new Error(`RMP list exceeds engine limit at chunk ${chunk}`);
+      for (let plane = 0; plane < size; plane++) {
+        const vertices = [], uv = [], colors = [], indices = [];
+        for (let v = 0; v < 4; v++) {
+          const p = offset + v * 24;
+          vertices.push([0, 4, 8].map((k) => d.getFloat32(p + k, true)));
+          uv.push([d.getFloat32(p + 12, true), d.getFloat32(p + 16, true)]);
+          colors.push([0, 1, 2].map((k) => d.getUint8(p + 20 + k)));
+        }
+        for (let k = 0; k < 6; k++) indices.push(d.getInt32(offset + 96 + k * 4, true));
+        if (indices.some((i) => i < 0 || i > 3) || [...vertices.flat(), ...uv.flat()].some((x) => !Number.isFinite(x))) throw new Error("Invalid RMP plane");
+        const twoSided = uv.every(([u]) => u >= 4 && u < 5);
+        passes[pass].push({ chunk, pass, plane, vertices, uv, colors, indices, twoSided });
+        offset += 120;
+      }
+    }
+  }
+  if (offset !== buffer.byteLength || passes.flat().length !== count) throw new Error("RMP length or plane count mismatch");
+  return { chunks, count, passes };
+}
+
+// source/render/vianen-geometry.js
+var VianenGeometry = class {
+  constructor(bytes) {
+    const model = readPlanes(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+    this.passes = model.passes.map((planes) => ({
+      count: planes.length * 4,
+      indices: Uint16Array.from(planes.flatMap((p, i) => p.indices.map((v) => i * 4 + v))),
+      samples: [.../* @__PURE__ */ new Set([0, Math.floor(planes.length / 2), planes.length - 1])].flatMap((i) => planes[i].vertices.map((p, v) => ({ index: i * 4 + v, values: [...p, ...planes[i].uv[v]] })))
+    }));
+    this.cache = /* @__PURE__ */ new Map();
+  }
+  indicesFor(floats, pointer, count) {
+    const key = `${pointer}:${count}`;
+    if (this.cache.has(key)) return this.cache.get(key);
+    const start = pointer >> 2;
+    const pass = this.passes.find((p) => p.count === count && p.samples.every((sample) => {
+      const base = start + sample.index * 8;
+      return sample.values.every((value, k) => floats[base + (k < 3 ? k : k + 3)] === value);
+    }));
+    if (pass) this.cache.set(key, pass.indices);
+    return pass?.indices;
+  }
+};
+
 // source/render/d3d-renderer.js
 var DYNAMIC_VERTS = 12e4;
 var STATIC_VERTS = 24e4;
@@ -30453,6 +30577,9 @@ var D3DRenderer = class {
   attach(m, host) {
     this.m = m;
     this.host = host;
+    this.smoothVianen = Number(host.vfs.iniGet("game.ini", "ETAPPE", "ETAPPE")) === 10;
+    this.vianenGeometry = this.smoothVianen ? new VianenGeometry(host.vfs.read("etappe10.rmp")) : null;
+    for (const a of this.arrays) this.filterTrackArray(a);
     this.u32 = m.u32;
     this.u16 = m.u16;
     this.f32 = m.f32;
@@ -30539,9 +30666,17 @@ var D3DRenderer = class {
     tex.generateMipmaps = false;
     tex.needsUpdate = true;
     a = { w, h, tex, data, layers, next: 0, free: [], index: this.arrays.length };
+    this.filterTrackArray(a);
     this.arrays.push(a);
     this.uniformsShared["uTex" + a.index].value = tex;
     return a;
+  }
+  filterTrackArray(a) {
+    const smooth = this.smoothVianen && a.w >= 512 && a.h >= 512;
+    a.tex.minFilter = smooth ? LinearMipmapLinearFilter : LinearFilter;
+    a.tex.generateMipmaps = smooth;
+    a.tex.anisotropy = smooth ? Math.min(4, this.three.capabilities.getMaxAnisotropy()) : 1;
+    a.tex.needsUpdate = true;
   }
   freeTexture(surface) {
     if (surface.ownsLayer && surface.textureId >= 0) {
@@ -30690,7 +30825,8 @@ var D3DRenderer = class {
     k |= (texture ? s[RS.TEXTUREMAPBLEND] & 7 : 0) << 14;
     k |= (this.hud ? 1 : 0) << 17;
     const mag = s[RS.TEXTUREMAG];
-    k |= (texture && (mag === 1 || mag === 3) ? 1 : 0) << 18;
+    const smoothWorld = this.smoothVianen && !this.hud && !this.indexed;
+    k |= (texture && !smoothWorld && (mag === 1 || mag === 3) ? 1 : 0) << 18;
     k |= (this.indexed ? 1 : 0) << 19;
     return k;
   }
@@ -30819,7 +30955,10 @@ var D3DRenderer = class {
     f.indexCount = n;
   }
   drawIndexed(prim, vtype, verts, nverts, indices, nindices) {
-    if (nindices <= 0 || prim !== 4) return;
+    if (prim !== 4) return;
+    const complete = !this.hud && !this.indexed && vtype === 2 && this.vianenGeometry?.indicesFor(this.f32, verts, nverts);
+    if (complete) nindices = complete.length;
+    if (nindices <= 0) return;
     this.drawsThisFrame++;
     if (this.captureLevel === 0) return;
     const world = this.worldIndex(verts);
@@ -30834,12 +30973,27 @@ var D3DRenderer = class {
     if (base < 0) return;
     const b = this.batch(texture);
     const out = this.indexArray;
-    const src = this.u16;
+    const src = complete || this.u16;
     let n = f.indexCount;
     if (n + nindices >= MAX_INDICES) return;
-    const p = indices >> 1;
+    const p = complete ? 0 : indices >> 1;
     for (let k = 0; k < nindices; k++) out[n++] = base + src[p + k];
-    b.count += nindices;
+    if (this.smoothVianen && !this.hud && vtype === 2) {
+      const vertex2 = verts >> 2, floats = this.f32;
+      const tagged = (i) => {
+        const u = floats[vertex2 + i * 8 + 6];
+        return u >= 4 && u < 5;
+      };
+      for (let k = 0; k + 2 < nindices && n + 3 < MAX_INDICES; k += 3) {
+        const a = src[p + k], c = src[p + k + 1], d = src[p + k + 2];
+        if (tagged(a) && tagged(c) && tagged(d)) {
+          out[n++] = base + a;
+          out[n++] = base + d;
+          out[n++] = base + c;
+        }
+      }
+    }
+    b.count += n - f.indexCount;
     f.indexCount = n;
   }
   /** A place in the never-rewritten part of the vertex buffer, or -1 if this draw needs copying. */
@@ -33192,10 +33346,20 @@ function vianenMenuImages(index) {
   return out;
 }
 var TRACK = ["rmp", "pmp", "dmp", "cmp", "omp", "pth"];
-var TEXTURES = ["vn_weg.tga", "vn_land.tga", "vn_gevel.tga", "vn_bouw.tga"];
+var TEXTURES = ["vn_weg.tga", "vn_land.tga", "vn_gevel.tga", "vn_bouw.tga", "vn_fun.tga"];
+var PROPS = [
+  ["vn_paal.d3d", "VN_PAAL_ANIM", "Vianen red-white post"],
+  ["vn_lamp.d3d", "VN_LAMP_ANIM", "Vianen lantern post"],
+  ["vn_fiets.d3d", "VN_BIKE_ANIM", "Vianen town bicycle"],
+  ["vn_doos.d3d", "VN_BOX_ANIM", "Light cardboard carton", "vn_fun.tga"],
+  ["vn_kist.d3d", "VN_CRATE_ANIM", "Empty market crate", "vn_fun.tga"],
+  ["vn_kegel.d3d", "VN_CONE_ANIM", "Traffic cone", "vn_fun.tga"],
+  ["vn_bord.d3d", "VN_SIGN_ANIM", "Market chalkboard", "vn_fun.tga"]
+];
+var MODELS = PROPS.map(([model]) => model);
 var BASE = "assets/vianen/";
 function vianenFiles() {
-  return [...TRACK.map((ext) => `vianen.${ext}`), ...TEXTURES];
+  return [...TRACK.map((ext) => `vianen.${ext}`), ...TEXTURES, ...MODELS, ...VIANEN_IMPACT_SOUNDS.map((s) => s.file)];
 }
 function likeFiles() {
   return [`etappe${VIANEN.like}.ini`, `e${String(VIANEN.like).padStart(2, "0")}_anim.ini`];
@@ -33221,6 +33385,16 @@ function installVianen(vfs, files) {
   try {
     for (const ext of TRACK) vfs.add(`etappe${slot}.${ext}`, files.get(`vianen.${ext}`));
     for (const name of TEXTURES) vfs.add(name, files.get(name));
+    for (const name of MODELS) vfs.add(name, files.get(name));
+    for (const { file } of VIANEN_IMPACT_SOUNDS) vfs.add(file, files.get(file));
+    const soundIni = new IniFile(latin1(vfs.read("sound.ini")));
+    let soundCount = Number(soundIni.get("SndTypes", "COUNT"));
+    for (const { name, file } of VIANEN_IMPACT_SOUNDS) {
+      if (soundIni.keys("SndTypes").some((k) => soundIni.get("SndTypes", k).split(",")[0] === name)) continue;
+      soundIni.set("SndTypes", String(soundCount++), `${name},${file},1,75,90,10,GENERAL`);
+    }
+    soundIni.set("SndTypes", "COUNT", String(soundCount));
+    vfs.add("sound.ini", encodeLatin1(soundIni.serialize()));
     const [ini, anim] = likeFiles();
     const etappeIni = new IniFile(latin1(files.get(ini) || vfs.read(ini)));
     for (const key of etappeIni.keys("CamMarkers")) {
@@ -33229,8 +33403,19 @@ function installVianen(vfs, files) {
       v[v.length - 1] = " 0";
       etappeIni.set("CamMarkers", key, v.join(","));
     }
+    const animIni = new IniFile(latin1(files.get(anim) || vfs.read(anim)));
+    const objects = Number(etappeIni.get("objects", "count"));
+    const animations = Number(animIni.get("config", "count"));
+    PROPS.forEach(([model, animation, label, texture = "vn_land.tga"], i) => {
+      etappeIni.set("objects", String(objects + i), `${model},${texture},${label},0,${animation},0,${900 + i},0,-1`);
+      animIni.set("config", String(animations + i), animation);
+      animIni.set(animation, "0", `${model},${texture}`);
+      animIni.set(animation, "count", "1");
+    });
+    etappeIni.set("objects", "count", String(objects + PROPS.length));
+    animIni.set("config", "count", String(animations + PROPS.length));
     vfs.add(`etappe${slot}.ini`, encodeLatin1(etappeIni.serialize()));
-    vfs.add(`e${two3}_anim.ini`, files.get(anim) || vfs.read(anim));
+    vfs.add(`e${two3}_anim.ini`, encodeLatin1(animIni.serialize()));
     const opp = new IniFile(latin1(vfs.read("opponent.ini")));
     for (const sec of opp.sections()) {
       if (/^Racer \d+ Level \d+$/.test(sec) && opp.get(sec, String(slot)) === null) opp.set(sec, String(slot), opp.get(sec, String(like)));

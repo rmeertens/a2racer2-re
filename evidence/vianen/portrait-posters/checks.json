@@ -1,0 +1,35 @@
+{
+  "geometry": {
+    "chunks": 106,
+    "start": 10,
+    "lengthMetres": 1357,
+    "planes": 6434,
+    "posters": 6,
+    "billboards": 1,
+    "roofDetails": {
+      "chimney": 33,
+      "dormer": 15
+    }
+  },
+  "removedAIReportBoards": 6,
+  "posterWorldAspectRatio": "3:4, rectangular even on road grades",
+  "reviewed": "6 close poster views, route roofline overview, elevated overview, close dormer view",
+  "photoWarpTests": "4 passed; dormer crop included",
+  "geometryChecks": "6 shop portraits plus 2 billboard faces retain 3:4 proportions; 365 two-sided props; four complete static pools",
+  "runtimeChecks": "forward, rear view, reverse gear; four live pools matched; 3344 partial windows replaced",
+  "botLap": "completed by simulated second 105, no missing assets",
+  "boundaryCheck": {
+    "reachableCells": 171291,
+    "leaks": 0
+  },
+  "billboard": {
+    "widthMetres": 9,
+    "heightMetres": 12,
+    "station": 46,
+    "faces": 2,
+    "supports": "closed steel volumes",
+    "visibility": "checked in normal forward driving views at stations 42 and 44, and rear inspection camera"
+  },
+  "fullRouteSurveyBeforeBillboard": 1696,
+  "billboardAreaSurveyViews": 112
+}

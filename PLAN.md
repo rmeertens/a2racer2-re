@@ -39,6 +39,34 @@ None.
 
 ## Next actions
 
+Vianen realism pass, 10 November 2026: revised house proportions/materials, closed OSM backdrop
+buildings, correctly scaled street furniture, projective landmark crops and redesigned readable
+shop advertisements. Rebuilt assets, completed a bot lap and checked for map leaks; local browser
+evidence and the remaining approximation limits are in [`docs/vianen.md`](docs/vianen.md).
+Follow-up: added a silent, independent viewer at `http://127.0.0.1:4180/track-viewer.html`, with
+106-station camera surveys, free cameras, saved views and additional Google Images references.
+Second pass completed: connected ground/canal banks/water, seamless paving, sixteen varied
+facades, detailed brick end walls, smaller street furniture and corrected landmark proportions.
+Vianen-only race texture filtering and viewer handedness/transparent-edge fixes are in place.
+Final track: 5,897 planes, zero dropped planes, zero boundary leaks, completed bot lap and
+318-camera route survey. See `docs/vianen.md` and `evidence/vianen/realism-2/`.
+Next: owner local playtest at `http://127.0.0.1:4180/?race=1&etappe=vianen`.
+Follow-up: moved the Grote Kerk and its churchyard across the street onto the outside of the
+returning corner for a clear approach sightline. Rebuilt to 5,915 planes; zero boundary leaks
+and completed bot lap. New corner evidence: `evidence/vianen/church-move/`.
+Photo mapping follow-up: recalibrated all nine active photo crops to their facade planes,
+corrected landmark UV orientation and cropped UV mirroring, and aligned the Lekpoort opening
+with its photographed arch. Four focused warp checks, local visual checks, zero leaks and a
+completed bot lap. Evidence and limits: `docs/vianen.md`, `evidence/vianen/photo-warp/`.
+Reverse-view follow-up: 365 flat props now render from both sides, using tagged UVs and reverse
+GPU triangles without extra RMP/collision planes. Checked actual renderer handling, live rear
+view/reverse gear and local viewer. Evidence: `evidence/vianen/reverse-culling/`.
+Full-angle follow-up: 16-view survey presets plus station ranges (1,696 cameras); closed rear
+house walls, side-street buildings, landmark backs, bridge undersides and raised embankments.
+The Vianen 3D renderer now draws each verified static pool in full to eliminate partial-chunk
+scenery omissions. Final assets: 6,178 planes, zero drops/leaks, completed bot lap, matched all
+four live geometry pools. Current evidence: `evidence/vianen/angle-sweep/`.
+
 Nothing is required. What a continuing developer could do, from `docs/feature-parity.md` Known incomplete and `docs/validation.md` Not verified:
 
 1. Listen to the sound, race and menu. It was checked by state only.

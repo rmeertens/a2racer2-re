@@ -5,6 +5,7 @@ import { Machine, GameExit } from './machine.js';
 import { installWin32, VirtualClock } from './win32.js';
 import { installDirectX } from './directx.js';
 import { installCoreHooks } from './hooks.js';
+import { installVianenImpacts } from './vianen-impacts.js';
 
 class BootDone extends Error {}
 
@@ -199,6 +200,7 @@ export class Race {
     m.call(FN.INIT_MAIN, this.winMain);
     m.call(FN.START_GAME);
     this.m.esp = m.layout.STACK_TOP - 0x100;
+    this.vianenImpacts = installVianenImpacts(m, this.host.vfs);
   }
 
   /** One pass of the original main loop. dt is game time in seconds. */

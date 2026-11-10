@@ -6,30 +6,34 @@ import { chromium } from 'playwright';
 const opt = (n, d) => { const k = process.argv.indexOf('--' + n); return k < 0 ? d : process.argv[k + 1]; };
 const base = opt('url', 'http://127.0.0.1:4180/');
 const out = opt('out', 'evidence/vianen');
-const chunks = opt('chunks', '12,19,26,33,70').split(',').map(Number);
+const chunks = opt('chunks', '12,19,26,33,70').split(',').filter(Boolean).map(Number);
 // --etappe 3: Wenen as Vianen; default the Vianen sketch.
 const etappe = opt('etappe', 'vianen');
 const prefix = opt('prefix', etappe === 'vianen' ? 'chunk' : `e${etappe}-chunk`);
-const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
+const viewsFile = opt('views', '');
+// Close views need the car to stay before the building while its camera is overridden: the
+// original game still culls track planes against the car's own camera before the renderer.
+const speed = opt('speed', viewsFile ? '1' : '4');
+// --browser /path/to/chrome: reuse an installed Chromium when the pinned download is unavailable.
+const browser = await chromium.launch({ executablePath: opt('browser', undefined), args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
 const page = await (await browser.newContext({ viewport: { width: 960, height: 600 } })).newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
-await page.goto(`${base}?race=1&etappe=${etappe}&car=3&bot=1&speed=4`);
+await page.goto(`${base}?race=1&etappe=${etappe}&car=3&bot=1&speed=${speed}`);
 await page.waitForFunction(() => window.__bot && window.__bot.state, null, { timeout: 90000 });
 await page.evaluate(() => window.__app.settings.set('fullscreen', false));
 for (const c of chunks) {
-  await page.waitForFunction((c) => window.__bot.state && window.__bot.state.chunk === c, c, { timeout: 120000 }).catch(() => console.log('did not reach chunk', c));
+  await page.waitForFunction((c) => window.__bot.state && window.__bot.state.chunk === c, c, { timeout: 120000 });
   await page.screenshot({ path: `${out}/${prefix}-${c}.png` });
   console.log('chunk', c, await page.evaluate(() => window.__bot.state.speed.toFixed(1)));
 }
 // --views views.json: [{name, chunk, eye: [x,y,z], at: [x,y,z]}], a fixed camera at each, once
 // the bot is near (the game draws only chunks near the car). Written by build-track.py with
 // VIANEN_VIEWS=path.
-const viewsFile = opt('views', '');
 if (viewsFile) {
   const { readFileSync } = await import('node:fs');
   for (const v of JSON.parse(readFileSync(viewsFile, 'utf8'))) {
-    await page.waitForFunction((c) => window.__bot.state && window.__bot.state.chunk === c, v.chunk, { timeout: 150000 }).catch(() => console.log('did not reach chunk', v.chunk));
+    await page.waitForFunction((c) => window.__bot.state && Math.abs(window.__bot.state.chunk - c) <= 2, v.chunk, { timeout: 150000 });
     await page.evaluate(({ eye, at }) => {
       const sub = (a, b) => a.map((x, k) => x - b[k]);
       const norm = (a) => { const l = Math.hypot(...a); return a.map((x) => x / l); };
@@ -46,3 +50,4 @@ if (viewsFile) {
 }
 console.log('errors', errors.length ? errors : 'none');
 await browser.close();
+if (errors.length) process.exitCode = 1;

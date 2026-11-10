@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vianen · Track viewer</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="src/track-viewer.css">
+</head>
+<body>
+  <aside>
+    <header><a href="./">A2 Racer 4</a><h1>Vianen <span>Track viewer</span></h1><p>Inspect the actual track from any camera.</p></header>
+    <section>
+      <div class="section-heading"><h2>Route</h2><output id="station-label">Loading…</output></div>
+      <canvas id="route-map" width="560" height="360" aria-label="Track plan: click to move the camera"></canvas>
+      <label for="station">Position along the lap</label>
+      <input id="station" type="range" min="0" max="105.99" step="0.01" value="10">
+      <div class="button-row"><button id="previous" aria-label="Previous station">← Previous</button><button id="play">Play route</button><button id="next" aria-label="Next station">Next →</button></div>
+      <label for="landmark">Jump to a landmark</label><select id="landmark"></select>
+      <div class="button-row"><button id="whole-map">Whole map</button><a class="button" href="./?race=1&etappe=vianen" target="_blank" rel="noopener">Play the game ↗</a></div>
+    </section>
+    <section>
+      <h2>Camera</h2>
+      <div class="button-row directions" aria-label="Camera direction"><button data-yaw="0" aria-pressed="true">Ahead</button><button data-yaw="-90">Left</button><button data-yaw="90">Right</button><button data-yaw="180">Behind</button><button data-yaw="-45">Front left</button><button data-yaw="45">Front right</button><button data-yaw="-135">Rear left</button><button data-yaw="135">Rear right</button></div>
+      <label for="height">Height <output id="height-label">2 m</output></label><input id="height" type="range" min="1" max="60" step="0.5" value="2">
+      <label for="offset">Across the street <output id="offset-label">0 m</output></label><input id="offset" type="range" min="-60" max="60" step="0.5" value="0">
+      <label for="yaw">Turn <output id="yaw-label">0°</output></label><input id="yaw" type="range" min="-180" max="180" step="1" value="0">
+      <label for="pitch">Look up / down <output id="pitch-label">0°</output></label><input id="pitch" type="range" min="-70" max="70" step="1" value="0">
+      <p class="help">Drag to orbit · Right-drag to pan · Wheel to zoom.<br>WASD to move · Q/E down/up · Shift moves faster.</p>
+      <label for="camera-name">Camera name</label><input id="camera-name" type="text" maxlength="100" placeholder="Use current station name">
+      <div class="button-row"><button id="save-camera">Save camera</button><button id="screenshot">Save PNG</button></div>
+      <div id="saved-cameras" aria-label="Saved cameras"></div>
+      <div class="button-row"><button id="export">Export cameras</button><label class="button" for="import">Import cameras</label><input id="import" type="file" accept="application/json,.json" hidden></div>
+    </section>
+    <section>
+      <h2>Inspect geometry</h2>
+      <div class="checks"><label><input type="checkbox" data-pass="0" checked> Road</label><label><input type="checkbox" data-pass="1" checked> Ground & roofs</label><label><input type="checkbox" data-pass="2" checked> Facades</label><label><input type="checkbox" data-pass="3" checked> Details & walls</label></div>
+      <div class="checks"><label><input id="backs" type="checkbox"> Show back faces</label><label><input id="wireframe" type="checkbox"> Wireframe</label></div>
+      <label><input id="smooth" type="checkbox" checked> Smooth distant textures</label>
+      <p id="selection" class="help">Shift-click a surface to identify its source chunk and plane.</p>
+    </section>
+    <section>
+      <h2>Survey all stations</h2>
+      <label for="survey-direction">View at each station</label><select id="survey-direction"><option value="0">Ahead</option><option value="-45">Ahead / left diagonal</option><option value="45">Ahead / right diagonal</option><option value="-90">Left facades</option><option value="90">Right facades</option><option value="-135">Rear / left diagonal</option><option value="135">Rear / right diagonal</option><option value="180">Behind</option><option value="street">All 8 street angles</option><option value="coverage">16-angle geometry sweep</option></select>
+      <div class="button-row"><label for="survey-start">From station <input id="survey-start" type="number" min="0" max="105" value="0"></label><label for="survey-end">To station <input id="survey-end" type="number" min="0" max="105" value="105"></label></div>
+      <button id="survey">Build 106 camera views</button>
+      <p class="help">Click any image to restore its exact camera. Single directions use the controls above. The full sweep also checks elevated diagonals, roofs and rear walls from outside both rows.</p>
+    </section>
+    <section id="references"><h2>Real Vianen</h2><p class="help">Reference photographs found through Google Images. These links open the source pages.</p><ul id="reference-links"></ul><a href="https://www.google.com/search?tbm=isch&q=Vianen+Voorstraat+gevels+Lekpoort" target="_blank" rel="noopener">More on Google Images ↗</a></section>
+  </aside>
+  <main>
+    <div id="viewport" tabindex="0" aria-label="Interactive 3D Vianen track"></div>
+    <div id="view-status" role="status">Loading track geometry and textures…</div>
+    <div id="model-note">Track geometry · No race visibility culling · Cars and pickups hidden</div>
+    <section id="survey-panel" hidden><div class="survey-heading"><h2 id="survey-title">Route survey</h2><button id="close-survey" aria-label="Close survey">Close ×</button></div><div id="survey-grid"></div></section>
+  </main>
+  <script type="module" src="src/track-viewer.js"></script>
+</body>
+</html>

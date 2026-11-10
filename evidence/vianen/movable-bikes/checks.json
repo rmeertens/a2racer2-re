@@ -1,0 +1,29 @@
+{
+  "bikes": 63,
+  "mesh": "vn_fiets.d3d",
+  "dimensionsMetres": {
+    "length": 1.72,
+    "height": 1.081,
+    "width": 0.592
+  },
+  "vertices": 2152,
+  "triangles": 1076,
+  "nativePhysics": "type 22, 10 kg, low rebound",
+  "oldFlatColliders": 0,
+  "physicsHit": {
+    "propName": "VN_BIKE_ANIM",
+    "posts": 63,
+    "bakedColliders": 0,
+    "minUp": -0.2586463689804077,
+    "movedWorldUnits": 31.71633019633005,
+    "carPastBaseWorldUnits": 38.13309420472914,
+    "carSpeed": 0.180739164352417,
+    "missing": []
+  },
+  "groundRegression": "212 bevels and six isolated crossing/pavement probes passed",
+  "lap": "completed by simulated second 100",
+  "boundaryLeaks": 0,
+  "renderRegression": "168 remaining two-sided sprites and four native static pools passed, including rear view and reverse gear",
+  "viewer": "front, side, rear and source picker checked; uses the same mesh and yaw as the game",
+  "otherScenery": "Existing building/roof placement preserved; bollard and lantern impact tests passed"
+}

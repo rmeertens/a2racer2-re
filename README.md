@@ -50,6 +50,26 @@ npm run bundle
 
 The same game in Electron, with its files inside the package. `npm run desktop` starts it from this folder. `npm run desktop:linux` and `npm run desktop:win` build the packages into `release/`. macOS comes from `.github/workflows/macos-release.yml`. The quit path in the menu returns to the first screen, as in the browser: close the window to leave. Releases: [`docs/releasing.md`](docs/releasing.md).
 
+## Vianen track viewer
+
+With `npm start` running, open <http://127.0.0.1:4180/track-viewer.html> to inspect Vianen without
+driving. Scrub the route slider, click the track plan, jump to a landmark, or build a scrollable
+survey at each of the 106 track sections. Eight street directions and a 16-angle sweep cover
+diagonal, elevated, rear-wall and roof views (1,696 images). Limit the station range for a
+focused check; clicking a thumbnail restores that exact camera. Drag to orbit, right-drag to
+pan, scroll to zoom; WASD moves and Q/E changes height.
+Save named cameras in the browser, export/import them as JSON, or save the current view as a PNG.
+The address also preserves the current camera for sharing an exact problem spot.
+
+Shift-click a surface to identify its source chunk and plane. Layer, back-face, wireframe and
+texture-filter controls help diagnose defects. This reads the actual RMP/PMP geometry and TGA
+atlases directly; the race engine, vehicles and audio are not started. More details and reference
+photo links: [`docs/vianen.md`](docs/vianen.md).
+
+To regenerate the track assets, install the Python dependencies with
+`python3 -m pip install -r tools/vianen/requirements.txt`, then run
+`python3 tools/vianen/build-track.py` and `npm run bundle`. Prepared assets are already included.
+
 ## Controls
 
 | Action | Keyboard | Gamepad | Touch |

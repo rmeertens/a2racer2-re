@@ -5,6 +5,7 @@
 // come from there), opponent.ini values for etappe 10 (Amsterdam's), and its [MAPS] row. Records
 // are kept under track 10. The files live in memory only and nothing of another etappe changes.
 import { IniFile, encodeLatin1, latin1 } from './vfs.js';
+import { VIANEN_IMPACT_SOUNDS } from './vianen-impacts.js';
 
 export const VIANEN = { key: 'vianen', name: 'Vianen', type: 'Stadsrace', slot: 10, laps: 2, like: 0 };
 /**
@@ -38,12 +39,22 @@ export function vianenMenuImages(index) {
 }
 
 const TRACK = ['rmp', 'pmp', 'dmp', 'cmp', 'omp', 'pth'];
-const TEXTURES = ['vn_weg.tga', 'vn_land.tga', 'vn_gevel.tga', 'vn_bouw.tga'];
+const TEXTURES = ['vn_weg.tga', 'vn_land.tga', 'vn_gevel.tga', 'vn_bouw.tga', 'vn_fun.tga'];
+const PROPS = [
+  ['vn_paal.d3d', 'VN_PAAL_ANIM', 'Vianen red-white post'],
+  ['vn_lamp.d3d', 'VN_LAMP_ANIM', 'Vianen lantern post'],
+  ['vn_fiets.d3d', 'VN_BIKE_ANIM', 'Vianen town bicycle'],
+  ['vn_doos.d3d', 'VN_BOX_ANIM', 'Light cardboard carton', 'vn_fun.tga'],
+  ['vn_kist.d3d', 'VN_CRATE_ANIM', 'Empty market crate', 'vn_fun.tga'],
+  ['vn_kegel.d3d', 'VN_CONE_ANIM', 'Traffic cone', 'vn_fun.tga'],
+  ['vn_bord.d3d', 'VN_SIGN_ANIM', 'Market chalkboard', 'vn_fun.tga'],
+];
+const MODELS = PROPS.map(([model]) => model);
 const BASE = 'assets/vianen/';
 
 /** All files the etappe needs, by name. */
 export function vianenFiles() {
-  return [...TRACK.map((ext) => `vianen.${ext}`), ...TEXTURES];
+  return [...TRACK.map((ext) => `vianen.${ext}`), ...TEXTURES, ...MODELS, ...VIANEN_IMPACT_SOUNDS.map(s => s.file)];
 }
 
 /** Amsterdam's files it copies: they load per race, so in a browser they may not be there yet. */
@@ -85,6 +96,17 @@ export function installVianen(vfs, files) {
   try {
     for (const ext of TRACK) vfs.add(`etappe${slot}.${ext}`, files.get(`vianen.${ext}`));
     for (const name of TEXTURES) vfs.add(name, files.get(name));
+    for (const name of MODELS) vfs.add(name, files.get(name));
+    for (const { file } of VIANEN_IMPACT_SOUNDS) vfs.add(file, files.get(file));
+    // Append material samples to this race's in-memory registry; never persist them.
+    const soundIni = new IniFile(latin1(vfs.read('sound.ini')));
+    let soundCount = Number(soundIni.get('SndTypes','COUNT'));
+    for (const { name, file } of VIANEN_IMPACT_SOUNDS) {
+      if (soundIni.keys('SndTypes').some(k => soundIni.get('SndTypes',k).split(',')[0] === name)) continue;
+      soundIni.set('SndTypes',String(soundCount++),`${name},${file},1,75,90,10,GENERAL`);
+    }
+    soundIni.set('SndTypes','COUNT',String(soundCount));
+    vfs.add('sound.ini',encodeLatin1(soundIni.serialize()));
     const [ini, anim] = likeFiles();
     // Amsterdam's start fly-by markers lie far from Vianen: switched off (the last value).
     const etappeIni = new IniFile(latin1(files.get(ini) || vfs.read(ini)));
@@ -94,8 +116,19 @@ export function installVianen(vfs, files) {
       v[v.length - 1] = ' 0';
       etappeIni.set('CamMarkers', key, v.join(','));
     }
+    const animIni = new IniFile(latin1(files.get(anim) || vfs.read(anim)));
+    const objects = Number(etappeIni.get('objects', 'count'));
+    const animations = Number(animIni.get('config', 'count'));
+    PROPS.forEach(([model, animation, label, texture = 'vn_land.tga'], i) => {
+      etappeIni.set('objects', String(objects + i), `${model},${texture},${label},0,${animation},0,${900 + i},0,-1`);
+      animIni.set('config', String(animations + i), animation);
+      animIni.set(animation, '0', `${model},${texture}`);
+      animIni.set(animation, 'count', '1');
+    });
+    etappeIni.set('objects', 'count', String(objects + PROPS.length));
+    animIni.set('config', 'count', String(animations + PROPS.length));
     vfs.add(`etappe${slot}.ini`, encodeLatin1(etappeIni.serialize()));
-    vfs.add(`e${two}_anim.ini`, files.get(anim) || vfs.read(anim));
+    vfs.add(`e${two}_anim.ini`, encodeLatin1(animIni.serialize()));
     // ai_racer.cpp reads a value per etappe from each racer's section: Amsterdam's for Vianen.
     const opp = new IniFile(latin1(vfs.read('opponent.ini')));
     for (const sec of opp.sections()) {

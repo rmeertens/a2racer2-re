@@ -1,0 +1,13 @@
+{
+  "kerbsChecked": 212,
+  "oldProfile": "20 cm vertical step",
+  "newProfile": "10 cm rise over a 60 cm bevel",
+  "worstExtraFlatPavementRiseMetres": {
+    "before": 0.4876,
+    "after": 0.0281
+  },
+  "physicsProbes": 6,
+  "botLap": "finished by simulated second 110",
+  "boundaryLeaks": 0,
+  "runtime": "forward, rear view and reverse gear passed; four static pools matched"
+}

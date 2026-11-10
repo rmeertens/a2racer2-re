@@ -11,6 +11,7 @@
 // not need its own draw call: only blend and depth state changes do.
 import * as THREE from 'three';
 import { modeGrid } from '../settings.js';
+import { VianenGeometry } from './vianen-geometry.js';
 
 const DYNAMIC_VERTS = 120000;
 const STATIC_VERTS = 240000;
@@ -416,6 +417,11 @@ export class D3DRenderer {
   attach(m, host) {
     this.m = m;
     this.host = host;
+    // Vianen's new, densely detailed atlases need minification filtering. The original tracks
+    // retain their draw-state sampling; switching races also restores the array parameters.
+    this.smoothVianen = Number(host.vfs.iniGet('game.ini', 'ETAPPE', 'ETAPPE')) === 10;
+    this.vianenGeometry = this.smoothVianen ? new VianenGeometry(host.vfs.read('etappe10.rmp')) : null;
+    for (const a of this.arrays) this.filterTrackArray(a);
     this.u32 = m.u32;
     this.u16 = m.u16;
     this.f32 = m.f32;
@@ -507,9 +513,18 @@ export class D3DRenderer {
     tex.generateMipmaps = false;
     tex.needsUpdate = true;
     a = { w, h, tex, data, layers, next: 0, free: [], index: this.arrays.length };
+    this.filterTrackArray(a);
     this.arrays.push(a);
     this.uniformsShared['uTex' + a.index].value = tex;
     return a;
+  }
+
+  filterTrackArray(a) {
+    const smooth = this.smoothVianen && a.w >= 512 && a.h >= 512;
+    a.tex.minFilter = smooth ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
+    a.tex.generateMipmaps = smooth;
+    a.tex.anisotropy = smooth ? Math.min(4, this.three.capabilities.getMaxAnisotropy()) : 1;
+    a.tex.needsUpdate = true;
   }
 
   freeTexture(surface) {
@@ -677,7 +692,8 @@ export class D3DRenderer {
     k |= (this.hud ? 1 : 0) << 17;
     // D3DFILTER_NEAREST, or D3DFILTER_MIPNEAREST with mipmapping on: FUN_004bc200.
     const mag = s[RS.TEXTUREMAG];
-    k |= (texture && (mag === 1 || mag === 3) ? 1 : 0) << 18;
+    const smoothWorld = this.smoothVianen && !this.hud && !this.indexed;
+    k |= (texture && !smoothWorld && (mag === 1 || mag === 3) ? 1 : 0) << 18;
     k |= (this.indexed ? 1 : 0) << 19;
     return k;
   }
@@ -815,7 +831,10 @@ export class D3DRenderer {
   }
 
   drawIndexed(prim, vtype, verts, nverts, indices, nindices) {
-    if (nindices <= 0 || prim !== 4) return;
+    if (prim !== 4) return;
+    const complete = !this.hud && !this.indexed && vtype === 2 && this.vianenGeometry?.indicesFor(this.f32, verts, nverts);
+    if (complete) nindices = complete.length;
+    if (nindices <= 0) return;
     this.drawsThisFrame++;
     if (this.captureLevel === 0) return;
     const world = this.worldIndex(verts);
@@ -832,12 +851,25 @@ export class D3DRenderer {
     if (base < 0) return;
     const b = this.batch(texture);
     const out = this.indexArray;
-    const src = this.u16;
+    const src = complete || this.u16;
     let n = f.indexCount;
     if (n + nindices >= MAX_INDICES) return;
-    const p = indices >> 1;
+    const p = complete ? 0 : indices >> 1;
     for (let k = 0; k < nindices; k++) out[n++] = base + src[p + k];
-    b.count += nindices;
+    // Authored Vianen flat props carry U + 4, which repeats to the same atlas texel.
+    // Supply their reverse winding to the GPU, keeping the original RMP/collision plane count
+    // and normal back-face culling for buildings, the HUD and original tracks.
+    if (this.smoothVianen && !this.hud && vtype === 2) {
+      const vertex = verts >> 2, floats = this.f32;
+      const tagged = i => { const u = floats[vertex + i * 8 + 6]; return u >= 4 && u < 5; };
+      for (let k = 0; k + 2 < nindices && n + 3 < MAX_INDICES; k += 3) {
+        const a = src[p + k], c = src[p + k + 1], d = src[p + k + 2];
+        if (tagged(a) && tagged(c) && tagged(d)) {
+          out[n++] = base + a; out[n++] = base + d; out[n++] = base + c;
+        }
+      }
+    }
+    b.count += n - f.indexCount;
     f.indexCount = n;
   }
 

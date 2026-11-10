@@ -1,0 +1,87 @@
+{
+  "impacts": [
+    "box",
+    "crate",
+    "cone",
+    "sign"
+  ],
+  "nativeHandlers": 48,
+  "closedMeshes": true,
+  "persistentDisplacement": true,
+  "driveThroughFormerBase": true,
+  "missingAssets": [],
+  "botLapFinishedBySeconds": 100,
+  "raceEndedSeconds": 113.7,
+  "boundaryLeaks": 0,
+  "reachableCells": 171461,
+  "curbBevels": 212,
+  "curbPhysicsProbes": 6,
+  "sceneryRuntime": "four static pools, 3344 partial windows, rear view and reverse gear passed",
+  "browserWarningsAndErrors": [],
+  "materialImpactChecks": {
+    "box": [
+      {
+        "paperEmitters": 1,
+        "sounds": [
+          "VN_HIT_CARD"
+        ]
+      }
+    ],
+    "crate": [
+      {
+        "paperEmitters": 0,
+        "sounds": [
+          "VN_HIT_WOOD"
+        ]
+      }
+    ],
+    "cone": [
+      {
+        "paperEmitters": 0,
+        "sounds": [
+          "VN_HIT_RUBBER"
+        ]
+      }
+    ],
+    "sign": [
+      {
+        "paperEmitters": 0,
+        "sounds": [
+          "VN_HIT_WOOD"
+        ]
+      }
+    ],
+    "post": [
+      {
+        "paperEmitters": 0,
+        "sounds": [
+          "VN_HIT_WOOD"
+        ]
+      }
+    ],
+    "bike": [
+      {
+        "paperEmitters": 0,
+        "sounds": [
+          "VN_HIT_METAL"
+        ]
+      }
+    ],
+    "lantern": [
+      {
+        "paperEmitters": 0,
+        "sounds": [
+          "VN_HIT_METAL"
+        ]
+      }
+    ]
+  },
+  "materialSoundProfiles": [
+    "card",
+    "wood",
+    "rubber",
+    "metal"
+  ],
+  "originalTrackGuard": "no memory access on another etappe",
+  "soundRegistryIdempotent": true
+}

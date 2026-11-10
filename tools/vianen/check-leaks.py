@@ -41,10 +41,16 @@ for q in planes:
     ys = [v[1] for v in q]
     pts = [cell(v[0], v[2]) for v in q]
     area = abs(sum(pts[k][0] * pts[k - 1][1] - pts[k - 1][0] * pts[k][1] for k in range(4))) / 2
-    if max(ys) - min(ys) >= 12 and area < 4:
-        # Upright: its foot as a line (the two lowest corners).
-        low = sorted(q, key=lambda v: v[1])[:2]
-        w.line([cell(low[0][0], low[0][2]), cell(low[1][0], low[1][2])], fill=1, width=2)
+    if area < 4:
+        # A sloping railing's two lowest vertices can be at the same end. Measure its height
+        # at each x/z column, then project the full span; road elevation is not wall height.
+        columns = {}
+        for x, y, z in q:
+            columns.setdefault((round(x, 3), round(z, 3)), []).append(y)
+        height = max(max(c) - min(c) for c in columns.values())
+        if height >= 12:
+            a, b = max(((a, b) for a in q for b in q), key=lambda p: (p[0][0] - p[1][0]) ** 2 + (p[0][2] - p[1][2]) ** 2)
+            w.line([cell(a[0], a[2]), cell(b[0], b[2])], fill=1, width=2)
     elif area >= 1:
         g.polygon(pts, fill=1)
 G, Wl = np.array(ground), np.array(walls)

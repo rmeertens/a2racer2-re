@@ -1,0 +1,10 @@
+{
+  "props": 48,
+  "counts": {
+    "VN_BOX_ANIM": 12,
+    "VN_CRATE_ANIM": 12,
+    "VN_CONE_ANIM": 18,
+    "VN_SIGN_ANIM": 6
+  },
+  "minRoadClearanceMetres": 1.1799081949142909
+}

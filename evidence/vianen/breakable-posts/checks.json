@@ -1,0 +1,20 @@
+{
+  "movablePosts": 96,
+  "nativeBehaviour": "type 22, 10 kg, friction 0.9, rebound 0.2",
+  "mesh": "closed octagonal 12 cm diameter, 1 m high",
+  "postStaticColliders": 0,
+  "physicsHit": {
+    "posts": 96,
+    "bakedColliders": 0,
+    "minUp": -0.570932924747467,
+    "movedWorldUnits": 97.13387149589245,
+    "carPastBaseWorldUnits": 87.55466025227427,
+    "carSpeed": -0.00167412671726197,
+    "missing": []
+  },
+  "groundRegression": "212 bevels and six isolated ground probes passed",
+  "nativeLap": "completed by simulated second 105",
+  "boundaryLeaks": 0,
+  "renderChecks": "269 two-sided sprites, all 4 live native geometry pools, forward/rear/reverse passed",
+  "viewer": "same D3D mesh and OMP positions as the game; upright preview"
+}

@@ -1,0 +1,14 @@
+{
+  "stations": 106,
+  "anglesPerStation": 16,
+  "generatedViews": 1696,
+  "planes": 6178,
+  "droppedPlanes": 0,
+  "backgroundBuildings": 49,
+  "twoSidedProps": 365,
+  "boundaryLeaks": 0,
+  "botFinishedBySeconds": 95,
+  "raceEndedSeconds": 111.9,
+  "matchedLiveGeometryPools": 4,
+  "livePartialWindowsExercised": 3344
+}
