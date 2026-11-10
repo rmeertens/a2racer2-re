@@ -6,6 +6,10 @@ The architecture in short: `spel.dat`, the race, is recompiled from x86 to WebAs
 
 ## Read first
 
+For a request to add or improve a custom map, also read [Making a new map](map-making.md).
+It covers the Vianen workflow, native geometry limits, photo projection, visibility,
+collision, props and focused local checks. It is the map-making handoff for future work.
+
 | Order | Read | For |
 |---|---|---|
 | 1 | [`request.txt`](request.txt) | The brief. The limits in its fourth paragraph take precedence over broader language further down |
