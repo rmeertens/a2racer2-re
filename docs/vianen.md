@@ -180,6 +180,26 @@ views check the dike rows, roofs, rear walls and garage entrances. Runtime scene
 recognises all four updated pools; the full bot lap finishes, and the map boundary
 check reports zero leaks. Evidence: `evidence/vianen/dike-houses/`.
 
+## Houses beside the arched bridge
+
+The left-hand houses immediately beside the arched bridge (chunks 41 and 46)
+have finished exposed ends: ten sash windows preserve the drawn source frame's
+proportions, with a brick plinth and roof-edge fascia over the retained solid end
+wall. These are details on the approximate street-row houses, not a claim that the
+actual Vianen buildings have those exact side-window positions. The four arched
+bridge retaining wings are closed masonry volumes with stone foundations/caps,
+at the 1.8 m railing height. Previously each was a thin 3 m panel with no top or
+edge faces. The masonry is split at road grade so visible brick courses keep their
+scale instead of stretching over the foundation's full height.
+
+Regenerate references with
+`VIANEN_BRIDGE_ENDS=evidence/vianen/bridge-houses/geometry.json VIANEN_BUILDINGS=evidence/vianen/dike-houses/buildings.json python3 tools/vianen/build-track.py`.
+`node tools/vianen/check-bridge-houses.mjs` checks closed/wound wing geometry,
+the cap height, road clearance and all ten end-window aspect ratios in the packed
+RMP. The final track has 6,398 planes, no dropped planes, 60 backdrop buildings,
+43 chimneys and 28 dormers. Existing route and movable-object files are unchanged.
+Close local views of both bridge-facing ends: `evidence/vianen/bridge-houses/`.
+
 ## No way off the map
 
 `tools/vianen/check-leaks.py` draws the track from above (ground: every upward plane; walls: every upright plane at least 12 units high), floods from the road between the walls, and reports each place reached with nothing underneath. It found two kinds of holes, now closed:

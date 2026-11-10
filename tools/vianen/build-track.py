@@ -992,6 +992,9 @@ class Town:
         self.parked_bikes = []
         self.smashables = []
         self.scenery_slots = []  # temporary planner reservations, removed before writing the RMP
+        self.bridge_wings = []
+        self.bridge_house_ends = []
+        self.arch_bridge_chunks = set()
 
     def at(self, i, s):
         """Where the house fronts stand on this side of chunk i: wide on the Voorstraat."""
@@ -1133,14 +1136,16 @@ class Town:
     def house_wall(self, i, plane, brick):
         if self.chunks.room('rail', i):
             self.chunks.add('rail', i, plane)
-            return
+            return plane
         # Dense corners can exhaust the detail pass while the facade pass has room.
         # An opaque wall-colour sample from a drawn facade closes the same geometry there;
         # never silently drop an end wall or borrow a transparent gable corner.
         box = GEVEL[FACADES[5 if brick else 4]]
         sample = ((box[0] + 10.5) / 1024, (box[1] + 180.5) / 1024)
         vs, _, colour, indices = plane
-        self.chunks.add('extra', i, (vs, [sample] * 4, colour, indices))
+        plane = (vs, [sample] * 4, colour, indices)
+        self.chunks.add('extra', i, plane)
+        return plane
 
     def house(self, h, prev, nxt):
         """A town house: its drawn front with the gable's outline, its roof, and side walls where a
@@ -1248,7 +1253,50 @@ class Town:
                 self.house_wall(i, quad(vs, uv('bouw', material, 0, 1, 0, max(0.15, (top_wall - base) / 140)), wall_tint, facing), spec['brick'])
             if not h['gable']:
                 self.house_wall(i, closed_tri(F(t, T), B(t, T), M(t, T + h['roof']), uv_tri('bouw', 'brick' if spec['brick'] else 'white'), wall_tint, facing), spec['brick'])
+            neighbour = (i - 1 if t == 0 else i + 1) % self.n
+            if t in (0, 1) and neighbour in self.arch_bridge_chunks:
+                self.finish_bridge_house_end(h, t, facing)
         self.house_roof_details(h)
+
+    def finish_bridge_house_end(self, h, t, facing):
+        """Finish the exposed bridge-facing end, preserving the closed wall behind it."""
+        i, s = h['i'], h['s']
+        front, depth = self.at(i, s), h['depth']
+        P = lambda d, y: tuple(v + facing[k] * .2 for k, v in
+                               enumerate(self.p(i, t, s * (front + d), y)))
+        faces = []
+        # A weather-resistant brick plinth anchors the white end wall to its parcel.
+        faces.append(self.house_wall(i, quad([P(0, 0), P(depth, 0), P(depth, 8), P(0, 8)],
+            uv('bouw', 'brick', v0=.85), (225, 215, 205), facing), True))
+        # Crop one sash window from a drawn facade; keep the frame's aspect ratio
+        # instead of stretching an entire shop front across the end wall.
+        spec = HOUSE_TYPES[8]
+        eave_px = int(512 * (1 - spec['eave']))
+        floor_px = (512 - eave_px) * (1 - 1.12 / (spec['floors'] + 1.12)) / spec['floors']
+        y0 = eave_px + floor_px * .18 - 4
+        y1 = eave_px + floor_px * .82 + 4
+        width_px = (256 * .76 / spec['cols']) * .55 + 8
+        height = 20.0
+        width = height * width_px / (y1 - y0)
+        crop = dict(u0=(128 - width_px / 2) / 256, u1=(128 + width_px / 2) / 256,
+                    v0=y0 / 512, v1=y1 / 512)
+        floors = HOUSE_TYPES[h['type']]['floors'] + 1
+        for level in range(floors):
+            sill = 9 + level * (h['eave'] / floors)
+            for d in (depth * .3, depth * .7):
+                vs = [P(d - width / 2, sill), P(d + width / 2, sill),
+                      P(d + width / 2, sill + height), P(d - width / 2, sill + height)]
+                plane = quad(vs, wall_uv('gevel', FACADES[8], vs, facing, **crop), (245, 245, 240), facing)
+                self.chunks.add('extra', i, plane)
+                faces.append(plane)
+        # A visible fascia follows both roof slopes, rather than leaving an
+        # untrimmed white triangular end meeting a paper-thin roof edge.
+        if not h['gable']:
+            top, ridge = h['top'], h['top'] + h['roof']
+            for d0, y0, d1, y1 in ((0, top, depth / 2, ridge), (depth / 2, ridge, depth, top)):
+                vs = [P(d0, y0 - 1), P(d1, y1 - 1), P(d1, y1 + .2), P(d0, y0 + .2)]
+                faces.append(self.house_wall(i, quad(vs, uv('bouw', 'white'), (235, 234, 222), facing), False))
+        self.bridge_house_ends.append({'chunk': i, 'side': s, 't': t, 'windows': floors * 2, 'faces': faces})
 
     def jody_billboard(self, i=46):
         """A deliberately enormous 9 x 12 m, double-faced portrait on the open dike bank.
@@ -1810,7 +1858,7 @@ class Town:
         vs = [Q(t0, WL + L, 0), Q(t1, WL + L, 0), Q(t1, WL + L, top), Q(t0, WL + L, top)]
         self.side_house(i, vs, inward, spec)
 
-    def bridge(self, first, last):
+    def bridge(self, first, last, solid_ends=False):
         """A stretch of road over water: no houses, water both sides below, a narrower deck."""
         for i in range(first, last + 1):
             i %= self.n
@@ -1832,6 +1880,34 @@ class Town:
             for s in (-1, 1):
                 P = lambda off, y, i=i, s=s, t=t: self.p(i, t, s * off, y)
                 g0 = self.p(i, t, 0)[1]
+                if solid_ends:
+                    # Solid retaining wings with a stone cap, matching the bridge
+                    # rail height. The former two-sided 3 m panel had no top/edges.
+                    P = lambda off, y, d: tuple(v + self.fwd(i)[k] * d for k, v in
+                                                enumerate(self.p(i, t, s * off, y)))
+                    a, b, lo, hi = DECK, WALK + 2, WATER_Y - g0, 18
+                    wing = []
+                    sides = []
+                    # Split at road grade so the visible brickwork keeps ordinary
+                    # courses, instead of stretching a few rows up the buried pier.
+                    for y0, y1, material in ((lo, 0, 'stone'), (0, hi, 'brick')):
+                        sides.extend((
+                            ([P(a,y0,-2),P(b,y0,-2),P(b,y1,-2),P(a,y1,-2)],tuple(-v for v in self.fwd(i)),material),
+                            ([P(b,y0,2),P(a,y0,2),P(a,y1,2),P(b,y1,2)],self.fwd(i),material),
+                            ([P(a,y0,2),P(a,y0,-2),P(a,y1,-2),P(a,y1,2)],tuple(-s*v for v in self.right(i)),material),
+                            ([P(b,y0,-2),P(b,y0,2),P(b,y1,2),P(b,y1,-2)],tuple(s*v for v in self.right(i)),material),
+                        ))
+                    for vs, normal, material in sides + [
+                        ([P(a,hi,-2),P(b,hi,-2),P(b,hi,2),P(a,hi,2)],(0,1,0),'stone'),
+                        ([P(a,lo,2),P(b,lo,2),P(b,lo,-2),P(a,lo,-2)],(0,-1,0),'brick'),
+                    ]:
+                        width = math.dist(vs[0],vs[1])
+                        mapping = uv('bouw',material,0,min(1,width/75),0,.3 if material=='brick' else .7)
+                        plane = quad(vs, mapping, (230,220,205), normal)
+                        self.chunks.add('rail',i,plane)
+                        wing.append(plane)
+                    self.bridge_wings.append({'chunk':i,'side':s,'t':t,'faces':wing})
+                    continue
                 vs = [P(DECK, WATER_Y - g0), P(WALK + 2, WATER_Y - g0), P(WALK + 2, 30), P(DECK, 30)]
                 for face in (fw, tuple(-x for x in fw)):
                     self.chunks.add('rail', i, quad(vs, uv('bouw', 'brick', 0, 0.3, 0, 0.5), (226, 214, 206), face))
@@ -1851,7 +1927,8 @@ class Town:
     def arched_bridge(self, first, last):
         """The hump on the dike as the brick bridge with three arches in the owner's photo: its
         faces from the water up to the road, both sides, and parapets."""
-        self.bridge(first, last)
+        self.arch_bridge_chunks.update(range(first, last + 1))
+        self.bridge(first, last, solid_ends=True)
         span = last - first + 1
         for k, i in enumerate(range(first, last + 1)):
             i %= self.n
@@ -2201,6 +2278,12 @@ def build():
         raise RuntimeError(f'Geometry exceeded the chunk budget: {town.chunks.lost_at}')
 
     chunks = [[c[k] for k in ('road', 'land', 'extra', 'rail')] for c in town.chunks.lists]
+    if os.environ.get('VIANEN_BRIDGE_ENDS'):
+        refs = {id(plane): [ci, pi, vi] for ci, chunk in enumerate(chunks)
+                for pi, planes in enumerate(chunk) for vi, plane in enumerate(planes)}
+        groups = {'wings': town.bridge_wings, 'houses': town.bridge_house_ends}
+        json.dump({kind: [{**b, 'faces': [refs[id(p)] for p in b['faces']]} for b in values]
+                   for kind, values in groups.items()}, open(os.environ['VIANEN_BRIDGE_ENDS'], 'w'))
     if os.environ.get('VIANEN_BUILDINGS'):
         refs = {id(plane): [ci, pi, vi] for ci, chunk in enumerate(chunks)
                 for pi, planes in enumerate(chunk) for vi, plane in enumerate(planes)}
