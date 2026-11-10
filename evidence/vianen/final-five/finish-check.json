@@ -1,0 +1,16 @@
+{
+  "objects": {
+    "VN_CROWN_ANIM": 48,
+    "VN_DRAIN_ANIM": 16,
+    "VN_COVER_ANIM": 8,
+    "VN_BENCH_ANIM": 4
+  },
+  "nativeObjectsWithoutPhysics": 72,
+  "shadedBankFaces": 508,
+  "missingAssets": [],
+  "unavailableOriginalVoiceVariants": [
+    "cco00_05.wav",
+    "cpa00_05.wav",
+    "cbp00_00.wav"
+  ]
+}

@@ -39,7 +39,7 @@ export function vianenMenuImages(index) {
 }
 
 const TRACK = ['rmp', 'pmp', 'dmp', 'cmp', 'omp', 'pth'];
-const TEXTURES = ['vn_weg.tga', 'vn_land.tga', 'vn_gevel.tga', 'vn_bouw.tga', 'vn_fun.tga'];
+const TEXTURES = ['vn_weg.tga', 'vn_land.tga', 'vn_gevel.tga', 'vn_bouw.tga', 'vn_fun.tga', 'vn_detail.tga'];
 const PROPS = [
   ['vn_paal.d3d', 'VN_PAAL_ANIM', 'Vianen red-white post'],
   ['vn_lamp.d3d', 'VN_LAMP_ANIM', 'Vianen lantern post'],
@@ -48,6 +48,10 @@ const PROPS = [
   ['vn_kist.d3d', 'VN_CRATE_ANIM', 'Empty market crate', 'vn_fun.tga'],
   ['vn_kegel.d3d', 'VN_CONE_ANIM', 'Traffic cone', 'vn_fun.tga'],
   ['vn_bord.d3d', 'VN_SIGN_ANIM', 'Market chalkboard', 'vn_fun.tga'],
+  ['vn_bank.d3d', 'VN_BENCH_ANIM', 'Wooden street bench', 'vn_fun.tga'],
+  ['vn_put.d3d', 'VN_DRAIN_ANIM', 'Drain cover', 'vn_detail.tga'],
+  ['vn_deksel.d3d', 'VN_COVER_ANIM', 'Manhole cover', 'vn_detail.tga'],
+  ['vn_kruin.d3d', 'VN_CROWN_ANIM', 'Lime canopy layer'],
 ];
 const MODELS = PROPS.map(([model]) => model);
 const BASE = 'assets/vianen/';

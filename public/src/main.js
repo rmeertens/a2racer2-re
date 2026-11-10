@@ -2538,7 +2538,8 @@ var VIANEN_IMPACTS = {
   VN_CONE_ANIM: { material: "rubber", handler: 4540816, paper: false },
   VN_PAAL_ANIM: { material: "wood", handler: 4545376, paper: false },
   VN_BIKE_ANIM: { material: "metal", handler: 4545376, paper: false },
-  VN_LAMP_ANIM: { material: "metal", handler: 4545376, paper: false }
+  VN_LAMP_ANIM: { material: "metal", handler: 4545376, paper: false },
+  VN_BENCH_ANIM: { material: "wood", handler: 4545376, paper: false }
 };
 function installVianenImpacts(m, vfs) {
   if (Number(vfs.iniGet("game.ini", "ETAPPE", "ETAPPE")) !== 10 || !vfs.exists("vn_fun.tga")) return [];
@@ -33346,7 +33347,7 @@ function vianenMenuImages(index) {
   return out;
 }
 var TRACK = ["rmp", "pmp", "dmp", "cmp", "omp", "pth"];
-var TEXTURES = ["vn_weg.tga", "vn_land.tga", "vn_gevel.tga", "vn_bouw.tga", "vn_fun.tga"];
+var TEXTURES = ["vn_weg.tga", "vn_land.tga", "vn_gevel.tga", "vn_bouw.tga", "vn_fun.tga", "vn_detail.tga"];
 var PROPS = [
   ["vn_paal.d3d", "VN_PAAL_ANIM", "Vianen red-white post"],
   ["vn_lamp.d3d", "VN_LAMP_ANIM", "Vianen lantern post"],
@@ -33354,7 +33355,11 @@ var PROPS = [
   ["vn_doos.d3d", "VN_BOX_ANIM", "Light cardboard carton", "vn_fun.tga"],
   ["vn_kist.d3d", "VN_CRATE_ANIM", "Empty market crate", "vn_fun.tga"],
   ["vn_kegel.d3d", "VN_CONE_ANIM", "Traffic cone", "vn_fun.tga"],
-  ["vn_bord.d3d", "VN_SIGN_ANIM", "Market chalkboard", "vn_fun.tga"]
+  ["vn_bord.d3d", "VN_SIGN_ANIM", "Market chalkboard", "vn_fun.tga"],
+  ["vn_bank.d3d", "VN_BENCH_ANIM", "Wooden street bench", "vn_fun.tga"],
+  ["vn_put.d3d", "VN_DRAIN_ANIM", "Drain cover", "vn_detail.tga"],
+  ["vn_deksel.d3d", "VN_COVER_ANIM", "Manhole cover", "vn_detail.tga"],
+  ["vn_kruin.d3d", "VN_CROWN_ANIM", "Lime canopy layer"]
 ];
 var MODELS = PROPS.map(([model]) => model);
 var BASE = "assets/vianen/";

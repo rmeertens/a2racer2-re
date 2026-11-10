@@ -12,6 +12,7 @@ export const VIANEN_IMPACTS = {
   VN_PAAL_ANIM:  { material:'wood',   handler:0x455b60, paper:false },
   VN_BIKE_ANIM:  { material:'metal',  handler:0x455b60, paper:false },
   VN_LAMP_ANIM:  { material:'metal',  handler:0x455b60, paper:false },
+  VN_BENCH_ANIM: { material:'wood',   handler:0x455b60, paper:false },
 };
 
 export function installVianenImpacts(m, vfs) {

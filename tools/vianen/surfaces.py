@@ -125,7 +125,17 @@ def connected_terrain(town, water, sides, quad, tri, uv):
                 if town.chunks.room(kind, ci) == 0:
                     raise RuntimeError(f'No terrain slots near chunk {ci}; simplify the mesh instead of dropping ground')
             atlas = 'surface' if kind == 'road' else 'land'
-            town.chunks.add(kind, ci, tri(*vs, uv(atlas, material), (242, 245, 238), (0, 1, 0)))
+            plane = tri(*vs, uv(atlas, material), (242, 245, 238), (0, 1, 0))
+            if category == 'banks':
+                # Height-based wetness follows the actual waterline and keeps the
+                # collision mesh unchanged. Per-vertex colour avoids triangle-shaped bands.
+                vertices, mapping, colour, indices = plane
+                colours = []
+                for _, y, _ in vertices:
+                    wet = max(0, min(1, (-1-y)/24))
+                    colours.append(tuple(round(c*(1-wet*(1-low))) for c,low in zip(colour,(.62,.52,.46))))
+                plane = vertices, mapping, colours, indices
+            town.chunks.add(kind, ci, plane)
             counts[category] += 1
 
     # Keep large ground faces local to the car's chunk window. A distant triangle must not

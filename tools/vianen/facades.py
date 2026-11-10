@@ -179,6 +179,27 @@ def facade(spec, w=256, h=512, seed=0):
         d.rectangle((6, gy + 4, w - 6, h - 6), fill=frame)
         d.rectangle((14, gy + 28, w * 0.66, h - 26), fill=(52, 64, 68))
         d.polygon([(15, gy + 29), (w * 0.65, gy + 29), (w * 0.65, h - 66), (15, h - 90)], fill=(100, 112, 117))
+        # Recessed displays behind the glass, rather than a featureless grey pane.
+        # These belong only to the drawn fronts; photo facades are supplied separately.
+        x0,x1,y0,y1=18,int(w*.65)-4,int(gy+35),h-30
+        style=(seed//3)%3
+        d.rectangle((x0,y0,x1,y1),fill=(47,59,59))
+        for row in range(2):
+            shelf=y0+(row+1)*(y1-y0)//3+10
+            d.rectangle((x0,shelf,x1,shelf+3),fill=(108,85,60))
+            for col in range(5):
+                x=x0+8+col*(x1-x0-16)/5
+                if style==0:
+                    d.ellipse((x,shelf-12,x+19,shelf-2),fill=(162,127,79),outline=(110,86,54))
+                    d.line((x+5,shelf-9,x+8,shelf-6),fill=(209,178,119),width=2)
+                elif style==1:
+                    d.rectangle((x,shelf-11,x+13,shelf-1),fill=(131,89,66))
+                    d.line((x+6,shelf-10,x+6,shelf-27),fill=(67,100,69),width=3)
+                    d.ellipse((x,shelf-30,x+12,shelf-18),fill=(173,150,105) if col%2 else (148,84,83))
+                else:
+                    for book in range(3):
+                        d.rectangle((x+book*5,shelf-20+book*2,x+book*5+3,shelf-1),fill=((102,125,119),(144,112,76),(128,91,91))[book])
+        d.line((x0+8,y0+3,x0+8+(y1-y0)*.2,y1-3),fill=(106,125,125),width=3)
         d.line((w * 0.34, gy + 29, w * 0.34, h - 26), fill=frame, width=3)
         d.rectangle((w * 0.72, gy + 26, w - 14, h - 6), fill=(17, 27, 26))
         d.rectangle((w * 0.75, gy + 32, w - 20, h - 48), fill=(79, 94, 97))

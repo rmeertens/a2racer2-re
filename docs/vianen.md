@@ -1,7 +1,7 @@
 # Vianen
 
 The sections below record the track's successive iterations. The current appearance and the
-10 November 2026 checks are described in **Realism pass** at the end.
+latest checks are described in **Final five improvements** at the end.
 
 ## Vianen etappe (sketch)
 
@@ -129,10 +129,10 @@ The guard requires etappe 10 and Vianen's assets.
 Four original mono PCM sounds are generated deterministically by
 `tools/vianen/build-impact-sounds.py` (also called by the track builder). They use
 the native positional mixer and the user's effect-volume controls. The sound
-registry additions live in memory. Impact checks for all seven prop families
+registry additions live in memory. Impact checks for all eight prop families
 compare the PCM actually submitted to DirectSound with the intended material
 sample and check the native paper-emitter counter around the target's handler:
-one emitter for a carton, zero for the other six families. Each observed hit plays
+one emitter for a carton, zero for the other seven families. Each observed hit plays
 its material sample once. The test parks the car clear before checking the final
 fallen pose, so a still-pushing car cannot re-tip the prop during that assertion.
 
@@ -549,3 +549,49 @@ Verification of the final assets:
 Evidence: `evidence/vianen/angle-sweep/` contains selected 16-view sheets, before/after comparisons,
 and viewer/race screenshots. Exterior surfaces are closed in the checked views; free cameras
 can still be placed inside solids or below the authored terrain.
+
+
+## Final five improvements
+
+The final finishing pass adds five details without changing the route or existing static
+collision geometry:
+
+1. **Fuller Voorstraat limes.** Forty-eight extra two-sided canopy cards cross the original
+   foliage at right angles. Side views retain branches and leaves instead of showing only a
+   thin edge. These are crossed cutouts, not volumetric trees; canal-bank trees are unchanged.
+2. **Shop-window displays.** The drawn shop fronts now contain recessed bakery shelves,
+   flowerpots or books, with a glass reflection. The owner's four rectified photo fronts are
+   pixel-identical to the previous revision. The display contents are fictional scenery.
+3. **Darker canal banks.** Height-based per-vertex colour darkens 508 bank faces toward the
+   waterline. It uses the same terrain vertices and texture coordinates.
+4. **Flush street covers.** Sixteen grated drains sit beside the curb and eight circular
+   manhole covers break up the road paving. They are placed only on flat chunks, 3.5 mm above
+   their supporting surface. All 24 use native OMP type 0 with no physics body or hit handler.
+5. **Benches that topple.** Four closed wooden/slatted benches stand along Voorstraat, facing
+   the street. Native type 3 supplies a 50 kg movable body. They play the wood impact sample
+   once when hit and emit no paper. They use the same material effects as the other props.
+
+The new canopy layers also use non-colliding type 0. The map retains 6,398 RMP planes;
+all static positions, UVs and triangle indices match the previous revision. OMP object count
+rises from 252 to 328. The extra atlas is 256×256 pixels, with existing tree and wood materials
+reused for the canopy layers and benches. `tools/vianen/details.py` builds these details;
+the race and silent track viewer load the same models and textures.
+
+Validation on the final generated assets:
+
+- `node tools/vianen/check-finish.mjs`: all 72 decorative objects have null native body
+  pointers, disabled physics and no collision handlers; all four benches have physics bodies
+  and resolved wood samples. Models and textures load. Three optional original announcer
+  variants are absent from the source game archive and are recorded separately in the result.
+- `node tools/vianen/check-bollards.mjs --prop bench`: actual native impact topples a bench,
+  displaces it 2.21 m and permits the car to pass its old base. One wood sound, zero paper.
+- `node tools/vianen/check-sidewalks.mjs`: all six crossing probes pass, maximum rise 15.3 cm.
+- `node tools/vianen/check-scenery.mjs --runtime`: all four pools match; forward, rear-facing
+  and reverse-driving visibility checks pass.
+- `node tools/vianen/check-vianen.mjs --seconds 130`: bot finishes by 95 seconds; all Vianen
+  assets load. Boundary check has zero leaks. Building and bridge-house closure checks pass.
+- Inspected six close local viewer views covering all five additions, with no browser warnings
+  or errors. Screenshots and importable viewer cameras are in `evidence/vianen/final-five/`.
+
+These checks cover the added details and the existing single Vianen race; they are not a new
+performance benchmark or exhaustive camera sweep.

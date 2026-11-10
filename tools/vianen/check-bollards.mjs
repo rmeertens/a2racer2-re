@@ -21,8 +21,9 @@ const fun = propOption < 0 ? null : {
   crate: ['VN_CRATE_ANIM','vn_kist.d3d',22,7.38,70],
   cone: ['VN_CONE_ANIM','vn_kegel.d3d',2,7.87,64],
   sign: ['VN_SIGN_ANIM','vn_bord.d3d',22,7.68,72],
+  bench: ['VN_BENCH_ANIM','vn_bank.d3d',3,14.35,118],
 }[process.argv[propOption + 1]];
-if (propOption >= 0) assert(fun, 'Use --prop box, crate, cone or sign');
+if (propOption >= 0) assert(fun, 'Use --prop box, crate, cone, sign or bench');
 const bridge = process.argv.includes('--bridge');
 const bikes = process.argv.includes('--bikes');
 const lanterns = process.argv.includes('--lanterns') || bridge;
@@ -37,7 +38,7 @@ const read = name => {
 };
 const objects = readObjects(read('vianen.omp')).filter(o => o.name === propName);
 const metadata = JSON.parse(readFileSync(root + 'public/assets/vianen/vianen.json'));
-assert.equal(objects.length, fun ? metadata.smashableProps[propName] : bikes ? metadata.movableBikes : lanterns ? metadata.movableLanterns : 96);
+assert.equal(objects.length, fun ? (metadata.smashableProps[propName] ?? metadata.detailObjects[propName]) : bikes ? metadata.movableBikes : lanterns ? metadata.movableLanterns : 96);
 assert(objects.length > 0);
 assert(objects.every(o => o.type === nativeType), 'Use the intended native movable-object behaviour');
 const baked = readPlanes(read('vianen.rmp')).passes.flat().filter(p => !fun && p.twoSided && (bikes ?

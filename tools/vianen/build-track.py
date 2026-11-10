@@ -39,6 +39,7 @@ from route import load as load_osm  # noqa: E402
 from facades import facade_atlas, sash_window, TYPES as HOUSE_TYPES  # noqa: E402
 from surfaces import paving, landscape_texture, connected_terrain  # noqa: E402
 from photo_warp import rectify  # noqa: E402
+from details import detail_texture, build_detail_models, place_details  # noqa: E402
 
 UNITS = 10.0          # world units per metre
 CHUNK = 128.0         # chunk length in world units, as on the original tracks
@@ -183,8 +184,9 @@ def closed_tri(a, b, c, uvs, tint, facing):
 def pack_plane(p):
     vs, uvs, colour, idx = p
     b = b''
-    for v, uv in zip(vs, uvs):
-        b += struct.pack('<5f', v[0], v[1], v[2], uv[0], uv[1]) + bytes((colour[0], colour[1], colour[2], 0))
+    for k, (v, uv) in enumerate(zip(vs, uvs)):
+        rgb = colour[k] if isinstance(colour[0], (list, tuple)) else colour
+        b += struct.pack('<5f', v[0], v[1], v[2], uv[0], uv[1]) + bytes((*rgb, 0))
     return b + struct.pack('<6i', *idx)
 
 
@@ -542,8 +544,9 @@ SURFACE = {'road': (0, 0, 256, 256), 'pavement': (256, 0, 512, 256),
 FUN = {'carton': (0, 0, 128, 128), 'wood': (128, 0, 256, 128),
        'cone': (0, 128, 128, 256), 'board': (128, 128, 256, 256)}
 STREET_NAMES = []  # filled by build() from OSM before the textures: the signs' names
-ATLAS_SIZE = {'gevel': (1024, 1024), 'land': (512, 512), 'bouw': (1024, 1024), 'surface': (512, 512), 'fun': (256, 256)}
-ATLASES = {'gevel': GEVEL, 'land': LAND, 'bouw': BOUW, 'surface': SURFACE, 'fun': FUN}
+ATLAS_SIZE = {'gevel': (1024, 1024), 'land': (512, 512), 'bouw': (1024, 1024), 'surface': (512, 512), 'fun': (256, 256), 'detail': (256, 256)}
+ATLASES = {'gevel': GEVEL, 'land': LAND, 'bouw': BOUW, 'surface': SURFACE, 'fun': FUN,
+           'detail': {'drain': (0,0,128,128), 'cover': (128,0,256,128)}}
 
 
 def fun_texture():
@@ -690,6 +693,7 @@ def build_textures():
     bouw.paste(Image.fromarray(white), big['white'][:2])
     save_tga(bouw, os.path.join(OUT, 'vn_bouw.tga'))
     save_tga(fun_texture(), os.path.join(OUT, 'vn_fun.tga'))
+    save_tga(detail_texture(), os.path.join(OUT, 'vn_detail.tga'))
 
 
 def uv(atlas, name, u0=0.0, u1=1.0, v0=0.0, v1=1.0):
@@ -991,6 +995,7 @@ class Town:
         self.lanterns = []
         self.parked_bikes = []
         self.smashables = []
+        self.detail_objects = []
         self.scenery_slots = []  # temporary planner reservations, removed before writing the RMP
         self.bridge_wings = []
         self.bridge_house_ends = []
@@ -1652,6 +1657,9 @@ class Town:
             return
         c = self.p(i, t, off, base)
         f, r = self.fwd(i), self.right(i)
+        if name == 'crown':
+            yaw = math.degrees(math.atan2(-f[2],f[0]))
+            self.detail_objects.append((i,0,c,yaw,'VN_CROWN_ANIM'))
         side = 1 if off > 0 else -1
         # across: square to the road, facing the cars that come (seen whole down a long street).
         d = r if across else f
@@ -2262,6 +2270,7 @@ def build():
         town.chunks.add(kind, c, plane)
     town.bikes()
     town.fun_props()
+    place_details(town)
     town.road_dashes()
     for kind, c, plane in town.shells:
         town.chunks.add(kind, c, plane)
@@ -2325,6 +2334,8 @@ def build():
         objs.append(obj(chunk, 22, position, yaw, 'VN_BIKE_ANIM'))
     for chunk, kind, position, yaw, name in town.smashables:
         objs.append(obj(chunk,kind,position,yaw,name))
+    for chunk, kind, position, yaw, name in town.detail_objects:
+        objs.append(obj(chunk,kind,position,yaw,name))
     s = START + 1
     f = town.fr[s][0]
     heading = math.degrees(math.atan2(f[1], f[0]))
@@ -2348,6 +2359,7 @@ def build():
     build_lantern_mesh()
     build_bike_mesh()
     build_fun_meshes()
+    build_detail_models(save_prop_mesh, uv)
     from runpy import run_path
     run_path(os.path.join(HERE, 'build-impact-sounds.py'))['build']()
     build_loading()
@@ -2375,6 +2387,7 @@ def build():
                'movableLanterns': len(town.lanterns),
                'movableBikes': len(town.parked_bikes),
                'smashableProps': dict(Counter(p[4] for p in town.smashables)),
+               'detailObjects': dict(Counter(p[4] for p in town.detail_objects)),
                'backdropBuildings': len(town.backdrop_buildings),
                'utilityBuildings': sum(b['utility'] for b in town.backdrop_buildings),
                'roofDetails': town.roof_counts}, open(os.path.join(OUT, 'vianen.json'), 'w'))
@@ -2397,6 +2410,8 @@ def write_attribution():
         'Jody Bernal poster: artwork generated with the built-in image generation tool using [Kees Spiero\'s 12 April 2001 portrait](https://commons.wikimedia.org/wiki/File:2001_Portret_Jody_Bernal,_zanger_van_de_hit_Que_si_Que_no_(1).jpg), Stadsarchief Delft, [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Background replaced, portrait reframed and typography added. Source portrait, finished artwork and generation prompt: `source/assets/vianen/posters/`.',
         '',
         'The cardboard cartons, slatted wooden crates, traffic cones and market chalkboards are original procedural models and materials drawn by `tools/vianen/build-track.py` (`vn_fun.tga`). Their market lettering is fictional scenery.',
+        '',
+        'The wooden street benches, drain/manhole covers and extra lime-canopy cards are original procedural models from `tools/vianen/details.py`; the covers use its original `vn_detail.tga` texture. The drawn shop windows contain fictional bakery, flower and book displays from `tools/vianen/facades.py`. Canal-bank wetness uses height-based vertex colour from `tools/vianen/surfaces.py`.',
         '',
         'The four material impact sounds (`vn_card.wav`, `vn_wood.wav`, `vn_rubber.wav`, `vn_metal.wav`) are original procedural audio generated by `tools/vianen/build-impact-sounds.py`.',
         '',
