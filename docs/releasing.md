@@ -18,6 +18,41 @@ Kept from the disc: `Data/`, `Handleiding/`, the read-me and help files. `tools/
 
 `rcs.img`, 114 MB, is over GitHub's limit of 100 MB per file. Git holds it in pieces in `large-files/`. `tools/large-files.mjs restore` runs on `npm ci`, checks the SHA-256 and writes `public/assets/game/rcs.img`, `original/install/rcs.img` and `original/disc/Data/rcs.IMG`. The decompile archive holds it whole, at `original/install/rcs.img`.
 
+## Pages deployment delays
+
+The 10 November 2026 Vianen deployment (`42830189621`, attempt 3) built in
+36 seconds, including six seconds to package/upload the site. Its Pages deployment
+then spent about 2 minutes 16 seconds queued and 7 minutes 33 seconds at
+`syncing_files`, before succeeding at 15:08 UTC. Attempt 2 of the same commit
+timed out at `syncing_files`. An earlier deployment of this site completed in
+26 seconds. The delay is after the upload, inside Pages processing; logs do not
+identify GitHub's internal reason for the stall.
+
+The payload has about 210 MiB uncompressed across 812 files, approximately
+119 MiB as an Actions artifact; `rcs.img` accounts for 109 MiB uncompressed.
+The archive is required by the game's range-based resource loader. Its size
+may increase processing work, but neither these timings nor the size establish
+it as the cause. Contemporaneous independent reports also describe the same
+stall and recovery without content/configuration changes:
+<https://github.com/orgs/community/discussions/212625>.
+GitHub reported a Pages incident on 9 November at 18:30 UTC, resolved by 18:59;
+that incident does not overlap our later failed deployments, so a direct causal
+link is unconfirmed.
+
+`actions/deploy-pages@v4` hard-caps its timeout at 600000 milliseconds; setting
+1800000 only produces a warning and still cancels after ten minutes:
+<https://github.com/actions/deploy-pages/blob/v4/src/internal/deployment.js>.
+The workflow now uses the actual supported limit, reports its publish payload
+in the build summary, and skips root README/PLAN, docs and evidence-only pushes. A manual
+`workflow_dispatch` remains available for a retry. Re-run a failed deploy after
+the prior attempt has settled; repeated immediate retries can remain queued.
+These changes reduce unnecessary deployments and improve diagnosis; they do
+not repair GitHub's sync service. No automatic retry loop or hosting migration
+is enabled. If delays persist, request GitHub support with the run IDs and logs.
+Hosting immutable game assets separately could shrink future Pages payloads,
+but requires checking CORS and HTTP Range support for `GameFiles`; size reduction
+alone is not a demonstrated fix for this incident.
+
 ## Assets
 
 No `.zip` copies: they held the same files as the installer, the `.dmg` and the source. Since 1.1.1 the Windows installer, the `.dmg` and the AppImage are the desktop downloads, and the web build comes from the source with `npm run build`. Each release uploads about 1.5 GB less per host.

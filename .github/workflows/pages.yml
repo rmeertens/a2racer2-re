@@ -7,6 +7,12 @@ name: GitHub Pages
 on:
   push:
     branches: [main]
+    # These files are not copied to dist; use workflow_dispatch for a manual retry.
+    paths-ignore:
+      - 'README.md'
+      - 'PLAN.md'
+      - 'docs/**'
+      - 'evidence/**'
   workflow_dispatch:
 
 permissions:
@@ -36,6 +42,31 @@ jobs:
       - run: npm run build
       - name: Custom domain
         run: echo 'a2racer.meertens.dev' > dist/CNAME
+      - name: Report publish size
+        run: |
+          node --input-type=module <<'JS'
+          import { readdirSync, statSync, appendFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const files = [];
+          const walk = dir => {
+            for (const name of readdirSync(dir)) {
+              const path = join(dir, name), stat = statSync(path);
+              if (stat.isDirectory()) walk(path);
+              else files.push({ path, bytes: stat.size });
+            }
+          };
+          walk('dist');
+          const mib = n => (n / 1024 ** 2).toFixed(1);
+          const total = files.reduce((sum, f) => sum + f.bytes, 0);
+          const summary = [
+            `Publish payload: ${files.length} files, ${mib(total)} MiB uncompressed.`,
+            '', 'Largest files:',
+            ...files.sort((a, b) => b.bytes - a.bytes).slice(0, 5).map(f => `- ${f.path}: ${mib(f.bytes)} MiB`),
+            '', 'Build/upload timings and Pages queue/sync timings are separate in the job logs.',
+          ].join('\n');
+          console.log(summary);
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
+          JS
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -51,6 +82,6 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
         with:
-          # GitHub's side can take longer than the default 10 minutes for a site this size
-          # (rcs.img alone is over 100 MB); twice it timed out on 9 and 10 November 2026.
-          timeout: 1800000
+          # deploy-pages v4 clamps this input to 600000; larger values do not
+          # extend the wait. See docs/releasing.md for the sync-stall diagnosis.
+          timeout: 600000
