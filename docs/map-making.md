@@ -179,6 +179,13 @@ Vianen's sharp curb was replaced by a 10 cm rise over a 60 cm bevel. Probe cross
 several angles and locations, including bridges and slopes; keep a clear join between road,
 bevel and pavement. Decorative covers must not become extra collision bodies.
 
+Paint road markings into the road material. Vianen's white edge dashes were originally
+separate RMP terrain planes raised 8 cm above the road, so the wheels encountered physical
+steps. The fix uses a marked variant of the paving texture on the existing road faces and
+removes the raised planes entirely. A small visual offset on an RMP plane is still collision
+geometry; it is not a renderer-only decal. `check-sidewalks.mjs --road-markings` checks the
+packed geometry and drives with the wheels over the paint in both directions.
+
 ## Use advertisements as part of the street
 
 Use a few readable designs with a clear headline, coherent colours and the correct aspect

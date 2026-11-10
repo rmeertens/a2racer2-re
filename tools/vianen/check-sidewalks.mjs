@@ -1,6 +1,7 @@
 // Focused Vianen physics regression: cross a curb, then drive along both pavements.
 // Uses the original game's vehicle teleport only to arrange repeatable starting poses.
 // node tools/vianen/check-sidewalks.mjs [--json result.json] [--rmp old.rmp --measure-only]
+// Add --road-markings for forward/reverse probes with wheels over the edge paint.
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync,statSync,writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
@@ -11,7 +12,7 @@ import {GameInput} from '../../source/input/keyboard.js';
 import {NetRace} from '../../source/net/puppets.js';
 import {Bot} from '../../source/dev/bot.js';
 import {installVianen,vianenFiles} from '../../source/host/vianen.js';
-import {readPositions,readPlanes,routeFrame} from '../../source/dev/track-model.js';
+import {readPositions,readPlanes,readTga,routeFrame} from '../../source/dev/track-model.js';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const option=name=>{const i=process.argv.indexOf('--'+name);return i<0?null:process.argv[i+1];};
 const results=[];
@@ -30,6 +31,22 @@ if (!process.argv.includes('--measure-only')) {
   console.log(`${kerbs.length} continuous bevels checked, including bridges and the dike`);
 }
 const pmp=readFileSync(root+'public/assets/vianen/vianen.pmp');const points=readPositions(pmp.buffer.slice(pmp.byteOffset,pmp.byteOffset+pmp.byteLength));
+if(process.argv.includes('--road-markings') && !process.argv.includes('--measure-only')) {
+ const read=n=>{const b=readFileSync(root+'public/assets/vianen/'+n);return b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength);};
+ const track=readPlanes(read('vianen.rmp'));
+ const oldPaint=track.passes[1].filter(p=>p.uv.every(([u,v])=>u>.775&&u<.787&&v>.112&&v<.139));
+ assert.equal(oldPaint.length,0,'Road paint must not leave raised RMP collision planes');
+ const painted=track.passes[0].filter(p=>p.uv.every(([u,v])=>u>.5&&u<1&&v>0&&v<.5));
+ assert(painted.length>0,'Painted streets must use the marked road atlas cell');
+ for(const p of painted)for(let k=0;k<4;k++) {
+  const ground=points[(p.chunk+([1,2].includes(k)?1:0))%points.length][1];
+  assert(Math.abs(p.vertices[k][1]-ground)<1e-4,'Paint must use the existing road vertices at grade');
+ }
+ const texture=readTga(read('vn_weg.tga'));
+ const brightness=x=>[0,1,2].reduce((s,k)=>s+texture.rgba[(140*texture.width+x)*4+k],0);
+ assert(brightness(256+216)>brightness(216)+100,'White paint must be present in the road texture');
+ console.log(`${painted.length} painted road faces checked: texture only, no raised collision planes`);
+}
 const wasm=new WebAssembly.Module(readFileSync(root+'public/game/spel.wasm')),meta=JSON.parse(readFileSync(root+'public/game/spel.meta.json'));
 async function probe(position,offset,angle,speed=10,seconds=2) {
  const vfs=new Vfs();for(const n of readdirSync(root+'public/assets/game/')){let p=root+'public/assets/game/'+n;if(statSync(p).isFile())vfs.addLazy(n,statSync(p).size,()=>readFileSync(p));}
@@ -41,7 +58,7 @@ async function probe(position,offset,angle,speed=10,seconds=2) {
  for(let i=0;i<view.getInt32(0,true);i++){
    const record=omp.slice(4+i*68,4+(i+1)*68);
    const name=String.fromCharCode(...record.slice(32,64)).split('\0')[0];
-   if(!['VN_PAAL_ANIM','VN_LAMP_ANIM','VN_BIKE_ANIM','VN_BOX_ANIM','VN_CRATE_ANIM','VN_CONE_ANIM','VN_SIGN_ANIM'].includes(name)) keep.push(record);
+   if(!['VN_PAAL_ANIM','VN_LAMP_ANIM','VN_BIKE_ANIM','VN_BOX_ANIM','VN_CRATE_ANIM','VN_CONE_ANIM','VN_SIGN_ANIM','VN_BENCH_ANIM'].includes(name)) keep.push(record);
  }
  const groundOnly=new Uint8Array(4+keep.length*68);new DataView(groundOnly.buffer).setInt32(0,keep.length,true);
  keep.forEach((record,i)=>groundOnly.set(record,4+i*68));files.set('vianen.omp',groundOnly);
@@ -61,9 +78,15 @@ async function probe(position,offset,angle,speed=10,seconds=2) {
  const result={position,offset,angle,speed,maxY,maxVy,rise,initial,end:bot.carState().pos,samples};
  results.push(result);
  console.log(`station ${position}, offset ${offset}, angle ${angle}: rise ${(rise/10).toFixed(3)} m, peak upward speed ${maxVy.toFixed(2)} m/s`);
- // A 10 cm curb plus 2 cm of suspension motion; obstacle impacts are a separate test.
- if(!process.argv.includes('--measure-only')) assert(rise < (angle ? 2.0 : 1.2), 'Unexpected sidewalk launch: '+JSON.stringify({position,offset,rise}));
+ // Paint on this flat road must not lift the chassis more than 1 cm. Sidewalk
+ // thresholds allow the intended curb rise; furniture impacts are separate.
+ if(!process.argv.includes('--measure-only')) assert(rise < (process.argv.includes('--road-markings') ? .1 : angle ? 2.0 : 1.2), 'Unexpected ground launch: '+JSON.stringify({position,offset,rise}));
 }
-for(const s of [[7.45,30,65,10,1.4],[7.45,-30,-65,10,1.4],[7.1,70,0,12,3],[7.1,-70,0,12,3],[12.1,70,0,12,3],[12.1,-70,0,12,3]])await probe(...s);
+// With the outer wheels over the painted edge line, traverse several dash edges
+// in both directions without crossing the curb itself.
+const probes=process.argv.includes('--road-markings')
+ ? [[65.05,35,0,8,1.2],[65.05,-35,0,8,1.2],[65.95,35,180,8,1.2],[65.95,-35,180,8,1.2]]
+ : [[7.45,30,65,10,1.4],[7.45,-30,-65,10,1.4],[7.1,70,0,12,3],[7.1,-70,0,12,3],[12.1,70,0,12,3],[12.1,-70,0,12,3]];
+for(const s of probes)await probe(...s);
 
 if(option('json'))writeFileSync(option('json'),JSON.stringify({units:'positions/rise in 0.1 m world units, velocities in m/s',results},null,2)+'\n');

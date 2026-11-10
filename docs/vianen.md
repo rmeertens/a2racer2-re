@@ -1,7 +1,7 @@
 # Vianen
 
 The sections below record the track's successive iterations. The current appearance and the
-latest checks are described in **Final five improvements** at the end.
+latest checks are described in the final sections below.
 
 ## Vianen etappe (sketch)
 
@@ -595,3 +595,31 @@ Validation on the final generated assets:
 
 These checks cover the added details and the existing single Vianen race; they are not a new
 performance benchmark or exhaustive camera sweep.
+
+## Road paint collision fix
+
+The white edge dashes were 146 separate RMP land planes, 0.8 world units (8 cm) above the
+road. As native terrain they could contact the wheels rather than behaving as paint.
+They now appear inside a marked-road texture variant, on the existing road faces at grade.
+The variant reuses the previously unused pavement cell in `vn_weg.tga`; texture dimensions
+and memory use are unchanged. The left half of a marked street mirrors the cell to keep
+the stripe beside its outer edge. Wide Voorstraat sections and bridge decks remain unmarked.
+
+The raised planes are removed from the packed map, leaving 6,252 static planes. All other
+static vertices, colours and triangle indices are unchanged; only road UVs switch to the
+painted material. Temporary planning reservations preserve the existing selection of 60
+backdrop buildings and 43 chimneys/28 dormers, so this collision fix does not change town
+density. No new objects or physics bodies are added.
+
+`node tools/vianen/check-sidewalks.mjs --road-markings` verifies that the old raised planes
+are absent, the texture contains paint, and every painted road vertex remains at grade.
+Four native probes drive with the outer wheels on the edge line, on both sides and in both
+directions. Before the fix, measured chassis rises ranged from 0.9 to 2.4 cm; after the fix
+none rose above the settled starting height (about 3 mm of further settling). The largest
+upward speed fell from 0.57 to 0.32 m/s. These probes demonstrate small marking-induced
+motion; they did not reproduce a large launch.
+
+The six existing sidewalk probes, runtime forward/rear/reverse visibility checks and building
+closure checks pass. The bot race finishes by 95 seconds and ends at 111 seconds with all
+Vianen assets loaded. The local viewer shows both edge lines flat on the paving with no
+console warnings or errors. Evidence: `evidence/vianen/road-paint/`.

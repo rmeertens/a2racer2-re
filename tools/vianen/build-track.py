@@ -539,7 +539,7 @@ BOUW = {
     'kerk2': (512, 768, 704, 1024), 'produce': (704, 768, 832, 1024),
     'jody_poster': (832, 768, 1024, 1024),
 }
-SURFACE = {'road': (0, 0, 256, 256), 'pavement': (256, 0, 512, 256),
+SURFACE = {'road': (0, 0, 256, 256), 'marked_road': (256, 0, 512, 256),
            'grass': (0, 256, 256, 512), 'water': (256, 256, 512, 512)}
 FUN = {'carton': (0, 0, 128, 128), 'wood': (128, 0, 256, 128),
        'cone': (0, 128, 128, 256), 'board': (128, 128, 256, 256)}
@@ -612,7 +612,12 @@ def build_textures():
     save_tga(gevel, os.path.join(OUT, 'vn_gevel.tga'))
     # The road: the herringbone klinkers in front of the houses, tinted to red brick.
     surface = Image.new('RGB', ATLAS_SIZE['surface'])
-    for name, image in [('road', paving()), ('pavement', paving(herringbone=False)),
+    # Paint belongs in the road texture, never in raised collision planes. Reuse
+    # the formerly unused surface-pavement cell without increasing texture memory.
+    marked_road = paving()
+    ImageDraw.Draw(marked_road).polygon([(210, 179), (210, 102), (225, 123), (225, 179)],
+                                      fill=(238, 236, 225))
+    for name, image in [('road', paving()), ('marked_road', marked_road),
                         ('grass', landscape_texture(256)), ('water', landscape_texture(256, water=True))]:
         surface.paste(image, SURFACE[name][:2])
     save_tga(surface, os.path.join(OUT, 'vn_weg.tga'))
@@ -1057,7 +1062,10 @@ class Town:
             for a, b in ((-ROAD, 0.0), (0.0, ROAD)):
                 vs = [self.p(i, 0, a), self.p(i, 1, a), self.p(i, 1, b), self.p(i, 0, b)]
                 # Rotate the atlas cell coordinates: across the road is u, along it is v.
-                tile = uv('surface', 'road')
+                marked = self.has_road_dashes(i)
+                tile = uv('surface', 'marked_road' if marked else 'road',
+                          u0=1 if marked and a < 0 else 0,
+                          u1=0 if marked and a < 0 else 1)
                 self.chunks.add('road', i, quad(vs, [tile[0], tile[3], tile[2], tile[1]], grey, up))
             for s in (-1, 1):
                 edge = DECK if i in self.bridges else self.at(i, s)
@@ -1731,17 +1739,25 @@ class Town:
                 for t,off in ((.10,65),(.35,68),(.60,65)):
                     place(i,t,side,off,'VN_CONE_ANIM',2)
 
-    def road_dashes(self):
-        """White dashes along both road edges, as by the Grote Kerk (photos 1457-1459)."""
+    def has_road_dashes(self, i):
+        """Narrow-street edge paint, as by the Grote Kerk (photos 1457-1459)."""
+        return i not in self.bridges and self.at(i, -1) == WALK and self.at(i, 1) == WALK
+
+    def reserve_road_marking_slots(self):
+        # Keep the existing backdrop/roof density plan while moving the paint
+        # into the atlas. These reservations are removed with the other scenery
+        # planner slots before serialisation; no marking geometry reaches RMP.
         white = uv('land', 'bollard', 0.42, 0.58, 0.45, 0.55)
         for i in range(self.n):
-            if i in self.bridges or self.at(i, -1) != WALK or self.at(i, 1) != WALK:
+            if not self.has_road_dashes(i):
                 continue
             for s in (-1, 1):
                 a, b = s * (ROAD - 9), s * (ROAD - 6)
-                for t0 in (0.3,):
-                    vs = [self.p(i, t0, a, 0.8), self.p(i, t0 + 0.3, a, 0.8), self.p(i, t0 + 0.22, b, 0.8), self.p(i, t0, b, 0.8)]
-                    self.chunks.add('land', i, quad(vs, white, (255, 255, 255), (0, 1, 0)))
+                vs = [self.p(i, .3, a), self.p(i, .6, a),
+                      self.p(i, .52, b), self.p(i, .3, b)]
+                slot = quad(vs, white, (255, 255, 255), (0, 1, 0))
+                self.chunks.add('land', i, slot)
+                self.scenery_slots.append(slot)
 
     def sign(self, i, t, s, k, y=46.0):
         """Street name sign k on the house front at t, high on the wall, facing the road."""
@@ -2271,7 +2287,7 @@ def build():
     town.bikes()
     town.fun_props()
     place_details(town)
-    town.road_dashes()
+    town.reserve_road_marking_slots()
     for kind, c, plane in town.shells:
         town.chunks.add(kind, c, plane)
     connected_terrain(town, water, sides, quad, tri, uv)
