@@ -1,0 +1,28 @@
+{
+  "planes": 6360,
+  "backdropBuildings": 60,
+  "utilityBuildings": 39,
+  "roofDetails": {
+    "chimney": 45,
+    "dormer": 28
+  },
+  "geometry": {
+    "buildings": 60,
+    "utilityBuildings": 39,
+    "rays": 7112,
+    "missingWallsOrRoofs": 0,
+    "reversedFaces": 0
+  },
+  "boundaryLeaks": 0,
+  "reachableCells": 171461,
+  "botFinishedBySeconds": 100,
+  "raceEndedSeconds": 113.7,
+  "missingAssets": [],
+  "runtimePoolsMatched": 4,
+  "partialIndexWindowsChecked": 3344,
+  "rearViewAndReverseGearPassed": true,
+  "browserWarningsAndErrors": [],
+  "routeAndObjectFilesUnchanged": true,
+  "inspectedExteriorViews": 12,
+  "inspectedCloseViews": 14
+}

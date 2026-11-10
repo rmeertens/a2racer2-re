@@ -170,6 +170,16 @@ def tri(a, b, c, uvs, tint, facing):
     return quad([a, b, c1, c0], uvs, tint, facing)
 
 
+def closed_tri(a, b, c, uvs, tint, facing):
+    """Two non-degenerate triangles sharing the exact requested apex and edges.
+    A midpoint on b--c fits the RMP's four-vertex record without offsetting its
+    roof/gable boundary. Adjacent faces keep identical ridge and edge coordinates.
+    """
+    mid = tuple((b[k] + c[k]) / 2 for k in range(3))
+    mapping = [uvs[0], uvs[1], tuple((uvs[1][k] + uvs[2][k]) / 2 for k in range(2)), uvs[2]]
+    return quad([a, b, mid, c], mapping, tint, facing)
+
+
 def pack_plane(p):
     vs, uvs, colour, idx = p
     b = b''
@@ -513,7 +523,9 @@ LAND = {'pavement': (0, 0, 256, 256), 'water': (256, 0, 384, 128),
         'bike': (384, 128, 512, 192), 'planter': (384, 192, 448, 256),
         **{f'street{k}': (128, 256 + 32 * k, 256, 288 + 32 * k) for k in range(8)}, 'grass': (0, 256, 128, 384), 'tiles': (256, 256, 384, 384),
         'slate': (384, 256, 512, 384), 'deck': (256, 384, 384, 512), 'awning': (384, 384, 512, 512),
-        'dormer': (0, 384, 128, 512)}
+        'dormer': (0, 384, 128, 512),
+        'utility_roof': (448, 0, 512, 8), 'utility_brick': (448, 8, 512, 64), 'garage_door': (448, 64, 512, 128),
+        'shed_door': (448, 192, 512, 256)}
 # Materials, sprites, and the landmarks from the owner's photos.
 BOUW = {
     'brick': (0, 0, 256, 256), 'stone': (256, 0, 512, 256), 'railing': (512, 0, 768, 256), 'church': (768, 0, 1024, 256),
@@ -615,6 +627,24 @@ def build_textures():
     land.paste(landscape_texture(128), LAND['grass'][:2])
     land.paste(bike_sprite(128, 64), LAND['bike'][:2])
     land.paste(planter_sprite(64, 64), LAND['planter'][:2])
+    # Previously unused cells: low outbuildings need masonry and doors, not a
+    # complete multi-storey shop facade squeezed onto a two-metre footprint.
+    utility_brick = masonry(64, 64, 24, 12, (146, 107, 82), (117, 107, 94), 1987, jitter=8)
+    land.paste(utility_brick.crop((0, 8, 64, 64)), LAND['utility_brick'][:2])
+    bitumen = np.clip(np.array((52, 57, 57)) + np.random.default_rng(1987).normal(0, 3, (8, 64, 1)), 0, 254).astype(np.uint8)
+    land.paste(Image.fromarray(bitumen), LAND['utility_roof'][:2])
+    garage = utility_brick.copy(); gd = ImageDraw.Draw(garage)
+    gd.rectangle((5, 12, 58, 63), fill=(91, 99, 93), outline=(205, 198, 181), width=2)
+    for y in range(17, 62, 6):
+        gd.line((8, y, 55, y), fill=(62, 73, 70))
+    gd.rectangle((29, 49, 34, 50), fill=(42, 47, 45))
+    land.paste(garage, LAND['garage_door'][:2])
+    shed = utility_brick.copy(); sd = ImageDraw.Draw(shed)
+    sd.rectangle((21, 17, 44, 63), fill=(54, 73, 62), outline=(199, 194, 175), width=2)
+    for x in (28, 35):
+        sd.line((x, 20, x, 62), fill=(42, 58, 49))
+    sd.rectangle((39, 40, 41, 41), fill=(205, 197, 160))
+    land.paste(shed, LAND['shed_door'][:2])
     for k, name in enumerate(STREET_NAMES[:8]):
         land.paste(street_sign(128, 32, name), LAND[f'street{k}'][:2])
     land.paste(masonry(256, 256, 1, 9, (150, 112, 74), (70, 52, 36), 12, jitter=16, stagger=False).rotate(90).resize((128, 128)), LAND['deck'][:2])
@@ -1217,7 +1247,7 @@ class Town:
             if top_wall - base > 0.1:
                 self.house_wall(i, quad(vs, uv('bouw', material, 0, 1, 0, max(0.15, (top_wall - base) / 140)), wall_tint, facing), spec['brick'])
             if not h['gable']:
-                self.house_wall(i, tri(F(t, T), B(t, T), M(t, T + h['roof']), uv_tri('bouw', 'brick' if spec['brick'] else 'white'), wall_tint, facing), spec['brick'])
+                self.house_wall(i, closed_tri(F(t, T), B(t, T), M(t, T + h['roof']), uv_tri('bouw', 'brick' if spec['brick'] else 'white'), wall_tint, facing), spec['brick'])
         self.house_roof_details(h)
 
     def jody_billboard(self, i=46):
@@ -1938,6 +1968,28 @@ def side_streets(town, streets, water):
     return found
 
 
+def backdrop_profile(footprint, tags, default_height):
+    """Prefer OSM height/levels; distinguish small ancillary footprints from houses."""
+    def number(key):
+        try:
+            value = float(str(tags.get(key, '')).strip().removesuffix('m').strip())
+            return value if 0 < value < 100 else None
+        except ValueError:
+            return None
+    rectangle = list(footprint.minimum_rotated_rectangle.exterior.coords)
+    width = min(math.dist(a, b) for a, b in zip(rectangle, rectangle[1:]))
+    category = tags.get('building', 'yes')
+    ancillary = category in ('garage', 'garages', 'shed', 'service', 'outbuilding', 'hut')
+    tagged_height, levels = number('height'), number('building:levels')
+    utility = ancillary or (category == 'yes' and not tagged_height and not levels
+                            and (footprint.area < 4000 or width < 25))
+    height = tagged_height * UNITS if tagged_height else levels * 30 if levels else (
+        28 if ancillary else 24 if utility else default_height)
+    # A multi-storey garage explicitly tagged as such is not a low shed.
+    utility = utility and height <= 40
+    return utility, height, width
+
+
 def building_fronts(town, nodes, ways, limit=100):
     """Closed, roofed buildings on OSM footprints behind the street rows.
 
@@ -1966,10 +2018,11 @@ def building_fronts(town, nodes, ways, limit=100):
         closest, ci = min(dists)
         if closest < max(town.at(ci, -1), town.at(ci, 1)) + DEPTH + 40 or closest > 1300:
             continue
-        candidates.append((closest, w['id'], ci, poly))
+        candidates.append((closest, w['id'], ci, poly, w['tags']))
     rng = random.Random(1355)
     placed = 0
-    for _, _, ci, poly in sorted(candidates):
+    town.backdrop_buildings = []
+    for _, osm_id, ci, poly, tags in sorted(candidates):
         if placed >= limit:
             break
         footprint = Polygon(poly)
@@ -1977,19 +2030,31 @@ def building_fronts(town, nodes, ways, limit=100):
             continue  # the rounded game canal must not leave an OSM house floating over water
         edges = list(zip(poly, poly[1:] + poly[:1]))
         faces = sum(max(1, round(math.dist(a, b) / 75)) for a, b in edges)
+        utility, _, _ = backdrop_profile(footprint, tags, 90)
+        wall_pass = 'land' if utility else 'extra'
+        roof_faces = 1 if utility and len(poly) == 4 else len(edges)
         # Keep room for water-facing backs and street furniture added afterwards.
-        if town.chunks.room('extra', ci) < faces + 32 or town.chunks.room('land', ci) < len(edges) + 32:
+        if (town.chunks.room(wall_pass, ci) < faces + (roof_faces if utility else 0) + 32
+                or town.chunks.room('land', ci) < roof_faces + 32):
             continue
         kind = rng.choice((1, 2, 4, 5, 6))  # solid cornice fronts, roof is actual geometry
         spec = HOUSE_TYPES[kind]
-        height = (spec['floors'] + 1) * 30 + rng.choice((0, 5, 10))
+        utility, height, span = backdrop_profile(footprint, tags, (spec['floors'] + 1) * 30 + rng.choice((0, 5, 10)))
         g = 0.0  # OSM background houses stand on town terrain, not the nearest elevated bridge.
         cx = sum(p[0] for p in poly) / len(poly)
         cz = sum(p[1] for p in poly) / len(poly)
-        span = min(max(p[0] for p in poly) - min(p[0] for p in poly), max(p[1] for p in poly) - min(p[1] for p in poly))
-        peak = (cx, g + height + min(32, span * 0.35), cz)
+        peak = (cx, g + height + (0 if utility else min(32, span * 0.35)), cz)
         roof = uv_tri('land', 'slate' if rng.random() < 0.8 else 'tiles')
-        for a, b in edges:
+        # Put one entrance on a short end, toward the nearest street. Other walls
+        # remain plain masonry, instead of repeating shop doors around a shed.
+        short = min(math.dist(a, b) for a, b in edges)
+        door = min((j for j, (a, b) in enumerate(edges) if math.dist(a, b) <= short * 1.3),
+                   key=lambda j: nearest(tuple((a + b) / 2 for a, b in zip(*edges[j])))[0])
+        emitted = []
+        def emit(kind, plane):
+            town.chunks.add(kind, ci, plane)
+            emitted.append(plane)
+        for j, (a, b) in enumerate(edges):
             L = math.dist(a, b)
             if L < 0.01:
                 continue
@@ -1999,8 +2064,17 @@ def building_fronts(town, nodes, ways, limit=100):
                 p0 = (a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n)
                 p1 = (a[0] + (b[0] - a[0]) * (k + 1) / n, a[1] + (b[1] - a[1]) * (k + 1) / n)
                 vs = [(p0[0], g, p0[1]), (p1[0], g, p1[1]), (p1[0], g + height, p1[1]), (p0[0], g + height, p0[1])]
-                town.chunks.add('extra', ci, quad(vs, wall_uv('gevel', FACADES[kind], vs, normal, v0=1 - spec['eave']), (225, 225, 220), normal))
-            town.chunks.add('land', ci, tri((a[0], g + height, a[1]), (b[0], g + height, b[1]), peak, roof, (215, 215, 218), norm((normal[0], 1.5, normal[2]))))
+                if utility:
+                    material = ('garage_door' if tags.get('building') in ('garage', 'garages') else 'shed_door') if j == door else 'utility_brick'
+                    emit('land', quad(vs, wall_uv('land', material, vs, normal), (235, 235, 230), normal))
+                else:
+                    emit('extra', quad(vs, wall_uv('gevel', FACADES[kind], vs, normal, v0=1 - spec['eave']), (225, 225, 220), normal))
+            if not utility or len(poly) != 4:
+                emit('land', closed_tri((a[0], g + height, a[1]), (b[0], g + height, b[1]), peak, roof, (215, 215, 218), (0, 1, 0) if utility else norm((normal[0], 1.5, normal[2]))))
+        if utility and len(poly) == 4:
+            emit('land', quad([(x, g + height, z) for x, z in poly], uv('land', 'utility_roof'), (230, 230, 230), (0, 1, 0)))
+        town.backdrop_buildings.append({'osmId': osm_id, 'chunk': ci, 'footprint': poly,
+            'building': tags.get('building'), 'utility': utility, 'height': height, 'faces': emitted})
         placed += 1
     return placed
 
@@ -2127,6 +2201,11 @@ def build():
         raise RuntimeError(f'Geometry exceeded the chunk budget: {town.chunks.lost_at}')
 
     chunks = [[c[k] for k in ('road', 'land', 'extra', 'rail')] for c in town.chunks.lists]
+    if os.environ.get('VIANEN_BUILDINGS'):
+        refs = {id(plane): [ci, pi, vi] for ci, chunk in enumerate(chunks)
+                for pi, planes in enumerate(chunk) for vi, plane in enumerate(planes)}
+        json.dump([{**b, 'faces': [refs[id(p)] for p in b['faces']]} for b in town.backdrop_buildings],
+                  open(os.environ['VIANEN_BUILDINGS'], 'w'))
     total = sum(len(l) for c in chunks for l in c)
     rmp = struct.pack('<iii', -1, total, n)
     for c in chunks:
@@ -2213,6 +2292,8 @@ def build():
                'movableLanterns': len(town.lanterns),
                'movableBikes': len(town.parked_bikes),
                'smashableProps': dict(Counter(p[4] for p in town.smashables)),
+               'backdropBuildings': len(town.backdrop_buildings),
+               'utilityBuildings': sum(b['utility'] for b in town.backdrop_buildings),
                'roofDetails': town.roof_counts}, open(os.path.join(OUT, 'vianen.json'), 'w'))
     full = {k: sum(1 for c in town.chunks.lists if len(c[k]) == LIMITS[k]) for k in LIMITS}
     print('planes', total, 'objects', len(objs), 'length m', round(n * CHUNK / UNITS), 'full lists', full)
@@ -2235,6 +2316,8 @@ def write_attribution():
         'The cardboard cartons, slatted wooden crates, traffic cones and market chalkboards are original procedural models and materials drawn by `tools/vianen/build-track.py` (`vn_fun.tga`). Their market lettering is fictional scenery.',
         '',
         'The four material impact sounds (`vn_card.wav`, `vn_wood.wav`, `vn_rubber.wav`, `vn_metal.wav`) are original procedural audio generated by `tools/vianen/build-impact-sounds.py`.',
+        '',
+        'Low garage/storage volumes use OpenStreetMap footprints and building classifications, with original procedural brick, door and bitumen-roof materials. Recorded height/levels are used when present; untagged small ancillary buildings use approximate single-storey heights.',
     ]
     open(os.path.join(OUT, 'ATTRIBUTION.md'), 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
 

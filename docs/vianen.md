@@ -151,6 +151,35 @@ authored road humps still use the game's collision response.
 - `tools/vianen/check-walls.py` now reports the side streets as openings, on purpose.
 - Vianen is in the multiplayer screens and at `?race=1&etappe=vianen`, not in the menu's Quick Race list.
 
+## Dike outbuildings and roof joins
+
+The dike-house follow-up identified undersized background footprints rendered as
+multi-storey houses: the tagged garage OSM 277708504 had 9.5 m walls, and a 2.3 ×
+2.6 m footprint (794518665) also had 9.5 m walls. These read as detached wall
+fragments even though their low-detail shells had faces and roofs. The builder
+now respects recorded heights/levels and distinguishes garages/storage buildings
+from residential houses. Small ancillary structures use 2.4–2.8 m walls, plain
+brick, one garage or storage entrance and a closed bitumen roof. Classification
+of untagged small footprints and their heights remains an approximation.
+
+Cornice gable ends and backdrop roof fans now use exact triangle boundaries in
+the four-vertex RMP record: a midpoint on one edge replaces the former offset
+apex pair. This aligns cap/ridge joins without extra planes. Utility materials
+occupy previously unused opaque cells in the existing land atlas. The freed
+facade budget admits 60 complete backdrop buildings (39 low utility structures)
+and the planned foreground roof details: 45 chimneys and 28 dormers. The resulting
+track has 6,360 planes, no dropped planes, and unchanged route and movable-object placements.
+
+For reproducible packed-geometry checks, build with
+`VIANEN_BUILDINGS=evidence/vianen/dike-houses/buildings.json python3 tools/vianen/build-track.py`,
+then run `node tools/vianen/check-buildings.mjs`. It checks all 60 authored backdrop
+volumes with 7,112 interior-to-exterior rays, including roof/wall joins, verifies
+outward winding, opaque materials and the two height regressions. Ground closes
+the bases; these are not standalone bottom-capped object meshes. Focused local
+views check the dike rows, roofs, rear walls and garage entrances. Runtime scenery
+recognises all four updated pools; the full bot lap finishes, and the map boundary
+check reports zero leaks. Evidence: `evidence/vianen/dike-houses/`.
+
 ## No way off the map
 
 `tools/vianen/check-leaks.py` draws the track from above (ground: every upward plane; walls: every upright plane at least 12 units high), floods from the road between the walls, and reports each place reached with nothing underneath. It found two kinds of holes, now closed:
