@@ -3,14 +3,17 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { D3DRenderer } from '../../source/render/d3d-renderer.js';
-import { readPlanes } from '../../source/dev/track-model.js';
+import { readPlanes, readObjects } from '../../source/dev/track-model.js';
 import { VianenGeometry } from '../../source/render/vianen-geometry.js';
 
 const bytes = readFileSync(new URL('../../public/assets/vianen/vianen.rmp', import.meta.url));
 const track = readPlanes(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
 const props = track.passes.flat().filter(p => p.twoSided);
 const geometry = new VianenGeometry(bytes);
-assert(props.length > 150, 'Expected the remaining flat trees and furniture to be tagged');
+const omp=readFileSync(new URL('../../public/assets/vianen/vianen.omp',import.meta.url));
+const marketStalls=readObjects(omp.buffer.slice(omp.byteOffset,omp.byteOffset+omp.byteLength)).filter(o=>o.name==='VN_STALL_ANIM');
+// Each movable stall replaces two previously tagged flat support poles.
+assert(props.length+marketStalls.length*2>150,'Expected flat scenery or its closed movable replacements');
 
 // Exercise the packed world geometry, including posters on graded/curving streets.
 // Four old horizontal ad cells now contain one portrait image; only six quads may use it.

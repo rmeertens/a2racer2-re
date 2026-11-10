@@ -1,5 +1,6 @@
 // Per-material effects for the authored Vianen props. Keep the native bodies and
 // hit-state lifecycle; only cardboard uses the paper emitter. No global handler patch.
+import { VIANEN_AWNINGS } from './vianen-market.js';
 export const VIANEN_IMPACT_SOUNDS = ['card','wood','rubber','metal'].map(material => ({
   name: `VN_HIT_${material.toUpperCase()}`, file: `vn_${material}.wav`,
 }));
@@ -13,6 +14,10 @@ export const VIANEN_IMPACTS = {
   VN_BIKE_ANIM:  { material:'metal',  handler:0x455b60, paper:false },
   VN_LAMP_ANIM:  { material:'metal',  handler:0x455b60, paper:false },
   VN_BENCH_ANIM: { material:'wood',   handler:0x455b60, paper:false },
+  VN_STALL_ANIM: { material:'wood',   handler:0x455b60, paper:false },
+  VN_CANOPY_ANIM:{ material:'metal',  handler:0x455b60, paper:false, mounted:true },
+  VN_MKTPOLE_ANIM:{material:'metal',  handler:0x455b60, paper:false },
+  ...Object.fromEntries(VIANEN_AWNINGS.map(name=>[name,{material:'metal',handler:0x455b60,paper:false,mounted:true}])),
 };
 
 export function installVianenImpacts(m, vfs) {
@@ -45,7 +50,7 @@ export function installVianenImpacts(m, vfs) {
     // collision callback, friction and rebound stay as initialised from OMP.
     m.u32[(car+0x6c)>>2]=profile.handler;
     m.call(0x450b00,[i,sounds.get(sound)]);
-    configured.push({index:i,name:prop.name,sound,...profile});
+    configured.push({index:i,name:prop.name,position:prop.position,sound,...profile});
   }
   return configured;
 }

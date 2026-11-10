@@ -12,6 +12,7 @@ import {GameInput} from '../../source/input/keyboard.js';
 import {NetRace} from '../../source/net/puppets.js';
 import {Bot} from '../../source/dev/bot.js';
 import {installVianen,vianenFiles} from '../../source/host/vianen.js';
+import {VIANEN_IMPACTS} from '../../source/host/vianen-impacts.js';
 import {readPositions,readPlanes,readTga,routeFrame} from '../../source/dev/track-model.js';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const option=name=>{const i=process.argv.indexOf('--'+name);return i<0?null:process.argv[i+1];};
@@ -58,7 +59,7 @@ async function probe(position,offset,angle,speed=10,seconds=2) {
  for(let i=0;i<view.getInt32(0,true);i++){
    const record=omp.slice(4+i*68,4+(i+1)*68);
    const name=String.fromCharCode(...record.slice(32,64)).split('\0')[0];
-   if(!['VN_PAAL_ANIM','VN_LAMP_ANIM','VN_BIKE_ANIM','VN_BOX_ANIM','VN_CRATE_ANIM','VN_CONE_ANIM','VN_SIGN_ANIM','VN_BENCH_ANIM'].includes(name)) keep.push(record);
+   if(!Object.hasOwn(VIANEN_IMPACTS,name)) keep.push(record);
  }
  const groundOnly=new Uint8Array(4+keep.length*68);new DataView(groundOnly.buffer).setInt32(0,keep.length,true);
  keep.forEach((record,i)=>groundOnly.set(record,4+i*68));files.set('vianen.omp',groundOnly);

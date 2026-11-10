@@ -39,7 +39,8 @@ from route import load as load_osm  # noqa: E402
 from facades import facade_atlas, sash_window, TYPES as HOUSE_TYPES  # noqa: E402
 from surfaces import paving, landscape_texture, connected_terrain  # noqa: E402
 from photo_warp import rectify  # noqa: E402
-from details import detail_texture, build_detail_models, place_details  # noqa: E402
+from details import detail_texture, build_detail_models, place_details
+from market import AWNING_WIDTHS, MARKET_CELLS, build_market_assets, place_market_object  # noqa: E402
 
 UNITS = 10.0          # world units per metre
 CHUNK = 128.0         # chunk length in world units, as on the original tracks
@@ -544,9 +545,9 @@ SURFACE = {'road': (0, 0, 256, 256), 'marked_road': (256, 0, 512, 256),
 FUN = {'carton': (0, 0, 128, 128), 'wood': (128, 0, 256, 128),
        'cone': (0, 128, 128, 256), 'board': (128, 128, 256, 256)}
 STREET_NAMES = []  # filled by build() from OSM before the textures: the signs' names
-ATLAS_SIZE = {'gevel': (1024, 1024), 'land': (512, 512), 'bouw': (1024, 1024), 'surface': (512, 512), 'fun': (256, 256), 'detail': (256, 256)}
+ATLAS_SIZE = {'gevel': (1024, 1024), 'land': (512, 512), 'bouw': (1024, 1024), 'surface': (512, 512), 'fun': (256, 256), 'detail': (256, 256), 'market': (512, 512)}
 ATLASES = {'gevel': GEVEL, 'land': LAND, 'bouw': BOUW, 'surface': SURFACE, 'fun': FUN,
-           'detail': {'drain': (0,0,128,128), 'cover': (128,0,256,128)}}
+           'detail': {'drain': (0,0,128,128), 'cover': (128,0,256,128)}, 'market': MARKET_CELLS}
 
 
 def fun_texture():
@@ -1192,8 +1193,13 @@ class Town:
             a0, a1 = t0 + (t1 - t0) * 0.06, t1 - (t1 - t0) * 0.06
             vs = [A(a0, 0.5, ya), A(a1, 0.5, ya), A(a1, 14, ya - 7), A(a0, 14, ya - 7)]
             # Added after all buildings (Town.later): decoration never takes a roof's place.
-            self.later.append(('land', i, quad(vs, uv('land', 'awning'), (255, 255, 255), norm((inward[0], 2.0, inward[2])))))
-            self.later.append(('land', i, quad(vs, uv('land', 'awning'), (190, 180, 180), (0, -1, 0))))
+            for plane in (quad(vs, uv('land', 'awning'), (255, 255, 255), norm((inward[0], 2.0, inward[2]))),
+                          quad(vs, uv('land', 'awning'), (190, 180, 180), (0, -1, 0))):
+                self.later.append(('land', i, plane))
+                self.scenery_slots.append(plane)
+            width = math.dist(A(a0, 0, ya), A(a1, 0, ya))
+            model_width = max(w for w in AWNING_WIDTHS if w <= width + .1)
+            place_market_object(self,i,tm,s,f0-7.25,ya-3.5,f'VN_AWN{model_width}_ANIM',22)
         if (i, s) in self.near_water:
             # The back of the house, which shows across the water: another front, a little darker.
             # Matching silhouette: a random different gable used to leave holes below the roof.
@@ -1815,6 +1821,11 @@ class Town:
     def market(self, first, last):
         """Market stalls along Voorstraat, as in the owner's photos: a table of produce under a
         striped awning on two white poles, against the houses."""
+        # Preserve the scenery density plan, then remove these old static faces
+        # before packing. Only the movable native model renders and collides.
+        def reserve(kind, i, plane):
+            self.chunks.add(kind,i,plane)
+            self.scenery_slots.append(plane)
         rng = random.Random(1452)
         self.market_chunks.update(k % self.n for k in range(first, last + 1))
         for i in range(first, last + 1):
@@ -1826,18 +1837,25 @@ class Town:
                 F = lambda t, off, y: self.p(i, t, s * off, y)
                 front, back = self.at(i, s) - 22, self.at(i, s) - 4
                 # The table: its front and its top of crates.
-                self.chunks.add('land', i, quad([F(t0, front + 4, 2), F(t1, front + 4, 2), F(t1, front + 4, 10), F(t0, front + 4, 10)], uv('land', 'deck'), (230, 220, 205), inward))
-                self.chunks.add('rail', i, quad([F(t0, front + 4, 10), F(t1, front + 4, 10), F(t1, back, 11), F(t0, back, 11)], uv('bouw', 'produce'), (225, 220, 202), (0, 1, 0)))
+                reserve('land', i, quad([F(t0, front + 4, 2), F(t1, front + 4, 2), F(t1, front + 4, 10), F(t0, front + 4, 10)], uv('land', 'deck'), (230, 220, 205), inward))
+                reserve('rail', i, quad([F(t0, front + 4, 10), F(t1, front + 4, 10), F(t1, back, 11), F(t0, back, 11)], uv('bouw', 'produce'), (225, 220, 202), (0, 1, 0)))
                 # Poles at the front corners.
                 for t in (t0, t1):
                     c = F(t, front - 2, 0)
                     fw = self.fwd(i)
                     pole = [(c[0] - fw[0] * 0.5, c[1], c[2] - fw[2] * 0.5), (c[0] + fw[0] * 0.5, c[1], c[2] + fw[2] * 0.5), (c[0] + fw[0] * 0.5, c[1] + 25, c[2] + fw[2] * 0.5), (c[0] - fw[0] * 0.5, c[1] + 25, c[2] - fw[2] * 0.5)]
-                    self.chunks.add('land', i, quad(pole, two_sided_uv(uv('land', 'bollard', 0.4, 0.6, 0.43, 0.57)), (255, 255, 255), inward))
+                    reserve('land', i, quad(pole, two_sided_uv(uv('land', 'bollard', 0.4, 0.6, 0.43, 0.57)), (255, 255, 255), inward))
                 # The awning, sloping down toward the street, seen from above and below.
                 canopy = [F(t0 - 0.03, front - 4, 25), F(t1 + 0.03, front - 4, 25), F(t1 + 0.03, back, 30), F(t0 - 0.03, back, 30)]
-                self.chunks.add('land', i, quad(canopy, uv('land', 'awning'), (255, 255, 255), norm((inward[0], 1.5, inward[2]))))
-                self.chunks.add('land', i, quad(canopy, uv('land', 'awning'), (200, 190, 190), (0, -1, 0)))
+                reserve('land', i, quad(canopy, uv('land', 'awning'), (255, 255, 255), norm((inward[0], 1.5, inward[2]))))
+                reserve('land', i, quad(canopy, uv('land', 'awning'), (200, 190, 190), (0, -1, 0)))
+
+                place_market_object(self,i,.5,s,self.at(i,s)-13,1,'VN_STALL_ANIM')
+                place_market_object(self,i,.5,s,self.at(i,s)-13,26,'VN_CANOPY_ANIM',22)
+                for t in (.22,.78):
+                    forward = self.fwd(i)
+                    yaw = math.degrees(math.atan2(-forward[2],forward[0]))
+                    self.detail_objects.append((i,22,F(t,front-2,1),yaw,'VN_MKTPOLE_ANIM'))
 
     def side_house(self, i, vs, facing, spec):
         """A closed little cornice house behind a side-street facade, not a floating billboard."""
@@ -2376,6 +2394,7 @@ def build():
     build_bike_mesh()
     build_fun_meshes()
     build_detail_models(save_prop_mesh, uv)
+    build_market_assets(OUT, save_prop_mesh, uv, LAND, BOUW)
     from runpy import run_path
     run_path(os.path.join(HERE, 'build-impact-sounds.py'))['build']()
     build_loading()
@@ -2428,6 +2447,8 @@ def write_attribution():
         'The cardboard cartons, slatted wooden crates, traffic cones and market chalkboards are original procedural models and materials drawn by `tools/vianen/build-track.py` (`vn_fun.tga`). Their market lettering is fictional scenery.',
         '',
         'The wooden street benches, drain/manhole covers and extra lime-canopy cards are original procedural models from `tools/vianen/details.py`; the covers use its original `vn_detail.tga` texture. The drawn shop windows contain fictional bakery, flower and book displays from `tools/vianen/facades.py`. Canal-bank wetness uses height-based vertex colour from `tools/vianen/surfaces.py`.',
+        '',
+        'Breakaway market counters, canopy roofs, support poles and shop awnings are original procedural models from `tools/vianen/market.py`. Their `vn_markt.tga` atlas reuses the existing drawn wood, produce and striped-cloth materials.',
         '',
         'The four material impact sounds (`vn_card.wav`, `vn_wood.wav`, `vn_rubber.wav`, `vn_metal.wav`) are original procedural audio generated by `tools/vianen/build-impact-sounds.py`.',
         '',

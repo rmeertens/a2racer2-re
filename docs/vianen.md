@@ -623,3 +623,52 @@ The six existing sidewalk probes, runtime forward/rear/reverse visibility checks
 closure checks pass. The bot race finishes by 95 seconds and ends at 111 seconds with all
 Vianen assets loaded. The local viewer shows both edge lines flat on the paving with no
 console warnings or errors. Evidence: `evidence/vianen/road-paint/`.
+
+
+## Breakaway market stalls and shop awnings
+
+All 15 market stalls and 20 red/white shop awnings now use movable native models. Each
+market consists of a wooden counter, a separate cloth canopy with metal edge bars, and two
+white support poles. Striking the counter or either support releases its canopy. The shop
+awnings use four widths (3.6, 4.8, 5.6 and 6.4 m), fitted within their existing house fronts.
+They stay mounted until actual contact, then detach and fall. They are above a normal car;
+the implementation does not add an invisible ground-level trigger to make them hittable.
+
+Counters use native type 3 (50 kg); poles, canopy roofs and shop awnings use type 22 (10 kg).
+The per-object effect setup assigns wood to counters and metal to the frames/poles, with no
+paper emission. These are separate rigid components, not a cloth simulation or wood fracture
+system. `tools/vianen/market.py` creates closed meshes and a 512×512 atlas reusing the existing
+produce, wood and striped-cloth art. Both the race and silent viewer load the same assets.
+
+`VianenMounts` in `source/host/vianen-market.js` holds the 35 unhit hanging parts at their
+original pose. It watches native hit state, permanently releases the part on contact, and
+wakes its Ipion body through `0x4f32e0`, the native detach/wake operation. Each market roof
+watches only its own counter and two poles. Released parts keep the original physics and hit
+lifecycle and are never snapped back to their mounts. Original tracks have no mounted props.
+
+The old 130 static market/awning planes are absent from the final RMP, including their
+collision surfaces. Other static vertices, UVs, colours and indices are unchanged. Temporary
+planning reservations preserve the existing buildings and roof details. The map now has
+6,122 static planes and 408 authored OMP objects. The native 525-frame animation pool is
+kept within budget by omitting unused Amsterdam scenery animations from Vianen's in-memory
+track configuration; shared car, HUD, particle and bonus registries remain intact. The
+focused impact run allocates 455 of those frames.
+
+Validation of the generated assets:
+
+- `check-bollards.mjs --prop stall`: counter hit plays one wood sample and zero paper;
+  its separate canopy releases and falls 2.67 m. The counter moves and the car passes its
+  former location.
+- `check-bollards.mjs --prop awning`: all 35 hanging parts remain mounted through countdown;
+  an actual airborne car contact releases the shop canopy. It plays one metal sample with
+  zero paper, falls 2.63 m and stays detached. The house behind it remains solid.
+- `check-bollards.mjs --prop marketpole`: closed support-pole geometry, native metal impact,
+  toppling, displacement and passage through the former base.
+- Six sidewalk probes, building/bridge closure, non-colliding cover checks and live
+  forward/rear/reverse visibility checks pass. All four static pools still match.
+- The bot finishes by 95 seconds; race ends at 111 seconds with all Vianen assets loaded.
+  Local intact stall/awning views have no browser warnings or errors.
+
+Evidence, native impact traces and importable viewer cameras are in
+`evidence/vianen/breakaway-market/`. These are focused Vianen checks, not a new performance
+benchmark or a test of every possible crash.

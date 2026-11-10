@@ -60,6 +60,12 @@ art and attribution. Register each model, animation, texture and sound in the ra
 and the viewer. Make restoration of temporary race settings explicit. Check native slot
 availability instead of overwriting an original track or silently replacing Vianen.
 
+The native animation frame pool holds 525 frames. Registering a few more models can overflow
+it even when the object count still fits. Vianen's loader keeps only the copied Amsterdam
+track animations it actually uses (sky, reflections and the start zeppelin) before appending
+its models. Leave shared vehicle, HUD and bonus animations intact. Check the live allocation
+and a full race after adding models; do not enlarge the native pool blindly.
+
 The native files have different jobs: RMP contains static planes; PMP contains chunk
 positions and triggers; DMP contains driving waypoints; OMP places objects. CMP and PTH
 cover additional native data that Vianen currently leaves empty. Adding visible roads does
@@ -173,6 +179,13 @@ Match sound and debris to material. Cardboard can rustle and emit paper; wood ca
 metal should clank; rubber should thump. Native hit lifecycle and positional volume handling
 should remain intact. Verify an actual hit, displacement, resting pose and passage through
 the old base. A registered handler alone does not establish that the interaction works.
+
+Suspended props need a mounting lifecycle. Keep an unhit awning at its authored pose, then
+release it once on native contact and let the original body simulate afterward. For a market
+stall, use separate counter, roof and pole bodies; couple the roof release to its own counter
+and supports. Wake a released body through the native API, or a roof that fell asleep while
+mounted may remain floating when its support is struck. `source/host/vianen-market.js` is the
+working example; do not apply mounting logic to original tracks.
 
 For sidewalk jumps, inspect the wheel's contact geometry before changing vehicle physics.
 Vianen's sharp curb was replaced by a 10 cm rise over a 60 cm bevel. Probe crossings at

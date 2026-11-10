@@ -22,8 +22,12 @@ const fun = propOption < 0 ? null : {
   cone: ['VN_CONE_ANIM','vn_kegel.d3d',2,7.87,64],
   sign: ['VN_SIGN_ANIM','vn_bord.d3d',22,7.68,72],
   bench: ['VN_BENCH_ANIM','vn_bank.d3d',3,14.35,118],
+  stall: ['VN_STALL_ANIM','vn_markt.d3d',3,14.5,157],
+  awning: ['VN_AWN48_ANIM','vn_luifel48.d3d',22,65.5,74.75],
+  marketpole: ['VN_MKTPOLE_ANIM','vn_marktpaal.d3d',22,14.22,146],
 }[process.argv[propOption + 1]];
-if (propOption >= 0) assert(fun, 'Use --prop box, crate, cone, sign or bench');
+if (propOption >= 0) assert(fun, 'Use --prop box, crate, cone, sign, bench, stall, awning or marketpole');
+const stall=fun?.[0]==='VN_STALL_ANIM', awning=fun?.[0]==='VN_AWN48_ANIM', marketPole=fun?.[0]==='VN_MKTPOLE_ANIM';
 const bridge = process.argv.includes('--bridge');
 const bikes = process.argv.includes('--bikes');
 const lanterns = process.argv.includes('--lanterns') || bridge;
@@ -41,7 +45,12 @@ const metadata = JSON.parse(readFileSync(root + 'public/assets/vianen/vianen.jso
 assert.equal(objects.length, fun ? (metadata.smashableProps[propName] ?? metadata.detailObjects[propName]) : bikes ? metadata.movableBikes : lanterns ? metadata.movableLanterns : 96);
 assert(objects.length > 0);
 assert(objects.every(o => o.type === nativeType), 'Use the intended native movable-object behaviour');
-const baked = readPlanes(read('vianen.rmp')).passes.flat().filter(p => !fun && p.twoSided && (bikes ?
+const packed=readPlanes(read('vianen.rmp'));
+if(stall||awning) {
+ assert.equal(packed.passes[1].filter(p=>p.uv.every(([u,v])=>u>.75&&u<1&&v>.75&&v<1)).length,0,'No baked canopy colliders may remain');
+ assert.equal(packed.passes[3].filter(p=>p.uv.every(([u,v])=>u>704/1024&&u<832/1024&&v>.75&&v<1)).length,0,'No baked market tabletops may remain');
+}
+const baked = packed.passes.flat().filter(p => !fun && p.twoSided && (bikes ?
   p.uv.every(([u,v]) => u > 4.75 && u < 5 && v > 0.25 && v < 0.375) : lanterns ?
   p.uv.every(([u,v]) => (u > 4.8125 && u < 4.875 && v < 0.25) ||
     (u > 4.5 && u < 4.625 && v > 0.25 && v < 0.5)) :
@@ -109,6 +118,10 @@ assert.equal(race.vianenImpacts.filter(p=>p.name===propName).length,objects.leng
 assert(race.vianenImpacts.every(p=>race.m.i32[(race.m.u32[0x715e50>>2]+p.index*0xf0+0x30)>>2]>=0), 'Every material sound must resolve in the native registry');
 const tick = () => { assert(race.tick(dt)); input.endTick(); };
 for (let i = 0; i < 420; i++) tick();
+if(awning) {
+ assert.equal(race.vianenMounts.mounts.length,35);
+ assert(race.vianenMounts.mounts.every(p=>!p.released),'All unhit awnings must remain mounted through countdown');
+}
 const net = Object.create(NetRace.prototype); net.race = race; net.scratch = race.m.lowAlloc(128);
 const bot = new Bot(race, input), player = bot.carState().index;
 const posts = [];
@@ -142,14 +155,17 @@ assert(before.rows[4] > 0.98, 'Post should stand upright before impact');
 // Approach across the road, away from the neighbouring posts. A longitudinal
 // setup between posts can overlap the car's rear body before the test even starts.
 const side = Math.sign(target.position.reduce((sum,x,k) => sum + (x-frame.center[k])*frame.right[k],0));
-const approach = frame.right.map(x => x*side);
-const start = target.position.map((x,k) => x - (lanterns || bikes || fun ? 65 : 40) * approach[k] + (k === 1 ? 5 : 0));
+const approach = (stall||marketPole) ? frame.forward : frame.right.map(x => x*side);
+const start = target.position.map((x,k) => x - (lanterns || bikes || fun ? 65 : 40) * approach[k] - ((awning?8:marketPole?7:0)*side*frame.right[k]) + (k === 1 ? 5 : 0));
 const rows = [approach[2],0,-approach[0], 0,1,0, ...approach];
 net.beam(player, start, rows, [0,0,0], [0,0,0]);
 for (const field of [0x34,0x38]) race.m.i32[(net.car(player) + field) >> 2] = target.chunk;
 for (let i = 0; i < 90; i++) tick();
 assert(net.read(post).rows[4] > 0.98, 'Arranging the car must not hit the post');
-net.beam(player, bot.carState().pos, rows, approach.map(x => x * 10), [0,0,0]);
+// A shop canopy is above an ordinary car: arrange a brief airborne contact,
+// as from the track's jumps, rather than inventing an invisible ground-level wall.
+const launch=awning?start.map((x,k)=>k===1?target.position[1]-5:x+approach[k]*30):bot.carState().pos;
+net.beam(player, launch, rows, approach.map(x => x * (awning?18:10)), [0,0,0]);
 const samples = []; let minUp = 1, moved = 0, hitState = 0;
 for (let i = 0; i < 300; i++) {
   input.dik[0xc8] = 0x80; tick();
@@ -166,7 +182,13 @@ const passed = car.pos.reduce((sum,x,k) => sum + (x - target.position[k]) * appr
 input.dik[0xc8] = 0;
 net.beam(player,start,rows,[0,0,0],[0,0,0]);
 for(let i=0;i<180;i++) tick();
-const summary = { propName, posts: posts.length, nativeType, hitState, material:profile.material, effectHits, bakedColliders: baked.length, minUp, movedWorldUnits: moved,
+const mount=awning?race.vianenMounts.mounts.find(p=>p.index===post):stall?race.vianenMounts.mounts.find(p=>p.triggers.includes(net.car(post))):null;
+const mountY=mount?new DataView(mount.pose.buffer,mount.pose.byteOffset).getFloat32(52,true):null;
+const mountResult=mount?{mountReleased:mount.released,mountDropWorldUnits:mountY-net.read(mount.index).p[1]}:{};
+const frameCapacity=race.m.u32[0x73b124>>2],frameFlags=race.m.u32[0x73b130>>2];
+const nativeFramePool={capacity:frameCapacity,used:race.m.u8.subarray(frameFlags,frameFlags+frameCapacity).filter(x=>x!==0).length};
+assert(nativeFramePool.used<nativeFramePool.capacity,'Keep headroom in the native animation frame pool');
+const summary = { ...mountResult, nativeFramePool, propName, posts: posts.length, nativeType, hitState, material:profile.material, effectHits, bakedColliders: baked.length, minUp, movedWorldUnits: moved,
   settledUp:net.read(post).rows[4], carPastBaseWorldUnits: passed, carSpeed: car.speed, missing: [...missing].filter(n => !n.endsWith('.wav')) };
 console.log(JSON.stringify(summary, null, 2));
 const at = process.argv.indexOf('--json');
@@ -182,5 +204,18 @@ if (!bridge && !fun) assert(net.read(post).rows[4] < 0.5, 'The street post must 
 assert(Math.hypot(...net.read(post).p.map((x,k) => x - before.p[k])) > 5,
   'The hit object must stay displaced instead of returning to its original base');
 // Bridge railings deliberately remain solid directly beyond the lantern base.
-if (!bridge) assert(passed > 20, 'The car must drive through the former post location');
+if (!bridge && !awning) assert(passed > 20, 'The car must drive through the former post location');
 assert.equal(summary.missing.length, 0);
+
+if(awning) {
+ assert(mount.released,'Actual native contact must release the wall mount');
+ assert(net.read(post).p[1]<before.p[1]-10,'The released canopy must fall down');
+}
+
+if(stall) {
+ assert.equal(mount.triggers.length,3,'A market canopy must link to its own counter and two poles');
+ assert(mount.released,'Hitting a stall must collapse its canopy');
+ assert(summary.mountDropWorldUnits>10,'The market canopy must fall separately from the counter');
+}
+
+if(marketPole) assert(minUp<.5,'The thin market support must topple when hit');

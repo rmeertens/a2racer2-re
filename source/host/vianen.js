@@ -6,6 +6,7 @@
 // are kept under track 10. The files live in memory only and nothing of another etappe changes.
 import { IniFile, encodeLatin1, latin1 } from './vfs.js';
 import { VIANEN_IMPACT_SOUNDS } from './vianen-impacts.js';
+import { VIANEN_MARKET_PROPS } from './vianen-market.js';
 
 export const VIANEN = { key: 'vianen', name: 'Vianen', type: 'Stadsrace', slot: 10, laps: 2, like: 0 };
 /**
@@ -39,7 +40,7 @@ export function vianenMenuImages(index) {
 }
 
 const TRACK = ['rmp', 'pmp', 'dmp', 'cmp', 'omp', 'pth'];
-const TEXTURES = ['vn_weg.tga', 'vn_land.tga', 'vn_gevel.tga', 'vn_bouw.tga', 'vn_fun.tga', 'vn_detail.tga'];
+const TEXTURES = ['vn_weg.tga', 'vn_land.tga', 'vn_gevel.tga', 'vn_bouw.tga', 'vn_fun.tga', 'vn_detail.tga', 'vn_markt.tga'];
 const PROPS = [
   ['vn_paal.d3d', 'VN_PAAL_ANIM', 'Vianen red-white post'],
   ['vn_lamp.d3d', 'VN_LAMP_ANIM', 'Vianen lantern post'],
@@ -52,6 +53,7 @@ const PROPS = [
   ['vn_put.d3d', 'VN_DRAIN_ANIM', 'Drain cover', 'vn_detail.tga'],
   ['vn_deksel.d3d', 'VN_COVER_ANIM', 'Manhole cover', 'vn_detail.tga'],
   ['vn_kruin.d3d', 'VN_CROWN_ANIM', 'Lime canopy layer'],
+  ...VIANEN_MARKET_PROPS,
 ];
 const MODELS = PROPS.map(([model]) => model);
 const BASE = 'assets/vianen/';
@@ -122,7 +124,15 @@ export function installVianen(vfs, files) {
     }
     const animIni = new IniFile(latin1(files.get(anim) || vfs.read(anim)));
     const objects = Number(etappeIni.get('objects', 'count'));
-    const animations = Number(animIni.get('config', 'count'));
+    // The native frame pool holds 525 frames. Vianen uses Amsterdam's sky,
+    // reflections and start zeppelin, not its trucks/organ/building animations.
+    // Leave the shared car/HUD/bonus registries intact and omit only unused
+    // track-specific animation entries from this in-memory etappe copy.
+    const required = new Set(['sky','car_reflect','a_zepp00_anim']);
+    const trackAnimations = Array.from({length:Number(animIni.get('config','count'))},(_,i)=>animIni.get('config',String(i)))
+      .filter(name=>required.has(name.toLowerCase()));
+    trackAnimations.forEach((name,i)=>animIni.set('config',String(i),name));
+    const animations = trackAnimations.length;
     PROPS.forEach(([model, animation, label, texture = 'vn_land.tga'], i) => {
       etappeIni.set('objects', String(objects + i), `${model},${texture},${label},0,${animation},0,${900 + i},0,-1`);
       animIni.set('config', String(animations + i), animation);

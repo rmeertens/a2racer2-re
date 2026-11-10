@@ -2526,6 +2526,58 @@ function describeThrow(m, type, obj) {
   return "";
 }
 
+// source/host/vianen-market.js
+var VIANEN_AWNINGS = [36, 48, 56, 64].map((width) => `VN_AWN${width}_ANIM`);
+var VIANEN_MARKET_PROPS = [
+  ["vn_markt.d3d", "VN_STALL_ANIM", "Breakaway market stall", "vn_markt.tga"],
+  ["vn_marktdak.d3d", "VN_CANOPY_ANIM", "Falling market canopy", "vn_markt.tga"],
+  ["vn_marktpaal.d3d", "VN_MKTPOLE_ANIM", "Breakaway canopy pole", "vn_markt.tga"],
+  ...[36, 48, 56, 64].map((width) => [`vn_luifel${width}.d3d`, `VN_AWN${width}_ANIM`, "Breakaway shop awning", "vn_markt.tga"])
+];
+var VianenMounts = class {
+  constructor(m, props) {
+    this.m = m;
+    const base = m.u32[7429712 >> 2], scene = m.u32[7581904 >> 2];
+    this.mounts = props.filter((p) => p.mounted).map((prop) => {
+      const car = base + prop.index * 240;
+      const object = scene + m.i32[car + 36 >> 2] * 169;
+      const triggers = prop.name === "VN_CANOPY_ANIM" ? props.filter(
+        (p) => ["VN_STALL_ANIM", "VN_MKTPOLE_ANIM"].includes(p.name) && Math.hypot(p.position[0] - prop.position[0], p.position[2] - prop.position[2]) < 45
+      ).map((p) => base + p.index * 240) : [];
+      return {
+        index: prop.index,
+        car,
+        object,
+        body: m.u32[car + 16 >> 2],
+        triggers,
+        pose: m.u8.slice(object + 16, object + 80),
+        released: false
+      };
+    });
+    this.scratch = this.mounts.length ? m.lowAlloc(80) : 0;
+  }
+  update() {
+    const { m, scratch } = this;
+    for (const mount of this.mounts) {
+      if (mount.released) continue;
+      if ([mount.car, ...mount.triggers].some((car) => m.i32[car + 44 >> 2] !== 0)) {
+        mount.released = true;
+        m.call(5190368, [], m.u32[mount.body + 8 >> 2]);
+        continue;
+      }
+      m.u8.set(mount.pose, scratch + 16);
+      m.u8.set(mount.pose.subarray(48, 60), scratch);
+      m.call(m.u32[m.u32[mount.body >> 2] + 12 >> 2], [scratch, scratch + 16], mount.body);
+      const core = m.u32[m.u32[mount.body + 8 >> 2] + 164 >> 2];
+      for (let k = 0; k < 3; k++) {
+        m.f32[core + 148 + k * 4 >> 2] = 0;
+        m.f32[core + 164 + k * 4 >> 2] = 0;
+      }
+      m.u8.set(mount.pose, mount.object + 16);
+    }
+  }
+};
+
 // source/host/vianen-impacts.js
 var VIANEN_IMPACT_SOUNDS = ["card", "wood", "rubber", "metal"].map((material) => ({
   name: `VN_HIT_${material.toUpperCase()}`,
@@ -2539,7 +2591,11 @@ var VIANEN_IMPACTS = {
   VN_PAAL_ANIM: { material: "wood", handler: 4545376, paper: false },
   VN_BIKE_ANIM: { material: "metal", handler: 4545376, paper: false },
   VN_LAMP_ANIM: { material: "metal", handler: 4545376, paper: false },
-  VN_BENCH_ANIM: { material: "wood", handler: 4545376, paper: false }
+  VN_BENCH_ANIM: { material: "wood", handler: 4545376, paper: false },
+  VN_STALL_ANIM: { material: "wood", handler: 4545376, paper: false },
+  VN_CANOPY_ANIM: { material: "metal", handler: 4545376, paper: false, mounted: true },
+  VN_MKTPOLE_ANIM: { material: "metal", handler: 4545376, paper: false },
+  ...Object.fromEntries(VIANEN_AWNINGS.map((name) => [name, { material: "metal", handler: 4545376, paper: false, mounted: true }]))
 };
 function installVianenImpacts(m, vfs) {
   if (Number(vfs.iniGet("game.ini", "ETAPPE", "ETAPPE")) !== 10 || !vfs.exists("vn_fun.tga")) return [];
@@ -2568,7 +2624,7 @@ function installVianenImpacts(m, vfs) {
     const profile = VIANEN_IMPACTS[prop.name], sound = `VN_HIT_${profile.material.toUpperCase()}`;
     m.u32[car + 108 >> 2] = profile.handler;
     m.call(4524800, [i, sounds.get(sound)]);
-    configured.push({ index: i, name: prop.name, sound, ...profile });
+    configured.push({ index: i, name: prop.name, position: prop.position, sound, ...profile });
   }
   return configured;
 }
@@ -2749,6 +2805,7 @@ var Race = class {
     m.call(FN.START_GAME);
     this.m.esp = m.layout.STACK_TOP - 256;
     this.vianenImpacts = installVianenImpacts(m, this.host.vfs);
+    this.vianenMounts = new VianenMounts(m, this.vianenImpacts);
   }
   /** One pass of the original main loop. dt is game time in seconds. */
   tick(dt) {
@@ -2763,6 +2820,7 @@ var Race = class {
       this.clock.advance(dt);
       if (!m.u32[DATA.RUNNING >> 2]) return this.finish();
       m.call(FN.HANDLE_GAME);
+      this.vianenMounts.update();
       m.call(FN.FOG_ZOOM);
       m.call(FN.COUNT_FRAME);
       if (m.call(FN.PUMP) !== 0) return this.finish();
@@ -33347,7 +33405,7 @@ function vianenMenuImages(index) {
   return out;
 }
 var TRACK = ["rmp", "pmp", "dmp", "cmp", "omp", "pth"];
-var TEXTURES = ["vn_weg.tga", "vn_land.tga", "vn_gevel.tga", "vn_bouw.tga", "vn_fun.tga", "vn_detail.tga"];
+var TEXTURES = ["vn_weg.tga", "vn_land.tga", "vn_gevel.tga", "vn_bouw.tga", "vn_fun.tga", "vn_detail.tga", "vn_markt.tga"];
 var PROPS = [
   ["vn_paal.d3d", "VN_PAAL_ANIM", "Vianen red-white post"],
   ["vn_lamp.d3d", "VN_LAMP_ANIM", "Vianen lantern post"],
@@ -33359,7 +33417,8 @@ var PROPS = [
   ["vn_bank.d3d", "VN_BENCH_ANIM", "Wooden street bench", "vn_fun.tga"],
   ["vn_put.d3d", "VN_DRAIN_ANIM", "Drain cover", "vn_detail.tga"],
   ["vn_deksel.d3d", "VN_COVER_ANIM", "Manhole cover", "vn_detail.tga"],
-  ["vn_kruin.d3d", "VN_CROWN_ANIM", "Lime canopy layer"]
+  ["vn_kruin.d3d", "VN_CROWN_ANIM", "Lime canopy layer"],
+  ...VIANEN_MARKET_PROPS
 ];
 var MODELS = PROPS.map(([model]) => model);
 var BASE = "assets/vianen/";
@@ -33410,7 +33469,10 @@ function installVianen(vfs, files) {
     }
     const animIni = new IniFile(latin1(files.get(anim) || vfs.read(anim)));
     const objects = Number(etappeIni.get("objects", "count"));
-    const animations = Number(animIni.get("config", "count"));
+    const required = /* @__PURE__ */ new Set(["sky", "car_reflect", "a_zepp00_anim"]);
+    const trackAnimations = Array.from({ length: Number(animIni.get("config", "count")) }, (_, i) => animIni.get("config", String(i))).filter((name) => required.has(name.toLowerCase()));
+    trackAnimations.forEach((name, i) => animIni.set("config", String(i), name));
+    const animations = trackAnimations.length;
     PROPS.forEach(([model, animation, label, texture = "vn_land.tga"], i) => {
       etappeIni.set("objects", String(objects + i), `${model},${texture},${label},0,${animation},0,${900 + i},0,-1`);
       animIni.set("config", String(animations + i), animation);

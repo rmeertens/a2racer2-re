@@ -28883,6 +28883,15 @@ function routeFrame(points2, position) {
   return { center, forward: [x / length, 0, z / length], right: [z / length, 0, -x / length] };
 }
 
+// source/host/vianen-market.js
+var VIANEN_AWNINGS = [36, 48, 56, 64].map((width) => `VN_AWN${width}_ANIM`);
+var VIANEN_MARKET_PROPS = [
+  ["vn_markt.d3d", "VN_STALL_ANIM", "Breakaway market stall", "vn_markt.tga"],
+  ["vn_marktdak.d3d", "VN_CANOPY_ANIM", "Falling market canopy", "vn_markt.tga"],
+  ["vn_marktpaal.d3d", "VN_MKTPOLE_ANIM", "Breakaway canopy pole", "vn_markt.tga"],
+  ...[36, 48, 56, 64].map((width) => [`vn_luifel${width}.d3d`, `VN_AWN${width}_ANIM`, "Breakaway shop awning", "vn_markt.tga"])
+];
+
 // source/dev/track-viewer.js
 var $ = (id) => document.getElementById(id);
 var vec = (a) => new Vector3(-a[0], a[1], a[2]);
@@ -29357,16 +29366,17 @@ async function start() {
     ["VN_BENCH_ANIM", "vn_bank.d3d", "Wooden street bench", 4],
     ["VN_DRAIN_ANIM", "vn_put.d3d", "Drain cover (no collider)", 5],
     ["VN_COVER_ANIM", "vn_deksel.d3d", "Manhole cover (no collider)", 5],
-    ["VN_CROWN_ANIM", "vn_kruin.d3d", "Crossed lime canopy", 1]
+    ["VN_CROWN_ANIM", "vn_kruin.d3d", "Crossed lime canopy", 1],
+    ...VIANEN_MARKET_PROPS.map(([model2, animation, label]) => [animation, model2, label, 6])
   ];
-  const names = ["vianen.pmp", "vianen.rmp", ...TEXTURES, "vianen.omp", "vn_fun.tga", "vn_detail.tga", ...scenery.map((p) => p[1])];
+  const names = ["vianen.pmp", "vianen.rmp", ...TEXTURES, "vianen.omp", "vn_fun.tga", "vn_detail.tga", "vn_markt.tga", ...scenery.map((p) => p[1])];
   const buffers = new Map(await Promise.all(names.map(async (name) => [name, await binary(name)])));
   points = readPositions(buffers.get("vianen.pmp"));
   const model = readPlanes(buffers.get("vianen.rmp"));
   routeDistances = [0];
   for (let i = 1; i < points.length; i++) routeDistances.push(routeDistances[i - 1] + vec(points[i]).distanceTo(vec(points[i - 1])));
   if (model.chunks !== points.length) throw new Error("Track geometry and positions have different chunk counts");
-  const textures = [...TEXTURES, "vn_fun.tga", "vn_detail.tga"].map((name) => {
+  const textures = [...TEXTURES, "vn_fun.tga", "vn_detail.tga", "vn_markt.tga"].map((name) => {
     const buffer = buffers.get(name);
     const { rgba, width, height } = readTga(buffer), texture = new DataTexture(rgba, width, height, RGBAFormat);
     texture.magFilter = LinearFilter;

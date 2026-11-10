@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PASS_NAMES, TEXTURES, SURVEY_VIEWS, readPositions, readPlanes, readTga, readObjects, readSceneryMesh, routeFrame } from './track-model.js';
+import { VIANEN_MARKET_PROPS } from '../host/vianen-market.js';
 
 const $ = id => document.getElementById(id);
 // D3D uses a left-handed world. Reflect X for Three's right-handed camera, and keep
@@ -303,14 +304,15 @@ async function start() {
     ['VN_DRAIN_ANIM', 'vn_put.d3d', 'Drain cover (no collider)', 5],
     ['VN_COVER_ANIM', 'vn_deksel.d3d', 'Manhole cover (no collider)', 5],
     ['VN_CROWN_ANIM', 'vn_kruin.d3d', 'Crossed lime canopy', 1],
+    ...VIANEN_MARKET_PROPS.map(([model,animation,label])=>[animation,model,label,6]),
   ];
-  const names = ['vianen.pmp', 'vianen.rmp', ...TEXTURES, 'vianen.omp', 'vn_fun.tga', 'vn_detail.tga', ...scenery.map(p => p[1])];
+  const names = ['vianen.pmp', 'vianen.rmp', ...TEXTURES, 'vianen.omp', 'vn_fun.tga', 'vn_detail.tga', 'vn_markt.tga', ...scenery.map(p => p[1])];
   const buffers = new Map(await Promise.all(names.map(async name => [name, await binary(name)])));
   points = readPositions(buffers.get('vianen.pmp')); const model = readPlanes(buffers.get('vianen.rmp'));
   routeDistances = [0];
   for (let i = 1; i < points.length; i++) routeDistances.push(routeDistances[i - 1] + vec(points[i]).distanceTo(vec(points[i - 1])));
   if (model.chunks !== points.length) throw new Error('Track geometry and positions have different chunk counts');
-  const textures = [...TEXTURES, 'vn_fun.tga', 'vn_detail.tga'].map(name => {
+  const textures = [...TEXTURES, 'vn_fun.tga', 'vn_detail.tga', 'vn_markt.tga'].map(name => {
     const buffer = buffers.get(name);
     const { rgba, width, height } = readTga(buffer), texture = new THREE.DataTexture(rgba, width, height, THREE.RGBAFormat);
     texture.magFilter = THREE.LinearFilter; texture.minFilter = THREE.LinearMipmapLinearFilter; texture.generateMipmaps = true; texture.needsUpdate = true;

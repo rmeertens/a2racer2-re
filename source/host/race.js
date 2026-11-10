@@ -6,6 +6,7 @@ import { installWin32, VirtualClock } from './win32.js';
 import { installDirectX } from './directx.js';
 import { installCoreHooks } from './hooks.js';
 import { installVianenImpacts } from './vianen-impacts.js';
+import { VianenMounts } from './vianen-market.js';
 
 class BootDone extends Error {}
 
@@ -201,6 +202,7 @@ export class Race {
     m.call(FN.START_GAME);
     this.m.esp = m.layout.STACK_TOP - 0x100;
     this.vianenImpacts = installVianenImpacts(m, this.host.vfs);
+    this.vianenMounts = new VianenMounts(m, this.vianenImpacts);
   }
 
   /** One pass of the original main loop. dt is game time in seconds. */
@@ -218,6 +220,7 @@ export class Race {
       this.clock.advance(dt);
       if (!m.u32[DATA.RUNNING >> 2]) return this.finish();
       m.call(FN.HANDLE_GAME);
+      this.vianenMounts.update();
       m.call(FN.FOG_ZOOM);
       m.call(FN.COUNT_FRAME);
       if (m.call(FN.PUMP) !== 0) return this.finish();
