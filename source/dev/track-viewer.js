@@ -2,25 +2,40 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PASS_NAMES, TEXTURES, SURVEY_VIEWS, readPositions, readPlanes, readTga, readObjects, readSceneryMesh, routeFrame } from './track-model.js';
 import { VIANEN_MARKET_PROPS } from '../host/vianen-market.js';
+import { BOXMEER_STREET_PROPS } from '../host/boxmeer-props.js';
+import { BoxmeerWorld } from '../render/boxmeer-world.js';
 
 const $ = id => document.getElementById(id);
 // D3D uses a left-handed world. Reflect X for Three's right-handed camera, and keep
 // saved cameras in the original game coordinates so existing links remain valid.
 const vec = a => new THREE.Vector3(-a[0], a[1], a[2]);
 const gameArray = v => [-v.x, v.y, v.z];
-const storageKey = 'a2racer4:vianen:cameras:v1';
+const mapKey = new URLSearchParams(location.search).get('map') === 'boxmeer' ? 'boxmeer' : 'vianen';
+const isBoxmeer = mapKey === 'boxmeer';
+const enhancedBoxmeer=isBoxmeer&&!new URLSearchParams(location.search).has('classicboxmeer');
+const textureNames = isBoxmeer ? ['bm_weg.tga','bm_land.tga','bm_gevel.tga','bm_bouw.tga'] : TEXTURES;
+const mapInfo = isBoxmeer ? await (await fetch('assets/boxmeer/boxmeer.json')).json() : null;
+const storageKey = `a2racer4:${mapKey}:cameras:v1`;
+if (isBoxmeer) {
+  document.title = 'Boxmeer · Track viewer';
+  document.querySelector('header h1').innerHTML = 'Boxmeer <span>Track viewer</span>';
+  document.querySelector('a[href*="etappe=vianen"]').href = './?race=1&etappe=boxmeer';
+  document.querySelector('#references h2').textContent = 'Real Boxmeer';
+  document.querySelector('#references > a').href = 'https://www.centrumboxmeer.nl/bezienswaardigheden/';
+  document.querySelector('#references > a').textContent = 'Explore Boxmeer ↗';
+}
 const state = { position: 10, playing: false, ready: false, surveyToken: 0 };
-let scene, renderer, camera, controls, points, meshes, planTransform, routeDistances;
+let scene, renderer, camera, controls, points, meshes, planTransform, routeDistances, modern;
 let saved = [];
 try { saved = JSON.parse(localStorage.getItem(storageKey) || '[]').filter(validCamera); } catch { /* storage is optional */ }
 function validCamera(c) {
   return c && typeof c.name === 'string' && [c.eye, c.target].every(a => Array.isArray(a) && a.length === 3 && a.every(x => Number.isFinite(x) && Math.abs(x) < 1e7)) && Number.isFinite(c.position);
 }
-const landmarks = [
+const landmarks = isBoxmeer ? [['Start / Spoorstraat', 10], ...mapInfo.landmarks.map(p=>[p.name,p.chunk])] : [
   ['Start / Voorstraat', 10], ['Stadhuis', 18], ['Lekpoort approach', 26], ['Lekpoort passage', 28],
   ['Dike', 35], ['Arched bridge', 44], ['East moat', 65], ['Drawbridge', 77], ['South moat', 90], ['Grote Kerk', 103],
 ];
-const references = [
+const references = isBoxmeer ? [['Boxmeer landmarks', 'https://www.centrumboxmeer.nl/bezienswaardigheden/'],['Maasheggen landscape','https://www.maasheggenunesco.com/ontdek/bezienswaardigheden/'],['Photo attribution','assets/boxmeer/ATTRIBUTION.md']] : [
   ['Voorstraat: wide street and varied house fronts', 'https://commons.wikimedia.org/wiki/File:Voorstraat_Vianen.jpg'],
   ['Lekpoort: passage and neighbouring houses', 'https://www.bezoeklekenlinge.nl/nl/locaties/1496584115/lekpoort'],
   ['Stadhuis: front, square and adjoining buildings', 'https://www.visitutrechtregion.com/nl/locaties/4279647297/stadhuis-vianen'],
@@ -33,7 +48,7 @@ for (const [label, chunk] of landmarks) $('landmark').add(new Option(`${label} �
 $('landmark').value = '10';
 
 async function binary(name) {
-  const response = await fetch(`assets/vianen/${name}`);
+  const response = await fetch(`assets/${mapKey}/${name}`);
   if (!response.ok) throw new Error(`${name}: HTTP ${response.status}`);
   return response.arrayBuffer();
 }
@@ -87,7 +102,9 @@ function updateLabels() {
   for (const key of ['height', 'offset', 'yaw', 'pitch']) $(key + '-label').textContent = `${$(key).value}${['height', 'offset'].includes(key) ? ' m' : '°'}`;
   for (const button of document.querySelectorAll('[data-yaw]')) button.setAttribute('aria-pressed', String(Number(button.dataset.yaw) === Number($('yaw').value)));
   const p = { x: -camera.position.x, y: camera.position.y, z: camera.position.z };
-  $('view-status').textContent = `Station ${state.position.toFixed(1)} · x ${(p.x / 10).toFixed(1)} m · y ${(p.y / 10).toFixed(1)} m · z ${(p.z / 10).toFixed(1)} m`;
+  const station=Math.floor(state.position),fraction=state.position-station;
+  const roadHeight=points[station][1]*(1-fraction)+points[(station+1)%points.length][1]*fraction;
+  $('view-status').textContent = `${isBoxmeer ? `Road height ${(roadHeight/10).toFixed(1)} m · ` : ''}Station ${state.position.toFixed(1)} · x ${(p.x / 10).toFixed(1)} m · y ${(p.y / 10).toFixed(1)} m · z ${(p.z / 10).toFixed(1)} m`;
 }
 let hashTimer;
 function updateHash() {
@@ -118,8 +135,19 @@ function updateMap() {
     const [x, y] = planTransform(points[i]); ctx.fillStyle = '#a5b5c1'; ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
   }
   ctx.font = '18px system-ui'; ctx.fillStyle = '#b8c6d1';
-  for (const [label, chunk] of [['Gate', 28], ['Bridge', 44], ['Church', 103]]) {
-    const [x, y] = planTransform(points[chunk]); ctx.fillText(label, x + 7, y - 8);
+  if(isBoxmeer && mapInfo.neighbourhood){
+    ctx.strokeStyle='#79cfb2';ctx.lineWidth=3;
+    for(const road of [...mapInfo.neighbourhood.roads,...(mapInfo.sideStreets||[]).flatMap(street=>street.roads)]){ctx.beginPath();road.forEach(([x,z],i)=>{const p=planTransform([x,0,z]);i?ctx.lineTo(...p):ctx.moveTo(...p)});ctx.stroke()}
+  }
+  const occupied=[];
+  for (const [label, chunk] of (isBoxmeer ? mapInfo.landmarks.map(p=>[p.name,p.chunk]) : [['Gate', 28], ['Bridge', 44], ['Church', 103]])) {
+    const [x,y]=planTransform(points[chunk]),width=ctx.measureText(label).width;
+    ctx.fillStyle=isBoxmeer?'#b5dbce':'#b8c6d1';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+    for(const [dx,dy]of [[8,-12],[8,20],[-width-8,-12],[-width-8,20],[8,43],[-width-8,43]]){
+      const tx=Math.max(4,Math.min(w-width-4,x+dx)),ty=Math.max(19,Math.min(h-5,y+dy)),rect=[tx-3,ty-18,width+6,22];
+      if(occupied.some(r=>rect[0]<r[0]+r[2] && rect[0]+rect[2]>r[0] && rect[1]<r[1]+r[3] && rect[1]+rect[3]>r[1]))continue;
+      ctx.fillText(label,tx,ty);occupied.push(rect);break;
+    }
   }
   for (const c of saved) {
     const [x, y] = planTransform(routeFrame(points, c.position).center); ctx.fillStyle = '#e4b97f'; ctx.fillRect(x - 4, y - 4, 8, 8);
@@ -156,7 +184,13 @@ function bindControls() {
   $('station').addEventListener('wheel', event => { event.preventDefault(); stop(); setPosition(state.position + Math.sign(event.deltaY) * 0.25); }, { passive: false });
   $('previous').onclick = () => { stop(); setPosition(Math.round(state.position) - 1); };
   $('next').onclick = () => { stop(); setPosition(Math.round(state.position) + 1); };
-  $('landmark').onchange = () => { stop(); setPosition(Number($('landmark').value)); };
+  $('landmark').onchange = () => {
+    stop();
+    const chunk = Number($('landmark').value);
+    const mark = mapInfo?.landmarks.find(p => p.chunk === chunk);
+    if (mark?.camera) restoreCamera({ ...mark.camera, position: chunk });
+    else setPosition(chunk);
+  };
   $('play').onclick = () => { state.playing = !state.playing; $('play').textContent = state.playing ? 'Pause route' : 'Play route'; };
   $('whole-map').onclick = fitWholeMap;
   for (const key of ['height', 'offset', 'yaw', 'pitch']) $(key).oninput = () => setPosition(state.position);
@@ -169,10 +203,12 @@ function bindControls() {
     stop(); setPosition(station);
   };
   for (const check of document.querySelectorAll('[data-pass]')) check.onchange = () => { meshes[Number(check.dataset.pass)].visible = check.checked; };
-  $('backs').onchange = () => meshes.forEach(mesh => { mesh.material.side = $('backs').checked ? THREE.DoubleSide : THREE.FrontSide; mesh.material.needsUpdate = true; });
-  $('wireframe').onchange = () => meshes.forEach(mesh => { mesh.material.wireframe = $('wireframe').checked; });
-  $('smooth').onchange = () => meshes.forEach(mesh => {
+  const eachMaterial=fn=>meshes.forEach(root=>{if(isBoxmeer)root.traverse(mesh=>{if(mesh.material)fn(mesh)});else fn(root)});
+  $('backs').onchange = () => eachMaterial(mesh => { mesh.material.side = $('backs').checked ? THREE.DoubleSide : THREE.FrontSide; mesh.material.needsUpdate = true; });
+  $('wireframe').onchange = () => eachMaterial(mesh => { mesh.material.wireframe = $('wireframe').checked; });
+  $('smooth').onchange = () => eachMaterial(mesh => {
     const texture = mesh.material.map;
+    if(!texture)return;
     texture.minFilter = $('smooth').checked ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
     texture.anisotropy = $('smooth').checked ? Math.min(8, renderer.capabilities.getMaxAnisotropy()) : 1;
     texture.needsUpdate = true;
@@ -182,7 +218,7 @@ function bindControls() {
     saved.push({ name: name.slice(0, 100), position: state.position, eye: gameArray(camera.position), target: gameArray(controls.target) }); persist();
     $('camera-name').value = '';
   };
-  $('export').onclick = () => download(new Blob([JSON.stringify(saved, null, 2)], { type: 'application/json' }), 'vianen-cameras.json');
+  $('export').onclick = () => download(new Blob([JSON.stringify(saved, null, 2)], { type: 'application/json' }), `${mapKey}-cameras.json`);
   $('import').onchange = async event => {
     try {
       const file = event.target.files[0]; if (!file) return;
@@ -195,7 +231,7 @@ function bindControls() {
   };
   $('screenshot').onclick = () => {
     renderer.render(scene, camera);
-    renderer.domElement.toBlob(blob => { if (blob) download(blob, `vianen-station-${state.position.toFixed(1)}.png`); });
+    renderer.domElement.toBlob(blob => { if (blob) download(blob, `${mapKey}-station-${state.position.toFixed(1)}.png`); });
   };
   $('survey').onclick = buildSurvey;
   for (const id of ['survey-direction', 'survey-start', 'survey-end']) $(id).addEventListener('input', updateSurveyButton);
@@ -210,7 +246,7 @@ function bindControls() {
     const rect = renderer.domElement.getBoundingClientRect();
     pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(meshes.filter(m => m.visible))[0];
+    const hit = raycaster.intersectObjects(meshes.filter(m => m.visible)).find(hit=>hit.object.userData.movable||hit.object.userData.facePlanes);
     if (!hit) return;
     if (hit.object.userData.movable) {
       const prop = hit.object.userData.movable, object = prop.objects[hit.instanceId];
@@ -218,10 +254,11 @@ function bindControls() {
       $('selection').textContent = `${prop.label} · source chunk ${object.chunk} · ${prop.animation} · vianen.omp / ${prop.model}`;
       return;
     }
-    const plane = hit.object.userData.facePlanes[hit.faceIndex];
+    const plane = hit.object.userData.facePlanes?.[hit.faceIndex];
+    if(!plane)return;
     outline.visible = true;
     outline.geometry.dispose(); outline.geometry = new THREE.BufferGeometry().setFromPoints(plane.vertices.map(vec));
-    $('selection').textContent = `${PASS_NAMES[plane.pass]} · source chunk ${plane.chunk} · plane ${plane.plane} · vianen.rmp`;
+    $('selection').textContent = `${PASS_NAMES[plane.pass]} · source chunk ${plane.chunk} · plane ${plane.plane} · ${mapKey}.rmp`;
   });
   controls.addEventListener('start', stop);
   controls.addEventListener('change', () => { updateLabels(); updateHash(); });
@@ -289,10 +326,10 @@ function frame(time) {
     delta.y += Number(keys.has('e')) - Number(keys.has('q'));
     delta.multiplyScalar(dt * (keys.has('shift') ? 500 : 100)); camera.position.add(delta); controls.target.add(delta); updateLabels(); updateHash();
   }
-  controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame);
+  controls.update();modern?.update(time/1000,camera); renderer.render(scene, camera); requestAnimationFrame(frame);
 }
 async function start() {
-  const scenery = [
+  const scenery = isBoxmeer ? [...BOXMEER_STREET_PROPS.map(([model,animation,label])=>[animation,model,label,5]),['BM_CONE_ANIM','bm_cone.d3d','Movable traffic cone',3],...['floralaan','maasheggen','centrum','finish'].map(name=>[`BM_GATE_${name.toUpperCase()}`,`bm_gate_${name}.d3d`,`${name} race gate`,4])] : [
     ['VN_PAAL_ANIM', 'vn_paal.d3d', 'Movable post', 1],
     ['VN_LAMP_ANIM', 'vn_lamp.d3d', 'Breakable lantern', 1],
     ['VN_BIKE_ANIM', 'vn_fiets.d3d', 'Movable bicycle', 1],
@@ -306,19 +343,22 @@ async function start() {
     ['VN_CROWN_ANIM', 'vn_kruin.d3d', 'Crossed lime canopy', 1],
     ...VIANEN_MARKET_PROPS.map(([model,animation,label])=>[animation,model,label,6]),
   ];
-  const names = ['vianen.pmp', 'vianen.rmp', ...TEXTURES, 'vianen.omp', 'vn_fun.tga', 'vn_detail.tga', 'vn_markt.tga', ...scenery.map(p => p[1])];
+  const extraTextures = isBoxmeer ? ['bm_route.tga','bm_street.tga'] : ['vn_fun.tga','vn_detail.tga','vn_markt.tga'];
+  const names = [`${mapKey}.pmp`, `${mapKey}.rmp`, ...textureNames, `${mapKey}.omp`, ...extraTextures, ...scenery.map(p => p[1]),...(isBoxmeer?['exploratory-views.json','boxmeer.json','buildings.json','bm_sky.tga','bm_plants.tga','bm_leaves.tga','facade-windows.json']:[])];
   const buffers = new Map(await Promise.all(names.map(async name => [name, await binary(name)])));
-  points = readPositions(buffers.get('vianen.pmp')); const model = readPlanes(buffers.get('vianen.rmp'));
+  points = readPositions(buffers.get(`${mapKey}.pmp`)); const model = readPlanes(buffers.get(`${mapKey}.rmp`));
   routeDistances = [0];
   for (let i = 1; i < points.length; i++) routeDistances.push(routeDistances[i - 1] + vec(points[i]).distanceTo(vec(points[i - 1])));
   if (model.chunks !== points.length) throw new Error('Track geometry and positions have different chunk counts');
-  const textures = [...TEXTURES, 'vn_fun.tga', 'vn_detail.tga', 'vn_markt.tga'].map(name => {
+  const textures = [...textureNames, ...extraTextures].map(name => {
     const buffer = buffers.get(name);
     const { rgba, width, height } = readTga(buffer), texture = new THREE.DataTexture(rgba, width, height, THREE.RGBAFormat);
     texture.magFilter = THREE.LinearFilter; texture.minFilter = THREE.LinearMipmapLinearFilter; texture.generateMipmaps = true; texture.needsUpdate = true;
+    if(enhancedBoxmeer)texture.colorSpace=THREE.SRGBColorSpace;
     return texture;
   });
-  scene = new THREE.Scene(); scene.background = new THREE.Color().setRGB(0.56, 0.65, 0.73);
+  scene = new THREE.Scene(); scene.background = new THREE.Color().setRGB(isBoxmeer?.68:.56,isBoxmeer?.77:.65,isBoxmeer?.84:.73);
+  if(isBoxmeer)scene.fog = new THREE.Fog(scene.background,12000,24000);
   renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
   // Preserve the track's baked RGB vertex lighting. No new lights or colour grading hide defects.
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace; renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -326,8 +366,12 @@ async function start() {
   textures.forEach(texture => { texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); });
   camera = new THREE.PerspectiveCamera(65, 1, 0.5, 30000);
   controls = new OrbitControls(camera, renderer.domElement); controls.minDistance = 1; controls.maxDistance = 25000;
-  meshes = model.passes.map((planes, pass) => buildMesh(planes, textures[pass])); meshes.forEach(mesh => scene.add(mesh));
-  const objects = readObjects(buffers.get('vianen.omp'));
+  if(enhancedBoxmeer){
+    renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
+    modern=new BoxmeerWorld(name=>new Uint8Array(buffers.get(name)),renderer);scene=modern.scene;meshes=modern.passGroups;
+  }else{meshes = model.passes.map((planes, pass) => buildMesh(planes, textures[pass])); meshes.forEach(mesh => scene.add(mesh));}
+  const objects = readObjects(buffers.get(`${mapKey}.omp`));
   for (const [animation, model, label, textureIndex] of scenery) {
     const props = objects.filter(o => o.name === animation);
     const prop = readSceneryMesh(buffers.get(model)), geometry = new THREE.BufferGeometry();
@@ -336,13 +380,15 @@ async function start() {
     const indices = [];
     for (let i = 0; i < prop.indices.length; i += 3) indices.push(prop.indices[i], prop.indices[i + 2], prop.indices[i + 1]);
     geometry.setIndex(indices);
-    const material = meshes[1].material.clone(); material.vertexColors = false;
+    geometry.computeVertexNormals();
+    const material = enhancedBoxmeer?new THREE.MeshStandardMaterial({roughness:.7,side:THREE.DoubleSide}):meshes[1].material.clone(); material.vertexColors = false;
     material.map = textures[textureIndex];
     const instances = new THREE.InstancedMesh(geometry, material, props.length), matrix = new THREE.Matrix4();
     props.forEach((o, i) => {
       matrix.makeRotationY(-o.rotation[1] * Math.PI / 180); matrix.setPosition(vec(o.position)); instances.setMatrixAt(i, matrix);
     });
     instances.instanceMatrix.needsUpdate = true; instances.computeBoundingSphere();
+    if(enhancedBoxmeer){instances.castShadow=true;instances.receiveShadow=true;}
     instances.userData.movable = { objects: props, animation, model, label };
     meshes[1].add(instances);
   }
@@ -354,8 +400,20 @@ async function start() {
     const view = JSON.parse(decodeURIComponent(location.hash.slice(1)));
     if (validCamera({ ...view, name: '' })) restoreCamera(view); else setPosition(10);
   } catch { setPosition(10); }
+  const highlight = new URLSearchParams(location.search).get('highlight');
+  const highlighted = mapInfo?.landmarks.find(p => p.name.toLowerCase().replaceAll(' ', '-') === highlight);
+  if (highlighted) {
+    $('landmark').value = String(highlighted.chunk);
+    $('landmark').onchange();
+  }
+  // Reuse the original viewer controls; survey links may still restore a camera.
+  if(isBoxmeer){
+    const views=JSON.parse(new TextDecoder().decode(buffers.get('exploratory-views.json'))).filter(validCamera);
+    const requested=new URLSearchParams(location.search).get('explore'),index=Number(requested);
+    if(requested!==null&&views.length&&Number.isFinite(index))restoreCamera(views[((Math.trunc(index)%views.length)+views.length)%views.length]);
+  }
   // Read-only diagnostics for screenshot checks; all camera controls remain ordinary UI actions.
-  window.__trackViewer = { get ready() { return state.ready; }, get station() { return state.position; }, chunks: points.length, planes: model.count, camera, controls, meshes };
+  window.__trackViewer = { get ready() { return state.ready; }, get station() { return state.position; }, chunks: points.length, planes: model.count, camera, controls, meshes,modern };
   requestAnimationFrame(frame);
 }
 start().catch(error => { $('view-status').textContent = `Could not load viewer: ${error.message}`; $('view-status').classList.add('error'); console.error(error); });

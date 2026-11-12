@@ -1,0 +1,8 @@
+{
+  "tool": "Built-in image generation",
+  "date": "2026-11-12",
+  "referenceImages": [],
+  "prompts": {
+    "garden-plants": "Create an original game-ready transparent botanical sprite atlas, square image divided into exactly four equal quadrants, each plant entirely inside its own quadrant with 12 percent transparent margin. Top left: a lush clump of Dutch summer meadow grass and white cow parsley flowers, knee high. Top right: a dense clump of riverside reeds and sedges, waist high. Bottom left: a bright natural garden clump of purple lavender, pink hollyhock and white daisies, knee high. Bottom right: a dense low leafy hornbeam garden shrub, waist high. Strong clear silhouettes and readable leaf clusters, finely detailed hand-painted semi-realistic game-art albedo with warm summer colour, neutral ambient illumination without directional shadows. Orthographic front elevation, full plants including bases and tips. TRUE transparent background, no ground plane, no pots, no ground shadows, no sky, no text, no labels, no borders, no perspective scene, no buildings, no photographs. Intended to dress an attractive Dutch arcade racing game with original AI-created vegetation."
+  }
+}

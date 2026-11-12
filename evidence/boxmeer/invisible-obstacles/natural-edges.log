@@ -1,0 +1,161 @@
+{
+  chunk: 0,
+  reason: 'circuit gap',
+  lengthMetres: 11.945518469395877,
+  maximumBeyondHedgeMetres: -2.756622668327728,
+  blocked: true
+}
+{
+  chunk: 27,
+  reason: 'circuit gap',
+  lengthMetres: 6.491107477373555,
+  maximumBeyondHedgeMetres: -2.745388039195695,
+  blocked: true
+}
+{
+  chunk: 49,
+  reason: 'circuit gap',
+  lengthMetres: 6.461166430435905,
+  maximumBeyondHedgeMetres: -2.7728956417820814,
+  blocked: true
+}
+{
+  chunk: 84,
+  reason: 'circuit gap',
+  lengthMetres: 6.059347712592284,
+  maximumBeyondHedgeMetres: -4.363790709631558,
+  blocked: true
+}
+{
+  chunk: 101,
+  reason: 'circuit gap',
+  lengthMetres: 6.423768403613489,
+  maximumBeyondHedgeMetres: -2.783442494697126,
+  blocked: true
+}
+{
+  chunk: 106,
+  reason: 'circuit gap',
+  lengthMetres: 6.714685757668034,
+  maximumBeyondHedgeMetres: -3.9820747855357097,
+  blocked: true
+}
+{
+  chunk: 105,
+  reason: 'circuit gap',
+  lengthMetres: 9.976431625820487,
+  maximumBeyondHedgeMetres: -2.76567482238232,
+  blocked: true
+}
+{
+  chunk: 209,
+  reason: 'circuit gap',
+  lengthMetres: 6.366139777566895,
+  maximumBeyondHedgeMetres: -2.7664145431265745,
+  blocked: true
+}
+{
+  chunk: 209,
+  reason: 'circuit gap',
+  lengthMetres: 6.366139777566845,
+  maximumBeyondHedgeMetres: -0.7768029660178053,
+  blocked: true
+}
+{
+  chunk: 227,
+  reason: 'circuit gap',
+  lengthMetres: 6.4327485247198295,
+  maximumBeyondHedgeMetres: -2.9261795207333585,
+  blocked: true
+}
+{
+  chunk: 251,
+  reason: 'circuit gap',
+  lengthMetres: 6.15030109925426,
+  maximumBeyondHedgeMetres: -2.762778872239918,
+  blocked: true
+}
+{
+  chunk: 273,
+  reason: 'circuit gap',
+  lengthMetres: 7.251646953116281,
+  maximumBeyondHedgeMetres: -2.7677643200181543,
+  blocked: true
+}
+{
+  chunk: 301,
+  reason: 'circuit gap',
+  lengthMetres: 6.221494882958098,
+  maximumBeyondHedgeMetres: -2.7619457619215213,
+  blocked: true
+}
+{
+  chunk: 110,
+  reason: 'side-street garden edge',
+  lengthMetres: 6.399999999999726,
+  maximumBeyondHedgeMetres: -2.7704625537028518,
+  blocked: true
+}
+{
+  chunk: 86,
+  reason: 'side-street garden edge',
+  lengthMetres: 6.467380949012666,
+  maximumBeyondHedgeMetres: -2.761535142861251,
+  blocked: true
+}
+{
+  chunk: 97,
+  reason: 'street end',
+  lengthMetres: 11.60000000000003,
+  maximumBeyondHedgeMetres: -2.881525067470099,
+  blocked: true
+}
+{
+  chunk: 99,
+  reason: 'street end',
+  lengthMetres: 11.600000000000009,
+  maximumBeyondHedgeMetres: -2.7615175482579155,
+  blocked: true
+}
+{
+  chunk: 111,
+  reason: 'street end',
+  lengthMetres: 11.60000000000004,
+  maximumBeyondHedgeMetres: -2.8900781622623293,
+  blocked: true
+}
+{
+  chunk: 74,
+  reason: 'street end',
+  lengthMetres: 11.599999999999941,
+  maximumBeyondHedgeMetres: -3.298127290118862,
+  blocked: true
+}
+{
+  chunk: 77,
+  reason: 'street end',
+  lengthMetres: 11.600000000000076,
+  maximumBeyondHedgeMetres: -2.821762560266595,
+  blocked: true
+}
+{
+  chunk: 68,
+  reason: 'street end',
+  lengthMetres: 11.599999999999914,
+  maximumBeyondHedgeMetres: -2.8137653992131115,
+  blocked: true
+}
+{
+  chunk: 94,
+  reason: 'street end',
+  lengthMetres: 11.599999999999927,
+  maximumBeyondHedgeMetres: -2.8574468228907812,
+  blocked: true
+}
+{
+  chunk: 94,
+  reason: 'street end',
+  lengthMetres: 11.59999999999996,
+  maximumBeyondHedgeMetres: -2.7906966216958917,
+  blocked: true
+}

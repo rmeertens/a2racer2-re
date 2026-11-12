@@ -1,0 +1,200 @@
+{
+  "streets": [
+    {
+      "name": "De Azalea",
+      "osmWays": [
+        6854683
+      ],
+      "entrances": 1,
+      "houses": 6
+    },
+    {
+      "name": "De Tamarisk",
+      "osmWays": [
+        6854477,
+        6854633,
+        6854466
+      ],
+      "entrances": 2,
+      "houses": 8
+    },
+    {
+      "name": "De Acacia",
+      "osmWays": [
+        6891413
+      ],
+      "entrances": 1,
+      "houses": 8
+    },
+    {
+      "name": "De Jasmijn",
+      "osmWays": [
+        6854718,
+        1449535273,
+        167492056,
+        1449535274
+      ],
+      "entrances": 1,
+      "houses": 8
+    }
+  ],
+  "geometry": {
+    "chunks": 320,
+    "planes": 12758,
+    "buildings": 573,
+    "closureRays": 68760,
+    "missingWalls": 0,
+    "reversedFaces": 0,
+    "taggedScenery": 673
+  },
+  "physics": {
+    "houses": 6,
+    "results": [
+      {
+        "label": "entrance",
+        "travelMetres": 14.09660666195085,
+        "riseMetres": 0.07576967477798462,
+        "initial": [
+          -4877.68994140625,
+          1.3480123281478882,
+          5875.0419921875
+        ],
+        "end": [
+          -5013.912109375,
+          0.1679796576499939,
+          5838.662109375
+        ]
+      },
+      {
+        "label": "north arm",
+        "travelMetres": 6.683777054080187,
+        "riseMetres": 0,
+        "initial": [
+          -4552.39599609375,
+          1.3480044603347778,
+          5917.5029296875
+        ],
+        "end": [
+          -4486.76611328125,
+          1.1277257204055786,
+          5932.197265625
+        ]
+      },
+      {
+        "label": "south arm",
+        "travelMetres": 13.943749578821208,
+        "riseMetres": 0.0038766860961914062,
+        "initial": [
+          -4280.89697265625,
+          1.3480215072631836,
+          5544.79931640625
+        ],
+        "end": [
+          -4420.517578125,
+          1.297224760055542,
+          5539.67822265625
+        ]
+      },
+      {
+        "label": "De Azalea entrance 1",
+        "travelMetres": 20.710664113640544,
+        "riseMetres": 0.0534438967704773,
+        "initial": [
+          -4772.16748046875,
+          1.3480618000030518,
+          5295.2880859375
+        ],
+        "end": [
+          -4572.41259765625,
+          1.2859716415405273,
+          5239.53564453125
+        ]
+      },
+      {
+        "label": "De Tamarisk entrance 1",
+        "travelMetres": 21.80947120638845,
+        "riseMetres": 0.06601022481918335,
+        "initial": [
+          -4787.65380859375,
+          1.3486636877059937,
+          4944.70654296875
+        ],
+        "end": [
+          -5005.7421875,
+          1.309753656387329,
+          4947.14697265625
+        ]
+      },
+      {
+        "label": "De Tamarisk entrance 2",
+        "travelMetres": 22.877662334189658,
+        "riseMetres": 0.08147691488265991,
+        "initial": [
+          -4844.0517578125,
+          1.3479913473129272,
+          5702.66943359375
+        ],
+        "end": [
+          -5070.1943359375,
+          1.2952280044555664,
+          5654.8642578125
+        ]
+      },
+      {
+        "label": "De Acacia entrance 1",
+        "travelMetres": 24.14291245021696,
+        "riseMetres": 0.023543405532836913,
+        "initial": [
+          -5820.21826171875,
+          1.3480067253112793,
+          6363.12841796875
+        ],
+        "end": [
+          -5786.2841796875,
+          1.2197240591049194,
+          6123.8154296875
+        ]
+      },
+      {
+        "label": "De Jasmijn entrance 1",
+        "travelMetres": 21.897492754591543,
+        "riseMetres": 0.06162570714950562,
+        "initial": [
+          -5319.3662109375,
+          1.3479992151260376,
+          6544.4580078125
+        ],
+        "end": [
+          -5259.13330078125,
+          1.3319599628448486,
+          6755.4765625
+        ]
+      }
+    ]
+  },
+  "races": {
+    "race": {
+      "finished": true,
+      "requiredMissing": [],
+      "finishSeconds": 288.31666666666666,
+      "peakKmh": 98.71541976928711,
+      "averageKmh": 53.876682272800856,
+      "slowSeconds": 23.35,
+      "recoveryAttempts": 6
+    },
+    "solo": {
+      "finished": true,
+      "requiredMissing": [],
+      "finishSeconds": 290.1,
+      "peakKmh": 87.95538940429688,
+      "averageKmh": 53.86838688589825,
+      "slowSeconds": 10.6,
+      "recoveryAttempts": 3
+    }
+  },
+  "limitations": [
+    "Keyboard bot used recovery attempts (three solo, six with opponents). Completion is not a subjective fun assessment.",
+    "Source street shapes and connections are preserved, with junction fitting and a rounded Floralaan bend rather than exact navigation geometry.",
+    "Side-street checks drive each entrance; they do not represent every possible maneuver through the network."
+  ]
+}

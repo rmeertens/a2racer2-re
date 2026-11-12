@@ -1,0 +1,76 @@
+{
+  "tool": "Built-in image generation",
+  "photographicInputs": [],
+  "sources": {
+    "facades": {
+      "file": "generated/facades.png",
+      "sha256": "b878e9729add69459695f26db8379b2b7840bf8371e4abcbbfb15c7441e71759"
+    },
+    "landmarks": {
+      "file": "generated/landmarks.png",
+      "sha256": "885888f36e121aef094e974744a6e3ee63ca19cc12f1f85a8bcc8ba4542d6bdf"
+    },
+    "materials": {
+      "file": "generated/materials.png",
+      "sha256": "ea2f5f24ccac12a21d62cea7511a58eaf4bee6628520ae7629ad0616d5057051"
+    },
+    "foliage": {
+      "file": "generated/foliage.png",
+      "sha256": "d937fb779e162eb1164d4e00d7b25e30570620b4ad3af396fa59f8b099cadf70"
+    },
+    "sky": {
+      "file": "generated/sky.png",
+      "sha256": "8feb946882479bab0e3a74944b62be2f332a63275af88fbfdd6d9288fc311072"
+    }
+  },
+  "prompts": [
+    "generated/prompts.json",
+    "generated/rework-prompts.json"
+  ],
+  "facadeColumns": [
+    0,
+    313,
+    626,
+    941,
+    1254
+  ],
+  "facadeRows": [
+    0,
+    360,
+    700,
+    998,
+    1254
+  ],
+  "landmarkCells": [
+    "castle",
+    "monastery",
+    "tower",
+    "church"
+  ],
+  "materialCells": [
+    "brick",
+    "cream",
+    "slate",
+    "tiles",
+    "hedge",
+    "grass",
+    "asphalt",
+    "pavement",
+    "paving",
+    "water",
+    "stone",
+    "white",
+    "green_wood",
+    "timber",
+    "solar",
+    "gravel"
+  ],
+  "codeAuthored": [
+    "street lettering",
+    "direction chevrons",
+    "parking and finish paint",
+    "sector gate lettering",
+    "menu name banner"
+  ],
+  "menuImages": "Rendered from the generated map geometry and textures"
+}

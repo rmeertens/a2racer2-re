@@ -75,7 +75,7 @@ def connected_terrain(town, water, sides, quad, tri, uv):
     water_shape = water_shape.difference(parcels.buffer(2)).simplify(15, preserve_topology=True)
     bank_outer = water_shape.buffer(75, quad_segs=2).simplify(20, preserve_topology=True)
     bank = bank_outer.difference(water_shape)
-    corridor = unary_union([make_valid(Polygon(p)) for p in town.road_corridor]).simplify(20, preserve_topology=True).buffer(8, quad_segs=1)
+    corridor = unary_union([make_valid(Polygon(p)) for p in town.road_corridor]).simplify(getattr(town, 'terrain_corridor_simplify', 20), preserve_topology=True).buffer(getattr(town, 'terrain_corridor_padding', 8), quad_segs=1)
     land = bounds.difference(bank_outer.union(corridor))
     counts = {'ground': 0, 'banks': 0, 'water': 0}
 
@@ -84,15 +84,15 @@ def connected_terrain(town, water, sides, quad, tri, uv):
     # All new faces start beyond the pavement, avoiding overlapping drivable road planes.
     raised = 0
     for i in range(town.n):
-        if i in town.bridges or max(town.ground[i], town.ground[(i + 1) % town.n]) < 4:
+        if i in town.bridges or max(town.ground[i], town.ground[(i + 1) % town.n]) < getattr(town, 'terrain_raised_threshold', 4):
             continue
         for side in (-1, 1):
             def point(t, off, high):
-                x, y, z = town.p(i, t, side * off, -2)
+                x, y, z = town.p(i, t, side * off, getattr(town, 'terrain_raised_height', -2))
                 if not high:
                     y = -25.0 if water_shape.contains(Point(x, z)) else -1.0
                 return (x, y, z)
-            inner, crest, toe = 82.0, 177.0, 317.0
+            inner, crest, toe = getattr(town, 'terrain_raised_profile', (82.0,177.0,317.0))
             faces = [
                 ([point(0, inner, True), point(1, inner, True), point(1, crest, True), point(0, crest, True)], (0, 1, 0)),
                 ([point(0, crest, True), point(1, crest, True), point(1, toe, False), point(0, toe, False)], (0, 1, 0)),
@@ -126,6 +126,8 @@ def connected_terrain(town, water, sides, quad, tri, uv):
                     raise RuntimeError(f'No terrain slots near chunk {ci}; simplify the mesh instead of dropping ground')
             atlas = 'surface' if kind == 'road' else 'land'
             plane = tri(*vs, uv(atlas, material), (242, 245, 238), (0, 1, 0))
+            if hasattr(town, 'terrain_mapping'):
+                plane = (plane[0], town.terrain_mapping(atlas, material, plane[0]), plane[2], plane[3])
             if category == 'banks':
                 # Height-based wetness follows the actual waterline and keeps the
                 # collision mesh unchanged. Per-vertex colour avoids triangle-shaped bands.
@@ -135,6 +137,8 @@ def connected_terrain(town, water, sides, quad, tri, uv):
                     wet = max(0, min(1, (-1-y)/24))
                     colours.append(tuple(round(c*(1-wet*(1-low))) for c,low in zip(colour,(.62,.52,.46))))
                 plane = vertices, mapping, colours, indices
+            if hasattr(town, 'terrain_colour'):
+                plane = (plane[0], plane[1], town.terrain_colour(plane[0], category, plane[2]), plane[3])
             town.chunks.add(kind, ci, plane)
             counts[category] += 1
 

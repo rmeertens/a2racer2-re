@@ -1,0 +1,20 @@
+// Check the packed driving surface and AI path, not just the viewer camera.
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {readPositions,readPlanes} from '../../source/dev/track-model.js';
+const read=name=>{const b=readFileSync(`public/assets/boxmeer/${name}`);return b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength)};
+const info=JSON.parse(readFileSync('public/assets/boxmeer/boxmeer.json'));
+const points=readPositions(read('boxmeer.pmp')),model=readPlanes(read('boxmeer.rmp')),dmp=new DataView(read('boxmeer.dmp'));
+const crest=info.dike.crestChunk,height=points[crest][1];
+assert(height>=49.9,'Dike crest must be five metres above the town datum');
+assert(points[info.dike.uphillStartChunk-10][1]<height*.1,'Uphill approach must begin near field level');
+assert(points[info.dike.downhillEndChunk+10][1]<height*.1,'Downhill approach must return near field level');
+assert(info.dike.maximumGrade<.08,'Dike transitions must remain smoothly drivable');
+for(let i=0;i<points.length;i++)for(let lane=0;lane<2;lane++)assert(Math.abs(dmp.getFloat32(4+(i*2+lane)*36+12,true)-points[i][1])<.001,'AI lanes must follow the raised road');
+const [x,,z]=points[crest];
+const near=model.passes.flat().filter(p=>p.vertices.some(v=>Math.hypot(v[0]-x,v[2]-z)<400));
+assert(near.some(p=>p.vertices.every(v=>Math.abs(v[1]-height)<1)),'Crest must have a real raised road surface');
+assert(near.some(p=>Math.max(...p.vertices.map(v=>v[1]))>height-.5&&Math.min(...p.vertices.map(v=>v[1]))<0),'Grass banks must connect the crest to the lower fields');
+for(const street of info.sideStreets)for(const e of street.entrances)assert(points[e.chunk][1]<1,'Residential junctions must stay at grade');
+const result={crestHeightMetres:height/10,maximumGradePercent:info.dike.maximumGrade*100,uphillStartChunk:info.dike.uphillStartChunk,crestChunk:crest,downhillEndChunk:info.dike.downhillEndChunk,raisedSurface:true,connectedBanks:true};
+writeFileSync('evidence/boxmeer/dike/profile.json',JSON.stringify(result,null,2));console.log(result);

@@ -1,0 +1,9 @@
+{
+  "crestHeightMetres": 5,
+  "maximumGradePercent": 2.6314145318078404,
+  "uphillStartChunk": 120,
+  "crestChunk": 160,
+  "downhillEndChunk": 200,
+  "raisedSurface": true,
+  "connectedBanks": true
+}

@@ -1,0 +1,7 @@
+[
+  { name: 'Boxmeer', errors: 0 },
+  { name: 'Vianen', errors: 0 },
+  { name: 'Amsterdam', errors: 0 },
+  { name: 'Amsterdam 8-bit', errors: 0 },
+  { name: 'Boxmeer viewer', errors: 0 }
+]

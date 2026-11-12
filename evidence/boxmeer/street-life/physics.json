@@ -1,0 +1,100 @@
+{
+  "objects": 56,
+  "totalKnockOverObjects": 62,
+  "minimumRoadClearanceMetres": 1.5243772755934615,
+  "nativeFramePool": {
+    "capacity": 525,
+    "used": 449
+  },
+  "collisions": [
+    {
+      "name": "BM_CHAIR_ANIM",
+      "bodies": 12,
+      "hit": 2,
+      "displacementMetres": 1.2788284400768208,
+      "minUp": 0.8596251010894775,
+      "effects": [
+        {
+          "paperEmitters": 0
+        }
+      ]
+    },
+    {
+      "name": "BM_TABLE_ANIM",
+      "bodies": 6,
+      "hit": 2,
+      "displacementMetres": 1.6984731408489488,
+      "minUp": -0.006331638433039188,
+      "effects": [
+        {
+          "paperEmitters": 0
+        }
+      ]
+    },
+    {
+      "name": "BM_BIN_ANIM",
+      "bodies": 8,
+      "hit": 2,
+      "displacementMetres": 9.067453941041851,
+      "minUp": -0.6589633226394653,
+      "effects": [
+        {
+          "paperEmitters": 0
+        }
+      ]
+    },
+    {
+      "name": "BM_BOARD_ANIM",
+      "bodies": 8,
+      "hit": 2,
+      "displacementMetres": 1.9461137153443278,
+      "minUp": -0.7294753193855286,
+      "effects": [
+        {
+          "paperEmitters": 0
+        }
+      ]
+    },
+    {
+      "name": "BM_CRATE_ANIM",
+      "bodies": 8,
+      "hit": 2,
+      "displacementMetres": 0.8973576730382055,
+      "minUp": 0.8433791399002075,
+      "effects": [
+        {
+          "paperEmitters": 0
+        }
+      ]
+    },
+    {
+      "name": "BM_FLOWERPOT_ANIM",
+      "bodies": 8,
+      "hit": 2,
+      "displacementMetres": 2.024728496374707,
+      "minUp": 0.9926542639732361,
+      "effects": [
+        {
+          "paperEmitters": 0
+        }
+      ]
+    },
+    {
+      "name": "BM_CARTON_ANIM",
+      "bodies": 6,
+      "hit": 2,
+      "displacementMetres": 1.320016086228011,
+      "minUp": 0.5811578631401062,
+      "effects": [
+        {
+          "paperEmitters": 1
+        }
+      ]
+    }
+  ],
+  "missing": [
+    "cco00_05.wav",
+    "cpa00_05.wav",
+    "cbp00_00.wav"
+  ]
+}

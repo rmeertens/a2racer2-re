@@ -16,6 +16,7 @@ import { LobbyUI } from './net/lobby-ui.js';
 import { NetRace } from './net/puppets.js';
 import { prepareRaceFiles } from './net/race-files.js';
 import { VIANEN, fetchVianen, installVianen, vianenMenuImages } from './host/vianen.js';
+import { BOXMEER, fetchBoxmeer, installBoxmeer, boxmeerMenuImages } from './host/boxmeer.js';
 
 // Esc for the quit prompt. T, N and W are default turbo chords a browser would take: input.md H8.
 const LOCKED_KEYS = ['Escape', 'KeyT', 'KeyN', 'KeyW'];
@@ -79,6 +80,8 @@ export class App {
     // Port: Vianen's Quick Race pictures, as the last track (source/host/vianen.js).
     const vianen = this.data.static.tracks.find((t) => t.vianen);
     if (vianen) Object.assign(assets.index, vianenMenuImages(vianen.index));
+    const boxmeer = this.data.static.tracks.find(t => t.boxmeer);
+    if (boxmeer) Object.assign(assets.index, boxmeerMenuImages(boxmeer.index));
     this.menu = new MenuRuntime({ canvas: this.canvasMenu, overlay: this.overlay, assets, data: this.data, sound });
     this.menu.forms = await (await fetch('assets/menu/forms.json')).json();
     this.data.app = this;
@@ -101,24 +104,31 @@ export class App {
     // iOS Safari counts only the end of a touch as a gesture.
     for (const ev of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown']) window.addEventListener(ev, unlock);
     for (const ev of ['fullscreenchange', 'webkitfullscreenchange']) document.addEventListener(ev, () => this.fullscreenChanged());
-    // The race handles its own sound on focus loss. In the menu: silence while the tab is hidden.
-    document.addEventListener('visibilitychange', () => {
+    // Side-by-side panels can stay visible while the track viewer has focus.
+    // Match the race: the menu must also be silent when it loses focus.
+    const syncMenuSound = () => {
       if (this.mode !== 'menu') return;
+      const inactive = document.hidden || !document.hasFocus();
       const c = this.audioContext;
       if (c) {
-        if (document.hidden) c.suspend();
+        if (inactive) c.suspend();
         else c.resume();
       }
       // The intro's sound comes from its video element, which is not in that context.
       const video = this.menu.video && this.menu.video.el;
-      if (document.hidden) {
-        this.videoHeld = Boolean(video && !video.paused);
-        if (this.videoHeld) video.pause();
+      if (inactive) {
+        if (video && !video.paused) {
+          this.videoHeld = true;
+          video.pause();
+        }
       } else if (this.videoHeld) {
         this.videoHeld = false;
         if (video) video.play().catch(() => {});
       }
-    });
+    };
+    document.addEventListener('visibilitychange', syncMenuSound);
+    window.addEventListener('blur', syncMenuSound);
+    window.addEventListener('focus', syncMenuSound);
     this.layout();
     this.say('');
     const loop = () => {
@@ -156,11 +166,15 @@ export class App {
     if (this.params.has('race')) {
       const vianen = this.params.get('etappe') === VIANEN.key;
       pinRace(this.vfs, {
-        etappe: vianen ? VIANEN.slot : Number(this.params.get('etappe')) || 0,
-        car: Number(this.params.get('car')) || 0,
+        etappe: vianen ? VIANEN.slot : this.params.get('etappe') === BOXMEER.key ? BOXMEER.slot : Number(this.params.get('etappe')) || 0,
+        car: this.params.has('car') ? Number(this.params.get('car')) || 0 : this.params.get('etappe') === BOXMEER.key ? 3 : 0,
+        laps: this.params.has('laps') ? Number(this.params.get('laps')) : this.params.get('etappe') === BOXMEER.key || this.params.get('etappe') === String(BOXMEER.slot) ? 1 : 2,
         resolution: this.params.has('resolution') ? Number(this.params.get('resolution')) : null,
         chunks: this.params.has('chunks') ? Number(this.params.get('chunks')) : null,
       });
+      if ((this.params.get('etappe') === BOXMEER.key || this.params.get('etappe') === String(BOXMEER.slot)) && !this.params.has('stock')) {
+        for (const key of ['MOTOR','BANDEN','ABS','VERSNELLINGSBAK']) this.vfs.iniSet('game.ini','PLAYER',key,'1');
+      }
       if (vianen) await this.withVianen(() => this.startRace());
       else await this.startRace();
       return;
@@ -173,6 +187,7 @@ export class App {
   async startRace() {
     // A race the menu set up on Vianen (etappe 10): its files first, as the network race does.
     if (!this.inVianen && Number(this.vfs.iniGet('game.ini', 'ETAPPE', 'ETAPPE')) === VIANEN.slot) return this.withVianen(() => this.startRace());
+    if (!this.inBoxmeer && Number(this.vfs.iniGet('game.ini', 'ETAPPE', 'ETAPPE')) === BOXMEER.slot) return this.withBoxmeer(() => this.startRace());
     this.showRace();
     await this.runner.run();
     // A key still held auto-repeats into the menu: 0x0043ac80 left that to a new process.
@@ -208,13 +223,14 @@ export class App {
     if (!me) return;
     const data = this.data;
     const vianen = setup.etappe === VIANEN.key;
+    const boxmeer = setup.etappe === BOXMEER.key || setup.etappe === BOXMEER.slot;
     const track = vianen ? null : data.static.tracks.find((t) => t.indexInGame === setup.etappe);
     const mode = data.raceMode;
     data.raceMode = 1;
     data.writeToInis();
     data.raceMode = mode;
     const set = (section, key, value) => this.vfs.iniSet('game.ini', section, key, String(value));
-    set('ETAPPE', 'ETAPPE', vianen ? VIANEN.slot : setup.etappe);
+    set('ETAPPE', 'ETAPPE', vianen ? VIANEN.slot : boxmeer ? BOXMEER.slot : setup.etappe);
     set('ETAPPE', 'BRITISH', track && track.british ? 1 : 0);
     set('OPTIONS', 'NRLAPS', setup.laps);
     set('LEAGUE', 'LEAGUE', setup.difficulty ?? 1);
@@ -225,7 +241,8 @@ export class App {
     this.showRace();
     try {
       const run = () => this.runner.run({ net, session, seed: setup.seed, cars: [...new Set(setup.players.map((p) => p.car))] });
-      if (vianen) await this.withVianen(run);
+      if (boxmeer) await this.withBoxmeer(run);
+      else if (vianen) await this.withVianen(run);
       else await run();
     } finally {
       files.restore();
@@ -235,6 +252,21 @@ export class App {
     this.showMenu();
     if (forms.TfrmMainScreen) await this.menu.goTo(forms.TfrmMainScreen);
     this.openMultiplayer();
+  }
+
+  async withBoxmeer(fn) {
+    let restore = () => {};
+    try {
+      this.boxmeerFiles ??= await fetchBoxmeer();
+      restore = installBoxmeer(this.vfs, this.boxmeerFiles);
+    } catch (e) {
+      console.error(e);
+      this.say('Boxmeer kon niet laden: ' + e.message, 10000);
+      return;
+    }
+    this.inBoxmeer = true;
+    try { return await fn(); }
+    finally { this.inBoxmeer = false; restore(); }
   }
 
   /** Runs fn with etappe 10 made Vianen: source/host/vianen.js. */

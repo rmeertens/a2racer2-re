@@ -1,0 +1,3455 @@
+{
+  "probes": 329,
+  "failures": [
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.260226062577469,
+      "riseMetres": 0.3741633057594299,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.943540827254038,
+      "riseMetres": 0.20605283975601196,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 5.94169476042927,
+      "riseMetres": 0.3154435396194458,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 4.401343150104952,
+      "riseMetres": 0.48621047735214235,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.30651052086788,
+      "riseMetres": 0.4852815747261047,
+      "clear": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.327146388284509,
+      "riseMetres": 0.3697554111480713,
+      "clear": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.904781680993115,
+      "riseMetres": 0.2757620930671692,
+      "clear": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 8.146924466483336,
+      "riseMetres": 0.4125086307525635,
+      "clear": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 4.101499923709122,
+      "riseMetres": 0.42692601680755615,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.465720587017313,
+      "riseMetres": 0.5830198287963867,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.349421176115399,
+      "riseMetres": 0.36469091176986695,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.3557049197245785,
+      "riseMetres": 0.521493136882782,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.790068456277751,
+      "riseMetres": 0.2387227773666382,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.204092974173989,
+      "riseMetres": 0.46224466562271116,
+      "clear": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.217339587147747,
+      "riseMetres": 0.5254777669906616,
+      "clear": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.278291491939263,
+      "riseMetres": 0.5313191294670105,
+      "clear": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.6909528724356795,
+      "riseMetres": 0.5758781909942627,
+      "clear": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.649828036040849,
+      "riseMetres": 0.36652926206588743,
+      "clear": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 7.072853704428444,
+      "riseMetres": 0.6426246762275696,
+      "clear": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.681121451415285,
+      "riseMetres": 0.5948718905448913,
+      "clear": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.70543084360429,
+      "riseMetres": 0.3824702262878418,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.42509695947799,
+      "riseMetres": 0.36577346324920657,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.962012832025768,
+      "riseMetres": 0.2257077217102051,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.128545787642511,
+      "riseMetres": 0.37769150733947754,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.353361108516788,
+      "riseMetres": 0.5500218749046326,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.406438908797942,
+      "riseMetres": 0.6676949024200439,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.091997432530512,
+      "riseMetres": 0.45454561710357666,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 4.965360024290794,
+      "riseMetres": 0.1495766520500183,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.342602103887859,
+      "riseMetres": 0.3580484986305237,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.926283764355746,
+      "riseMetres": 0.19645484685897827,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 4.739865140067407,
+      "riseMetres": 0.11810843944549561,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.357347887582532,
+      "riseMetres": 0.6392464280128479,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.9923493888421575,
+      "riseMetres": 0.19188289642333983,
+      "clear": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.39000431183923,
+      "riseMetres": 0.35731192827224734,
+      "clear": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.049987579383125,
+      "riseMetres": 0.4735396385192871,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.177079352742229,
+      "riseMetres": 0.44092113971710206,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.838010620915108,
+      "riseMetres": 0.23577815294265747,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.258482479819129,
+      "riseMetres": 0.36659334897994994,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.779122531629412,
+      "riseMetres": 0.2864458322525024,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.2238799619280725,
+      "riseMetres": 0.5269527673721314,
+      "clear": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.068473883287781,
+      "riseMetres": 0.3606722831726074,
+      "clear": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.0857410866536075,
+      "riseMetres": 0.38906570672988894,
+      "clear": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.817514616750847,
+      "riseMetres": 0.28011858463287354,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.440903217583835,
+      "riseMetres": 0.5617277979850769,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.962053561718504,
+      "riseMetres": 0.18943799734115602,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.098870489419621,
+      "riseMetres": 0.3815483093261719,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.836766293317689,
+      "riseMetres": 0.26290173530578614,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.303626443345509,
+      "riseMetres": 0.38718491792678833,
+      "clear": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.038295814372826,
+      "riseMetres": 0.4124589800834656,
+      "clear": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.997886073400577,
+      "riseMetres": 0.38551021814346315,
+      "clear": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.984024098280921,
+      "riseMetres": 0.2078909993171692,
+      "clear": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 5.993805065339886,
+      "riseMetres": 0.27322202920913696,
+      "clear": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.161971358920942,
+      "riseMetres": 0.40370659828186034,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.663888506711231,
+      "riseMetres": 0.4486141800880432,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.838121157884851,
+      "riseMetres": 0.30917896032333375,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 3.1294997034720304,
+      "riseMetres": 0.5577614665031433,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.2307989477230565,
+      "riseMetres": 0.6587964534759522,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.078778813635464,
+      "riseMetres": 0.47074134349823,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.4898070084800965,
+      "riseMetres": 0.36551504135131835,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 0.7495517453347349,
+      "riseMetres": 0.5871193170547485,
+      "clear": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.427779710450468,
+      "riseMetres": 0.3652834534645081,
+      "clear": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.883466651656958,
+      "riseMetres": 0.3225757241249084,
+      "clear": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.040787756878812,
+      "riseMetres": 0.4348299026489258,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.321248822301255,
+      "riseMetres": 0.43353972434997556,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 4.615839365532021,
+      "riseMetres": 0.19933861792087554,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 0.8112540196165288,
+      "riseMetres": 0.14337692260742188,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.032410992265623,
+      "riseMetres": 0.48254096508026123,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.499485952320112,
+      "riseMetres": 0.5280176043510437,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 1.6961276349827255,
+      "riseMetres": 0.0930076003074646,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.015503436693916,
+      "riseMetres": 0.46933941841125487,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.907541770099536,
+      "riseMetres": 0.2564374804496765,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.117925956648891,
+      "riseMetres": 0.40289671421051027,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.924666017706892,
+      "riseMetres": 0.28943194150924684,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 5.529368184536645,
+      "riseMetres": 0.16513638496398925,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.180596807751367,
+      "riseMetres": 0.5292654514312745,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.1064500277531035,
+      "riseMetres": 0.4171192288398743,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 3.727016307264988,
+      "riseMetres": 0.35342798233032224,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.339672754804189,
+      "riseMetres": 0.41782876253128054,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.91276398908017,
+      "riseMetres": 0.29346705675125123,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.409944121579413,
+      "riseMetres": 0.48085057735443115,
+      "clear": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.823969536718868,
+      "riseMetres": 0.3069087386131287,
+      "clear": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.034679220420126,
+      "riseMetres": 0.4108758568763733,
+      "clear": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.428855612750523,
+      "riseMetres": 0.5756588578224182,
+      "clear": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.149930150745982,
+      "riseMetres": 0.47924854755401614,
+      "clear": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.051710841053007,
+      "riseMetres": 0.42081485986709594,
+      "clear": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 2.572914088355254,
+      "riseMetres": 0.30312447547912597,
+      "clear": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 0.6118056934535563,
+      "riseMetres": 0.5230028748512268,
+      "clear": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.11800397601981,
+      "riseMetres": 0.36017093658447263,
+      "clear": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.737503397298555,
+      "riseMetres": 0.27674139738082887,
+      "clear": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 5.984318659572207,
+      "riseMetres": 0.26005605459213255,
+      "clear": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.050148473218005,
+      "riseMetres": 0.46217185258865356,
+      "clear": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 5.0855633107068865,
+      "riseMetres": 0.4923029184341431,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.583631547469412,
+      "riseMetres": 0.35409932136535643,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.949481863137454,
+      "riseMetres": 0.48418081998825074,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.436928443991031,
+      "riseMetres": 0.6244667291641235,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.067303113456276,
+      "riseMetres": 0.3843690037727356,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 5.85326260415216,
+      "riseMetres": 0.2216366410255432,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.3710765152829705,
+      "riseMetres": 0.3868136167526245,
+      "clear": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.3508603658344045,
+      "riseMetres": 0.38697348833084105,
+      "clear": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.68141884482943,
+      "riseMetres": 0.23057289123535157,
+      "clear": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.325944674631623,
+      "riseMetres": 0.6066086530685425,
+      "clear": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.155250196073039,
+      "riseMetres": 0.4372817873954773,
+      "clear": false
+    }
+  ],
+  "results": [
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.558769742483895,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 8.700322604237511,
+      "riseMetres": 0.09281798601150512,
+      "clear": true
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.260226062577469,
+      "riseMetres": 0.3741633057594299,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.156370860346607,
+      "riseMetres": 0.16545871496200562,
+      "clear": true
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.280320214969365,
+      "riseMetres": 0.21094422340393065,
+      "clear": true
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.943540827254038,
+      "riseMetres": 0.20605283975601196,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 5.94169476042927,
+      "riseMetres": 0.3154435396194458,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.084299359943225,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.680975969355098,
+      "riseMetres": 0.25752376317977904,
+      "clear": true
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.306443019262257,
+      "riseMetres": 0.3345054030418396,
+      "clear": true
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.736599397471561,
+      "riseMetres": 0.11387341022491455,
+      "clear": true
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 4.401343150104952,
+      "riseMetres": 0.48621047735214235,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.30651052086788,
+      "riseMetres": 0.4852815747261047,
+      "clear": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 7.008327840580057,
+      "riseMetres": 0.3432498097419739,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.272330498200251,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 8.343624849325249,
+      "riseMetres": 0.03340680599212646,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.327146388284509,
+      "riseMetres": 0.3697554111480713,
+      "clear": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.50341309279649,
+      "riseMetres": 0.1523434042930603,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.230072345813885,
+      "riseMetres": 0.2555076241493225,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.904781680993115,
+      "riseMetres": 0.2757620930671692,
+      "clear": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.711947576515982,
+      "riseMetres": 0.22010538578033448,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.239295721213761,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.896505277139224,
+      "riseMetres": 0.13230044841766359,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 7.455472505632829,
+      "riseMetres": 0.20340496301651,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 8.146924466483336,
+      "riseMetres": 0.4125086307525635,
+      "clear": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 7.719459560176969,
+      "riseMetres": 0.29544404745101926,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.9941416491121675,
+      "riseMetres": 0.21392104625701905,
+      "clear": true
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 4.101499923709122,
+      "riseMetres": 0.42692601680755615,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.810778999693468,
+      "riseMetres": 0.011055946350097656,
+      "clear": true
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 8.344700029781205,
+      "riseMetres": 0.025767827033996583,
+      "clear": true
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.465720587017313,
+      "riseMetres": 0.5830198287963867,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.349421176115399,
+      "riseMetres": 0.36469091176986695,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.278974564388369,
+      "riseMetres": 0.27008655071258547,
+      "clear": true
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.196322438153825,
+      "riseMetres": 0.2205043315887451,
+      "clear": true
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.341040877799529,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.284574495313711,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.171866278140018,
+      "riseMetres": 0.20931984186172486,
+      "clear": true
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.3557049197245785,
+      "riseMetres": 0.521493136882782,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.805839335127516,
+      "riseMetres": 0.05699843168258667,
+      "clear": true
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.790068456277751,
+      "riseMetres": 0.2387227773666382,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.204092974173989,
+      "riseMetres": 0.46224466562271116,
+      "clear": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.150174990777458,
+      "riseMetres": 0.005990302562713623,
+      "clear": true
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 8.598387818078935,
+      "riseMetres": 0.048585152626037596,
+      "clear": true
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.217339587147747,
+      "riseMetres": 0.5254777669906616,
+      "clear": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.1031654369624775,
+      "riseMetres": 0.2944514870643616,
+      "clear": true
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.239325479731749,
+      "riseMetres": 0.23497482538223266,
+      "clear": true
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.135246602478643,
+      "riseMetres": 0.23231617212295533,
+      "clear": true
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.59524417218312,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.561960743943095,
+      "riseMetres": 0.17131367921829224,
+      "clear": true
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.278291491939263,
+      "riseMetres": 0.5313191294670105,
+      "clear": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.748667415251458,
+      "riseMetres": 0.06553049087524414,
+      "clear": true
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.6909528724356795,
+      "riseMetres": 0.5758781909942627,
+      "clear": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.649828036040849,
+      "riseMetres": 0.36652926206588743,
+      "clear": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.316249476124822,
+      "riseMetres": 0.008883464336395263,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.257304296934162,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 8.79783311710855,
+      "riseMetres": 0.034788215160369874,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 7.072853704428444,
+      "riseMetres": 0.6426246762275696,
+      "clear": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.264746896812019,
+      "riseMetres": 0.2385409951210022,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.1237957151486,
+      "riseMetres": 0.26244091987609863,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.2006552323959525,
+      "riseMetres": 0.22430567741394042,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.932592809982427,
+      "riseMetres": 0.0004475712776184082,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.011994208420301,
+      "riseMetres": 0.04910672903060913,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.985753880383126,
+      "riseMetres": 0.23889415264129638,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.098594777267349,
+      "riseMetres": 0.34641638994216917,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.592392790294812,
+      "riseMetres": 0.12632901668548585,
+      "clear": true
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.681121451415285,
+      "riseMetres": 0.5948718905448913,
+      "clear": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.70543084360429,
+      "riseMetres": 0.3824702262878418,
+      "clear": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.090058579175935,
+      "riseMetres": 0.006639063358306885,
+      "clear": true
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 6.565362961646764,
+      "riseMetres": 0.11071534156799316,
+      "clear": true
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.75275695061252,
+      "riseMetres": 0.04063558578491211,
+      "clear": true
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.42509695947799,
+      "riseMetres": 0.36577346324920657,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.075645228114955,
+      "riseMetres": 0.15147647857666016,
+      "clear": true
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.183858014929694,
+      "riseMetres": 0.2781837463378906,
+      "clear": true
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.962012832025768,
+      "riseMetres": 0.2257077217102051,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.812022997175804,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.243283433996918,
+      "riseMetres": 0.0047507166862487795,
+      "clear": true
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.128545787642511,
+      "riseMetres": 0.37769150733947754,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.353361108516788,
+      "riseMetres": 0.5500218749046326,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.919754239907055,
+      "riseMetres": 0.15381847620010375,
+      "clear": true
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.406438908797942,
+      "riseMetres": 0.6676949024200439,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.091997432530512,
+      "riseMetres": 0.45454561710357666,
+      "clear": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.209836824316886,
+      "riseMetres": 0.0075940370559692385,
+      "clear": true
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 4.965360024290794,
+      "riseMetres": 0.1495766520500183,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 8.263648924492353,
+      "riseMetres": 0.05762486457824707,
+      "clear": true
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.342602103887859,
+      "riseMetres": 0.3580484986305237,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.244279544148289,
+      "riseMetres": 0.32096033096313475,
+      "clear": true
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.103653647535452,
+      "riseMetres": 0.2833254337310791,
+      "clear": true
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.926283764355746,
+      "riseMetres": 0.19645484685897827,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.96122101074662,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 4.739865140067407,
+      "riseMetres": 0.11810843944549561,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.811071407523807,
+      "riseMetres": 0.32363851070404054,
+      "clear": true
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.357347887582532,
+      "riseMetres": 0.6392464280128479,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.833288856829606,
+      "riseMetres": 0.07288875579833984,
+      "clear": true
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.9923493888421575,
+      "riseMetres": 0.19188289642333983,
+      "clear": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.0264877293049235,
+      "riseMetres": 0.3211889982223511,
+      "clear": true
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.769360113999936,
+      "riseMetres": 0.13031301498413086,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.297550257974788,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 8.66073410681063,
+      "riseMetres": 0.06104822158813476,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.39000431183923,
+      "riseMetres": 0.35731192827224734,
+      "clear": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.1353057697485465,
+      "riseMetres": 0.31013094186782836,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.153749324576535,
+      "riseMetres": 0.23304312229156493,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.398122310752474,
+      "riseMetres": 0.22791125774383544,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.036609725213015,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.241282163498422,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.803072514597703,
+      "riseMetres": 0.24990432262420653,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.373832245693437,
+      "riseMetres": 0.29580419063568114,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.399961457880163,
+      "riseMetres": 0.19077422618865966,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.049987579383125,
+      "riseMetres": 0.4735396385192871,
+      "clear": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.3040349770439175,
+      "riseMetres": 0.26414831876754763,
+      "clear": true
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.215990402809172,
+      "riseMetres": 0.09446473121643066,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.22241263539281,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 9.47317826236699,
+      "riseMetres": 0.046802055835723874,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.177079352742229,
+      "riseMetres": 0.44092113971710206,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.847538563480756,
+      "riseMetres": 0.24450703859329223,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.09264940728419,
+      "riseMetres": 0.28887964487075807,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.838010620915108,
+      "riseMetres": 0.23577815294265747,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.726750868433614,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.298960462714186,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.750052271300881,
+      "riseMetres": 0.2122230648994446,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.258482479819129,
+      "riseMetres": 0.36659334897994994,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.427964253201016,
+      "riseMetres": 0.20442050695419312,
+      "clear": true
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.779122531629412,
+      "riseMetres": 0.2864458322525024,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.2238799619280725,
+      "riseMetres": 0.5269527673721314,
+      "clear": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.81227033233667,
+      "riseMetres": 0.13739192485809326,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 9.607421161988915,
+      "riseMetres": 0.03424142599105835,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.068473883287781,
+      "riseMetres": 0.3606722831726074,
+      "clear": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.821284835541692,
+      "riseMetres": 0.2050589680671692,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.1112050003003855,
+      "riseMetres": 0.2656545162200928,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.157397572109351,
+      "riseMetres": 0.19444611072540283,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 8.663392836651571,
+      "riseMetres": 0.03662663698196411,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.435478198541071,
+      "riseMetres": 0.21251095533370973,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.0857410866536075,
+      "riseMetres": 0.38906570672988894,
+      "clear": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.746724937165533,
+      "riseMetres": 0.10304303169250488,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.817514616750847,
+      "riseMetres": 0.28011858463287354,
+      "clear": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.950987245040247,
+      "riseMetres": 0.3451103687286377,
+      "clear": true
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.420062237914992,
+      "riseMetres": 0.19038006067276,
+      "clear": true
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.061368246689542,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 9.527529785642558,
+      "riseMetres": 0.03709949254989624,
+      "clear": true
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.440903217583835,
+      "riseMetres": 0.5617277979850769,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.062088796649189,
+      "riseMetres": 0.2648312091827393,
+      "clear": true
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.306994033871431,
+      "riseMetres": 0.24036951065063478,
+      "clear": true
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.962053561718504,
+      "riseMetres": 0.18943799734115602,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 8.188738924293304,
+      "riseMetres": 0.03531576991081238,
+      "clear": true
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.319408235729712,
+      "riseMetres": 0.2553278684616089,
+      "clear": true
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.098870489419621,
+      "riseMetres": 0.3815483093261719,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.750627175907292,
+      "riseMetres": 0.09677960872650146,
+      "clear": true
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.836766293317689,
+      "riseMetres": 0.26290173530578614,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.303626443345509,
+      "riseMetres": 0.38718491792678833,
+      "clear": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.418414458217676,
+      "riseMetres": 0.13411264419555663,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 9.301983159612297,
+      "riseMetres": 0.04276478290557861,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.253855636327096,
+      "riseMetres": 0.30235456228256224,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.1785570634836375,
+      "riseMetres": 0.0517575740814209,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.222365173969498,
+      "riseMetres": 0.25003373622894287,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.0947507417695075,
+      "riseMetres": 0.15367527008056642,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 8.094401098528019,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.782777119535486,
+      "riseMetres": 0.28351147174835206,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.038295814372826,
+      "riseMetres": 0.4124589800834656,
+      "clear": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.612842663314583,
+      "riseMetres": 0.18910032510757446,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.04079891251089,
+      "riseMetres": 0.22754091024398804,
+      "clear": true
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.997886073400577,
+      "riseMetres": 0.38551021814346315,
+      "clear": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.552734513521716,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 7.398857584042678,
+      "riseMetres": 0.13261046409606933,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 9.262576408437155,
+      "riseMetres": 0.06194524765014649,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.2506121705147635,
+      "riseMetres": 0.2883347153663635,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.118210613193533,
+      "riseMetres": 0.08600829839706421,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.380952507349236,
+      "riseMetres": 0.3432555913925171,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.984024098280921,
+      "riseMetres": 0.2078909993171692,
+      "clear": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 5.993805065339886,
+      "riseMetres": 0.27322202920913696,
+      "clear": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 7.629906086733291,
+      "riseMetres": 0.12977888584136962,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.234469451053042,
+      "riseMetres": 0.1195410132408142,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.161971358920942,
+      "riseMetres": 0.40370659828186034,
+      "clear": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.903427382838444,
+      "riseMetres": 0.08129792213439942,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.007275409202699,
+      "riseMetres": 0.22213658094406127,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.415809450200944,
+      "riseMetres": 0.21345943212509155,
+      "clear": true
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 7.6012566055211765,
+      "riseMetres": 0.30736703872680665,
+      "clear": true
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.145555376064713,
+      "riseMetres": 0.006929028034210205,
+      "clear": true
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.663888506711231,
+      "riseMetres": 0.4486141800880432,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.838121157884851,
+      "riseMetres": 0.30917896032333375,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.073332938305403,
+      "riseMetres": 0.08063368797302246,
+      "clear": true
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.17870402041179,
+      "riseMetres": 0.3304487705230713,
+      "clear": true
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.563818396415348,
+      "riseMetres": 0.22051399946212769,
+      "clear": true
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 3.1294997034720304,
+      "riseMetres": 0.5577614665031433,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.130044855923684,
+      "riseMetres": 0.02774059772491455,
+      "clear": true
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.108619487377991,
+      "riseMetres": 0.21785415410995485,
+      "clear": true
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.2307989477230565,
+      "riseMetres": 0.6587964534759522,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.571234356171803,
+      "riseMetres": 0.20313422679901122,
+      "clear": true
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.078778813635464,
+      "riseMetres": 0.47074134349823,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.4898070084800965,
+      "riseMetres": 0.36551504135131835,
+      "clear": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 0.7495517453347349,
+      "riseMetres": 0.5871193170547485,
+      "clear": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.04050858622479,
+      "riseMetres": 0.03516665697097778,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.427779710450468,
+      "riseMetres": 0.3652834534645081,
+      "clear": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.883466651656958,
+      "riseMetres": 0.3225757241249084,
+      "clear": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.034208858377994,
+      "riseMetres": 0.09563020467758179,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.177386699079729,
+      "riseMetres": 0.24145889282226562,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.948727895374164,
+      "riseMetres": 0.19115599393844604,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 8.109601777840078,
+      "riseMetres": 0.2572246193885803,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.129064949336222,
+      "riseMetres": 0.09145268201828002,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.3998047230297805,
+      "riseMetres": 0.1541857361793518,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.040787756878812,
+      "riseMetres": 0.4348299026489258,
+      "clear": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.612679952424978,
+      "riseMetres": 0.1602381944656372,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.215952606455618,
+      "riseMetres": 0.19803910255432128,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.438121633253327,
+      "riseMetres": 0.20949480533599854,
+      "clear": true
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.65322574136447,
+      "riseMetres": 0.05618318319320679,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.016778174875279,
+      "riseMetres": 0.01472877264022827,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.295471806638126,
+      "riseMetres": 0.1827743887901306,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 7.522806334031367,
+      "riseMetres": 0.17571803331375122,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 8.297436224392738,
+      "riseMetres": 0.0333233118057251,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.321248822301255,
+      "riseMetres": 0.43353972434997556,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 4.615839365532021,
+      "riseMetres": 0.19933861792087554,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 0.8112540196165288,
+      "riseMetres": 0.14337692260742188,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.917997681073398,
+      "riseMetres": 0.033197855949401854,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.123383238365273,
+      "riseMetres": 0.2020416021347046,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.032410992265623,
+      "riseMetres": 0.48254096508026123,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.638939069082234,
+      "riseMetres": 0.1610121488571167,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.274411579763011,
+      "riseMetres": 0.17942113876342775,
+      "clear": true
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.499485952320112,
+      "riseMetres": 0.5280176043510437,
+      "clear": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 1.6961276349827255,
+      "riseMetres": 0.0930076003074646,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.344316765677002,
+      "riseMetres": 0.015063834190368653,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.015503436693916,
+      "riseMetres": 0.46933941841125487,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.250332722847721,
+      "riseMetres": 0.19923449754714967,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.107723023158295,
+      "riseMetres": 0.21486738920211793,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.294490334109822,
+      "riseMetres": 0.3065581679344177,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 5.907541770099536,
+      "riseMetres": 0.2564374804496765,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 8.679361187718374,
+      "riseMetres": 0.09254013299942017,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.535455525028599,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.956224064163432,
+      "riseMetres": 0.15960568189620972,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.117925956648891,
+      "riseMetres": 0.40289671421051027,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.610504941038505,
+      "riseMetres": 0.1928390622138977,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.924666017706892,
+      "riseMetres": 0.28943194150924684,
+      "clear": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.355491680047019,
+      "riseMetres": 0.27110151052474973,
+      "clear": true
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.82061465508411,
+      "riseMetres": 0.09560374021530152,
+      "clear": true
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 5.529368184536645,
+      "riseMetres": 0.16513638496398925,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.180596807751367,
+      "riseMetres": 0.5292654514312745,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.15802328491888,
+      "riseMetres": 0.2239366888999939,
+      "clear": true
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.831602841239537,
+      "riseMetres": 0.13991303443908693,
+      "clear": true
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.1064500277531035,
+      "riseMetres": 0.4171192288398743,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.1834940145943875,
+      "riseMetres": 0.1959337592124939,
+      "clear": true
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.157002793278902,
+      "riseMetres": 0.02614428997039795,
+      "clear": true
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 3.727016307264988,
+      "riseMetres": 0.35342798233032224,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.339672754804189,
+      "riseMetres": 0.41782876253128054,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.315145425358414,
+      "riseMetres": 0.26689471006393434,
+      "clear": true
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.700627693715307,
+      "riseMetres": 0.19013916254043578,
+      "clear": true
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 5.91276398908017,
+      "riseMetres": 0.29346705675125123,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.409944121579413,
+      "riseMetres": 0.48085057735443115,
+      "clear": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.816151693687782,
+      "riseMetres": 0.1187290906906128,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.10546076964232,
+      "riseMetres": 0.0031978726387023927,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.126156108306638,
+      "riseMetres": 0.3181993365287781,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.823969536718868,
+      "riseMetres": 0.3069087386131287,
+      "clear": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.677495618629884,
+      "riseMetres": 0.20133126974105836,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.034679220420126,
+      "riseMetres": 0.4108758568763733,
+      "clear": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.313900920806538,
+      "riseMetres": 0.1646330714225769,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.099749235516146,
+      "riseMetres": 0.016691911220550536,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.801740968033453,
+      "riseMetres": 0.10556398630142212,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.232871140082144,
+      "riseMetres": 0.14832397699356079,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.203345985364246,
+      "riseMetres": 0.298711097240448,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.896736522511847,
+      "riseMetres": 0.1181411862373352,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.113470221222808,
+      "riseMetres": 0.27165874242782595,
+      "clear": true
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.428855612750523,
+      "riseMetres": 0.5756588578224182,
+      "clear": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.905372705344794,
+      "riseMetres": 0.07345882654190064,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.239397510827533,
+      "riseMetres": 0.004360425472259522,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.175145805003263,
+      "riseMetres": 0.3179401636123657,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.149930150745982,
+      "riseMetres": 0.47924854755401614,
+      "clear": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.5428994990549985,
+      "riseMetres": 0.1999366521835327,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.051710841053007,
+      "riseMetres": 0.42081485986709594,
+      "clear": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.2024351351795755,
+      "riseMetres": 0.2201245903968811,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 2.572914088355254,
+      "riseMetres": 0.30312447547912597,
+      "clear": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.817063111429915,
+      "riseMetres": 0.11495959758758545,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.052783181174828,
+      "riseMetres": 0.19918941259384154,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.29395206168621,
+      "riseMetres": 0.20836548805236815,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.269802531520886,
+      "riseMetres": 0.23504897356033325,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.1669366135408135,
+      "riseMetres": 0.27481588125228884,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 8.206489469419834,
+      "riseMetres": 0.1750251054763794,
+      "clear": true
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 0.6118056934535563,
+      "riseMetres": 0.5230028748512268,
+      "clear": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.318969808982802,
+      "riseMetres": 0.0032850027084350584,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.305877956839778,
+      "riseMetres": 0.2607068657875061,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.111206456535304,
+      "riseMetres": 0.18424159288406372,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.988717931415825,
+      "riseMetres": 0.17903261184692382,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.178294097589773,
+      "riseMetres": 0.32143502235412597,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.220708997067023,
+      "riseMetres": 0.09846110343933105,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.675681109325215,
+      "riseMetres": 0.033485031127929686,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.69119202584888,
+      "riseMetres": 0.1004151701927185,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.526845326124523,
+      "riseMetres": 0.16178466081619264,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.413211317221743,
+      "riseMetres": 0.22239779233932494,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.288973750001257,
+      "riseMetres": 0.24948145151138307,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.11800397601981,
+      "riseMetres": 0.36017093658447263,
+      "clear": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 9.633050669006291,
+      "riseMetres": 0.053084588050842284,
+      "clear": true
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.16820840330819,
+      "riseMetres": 0.0025647640228271484,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.000220757446865,
+      "riseMetres": 0.03719702959060669,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.1804432741051105,
+      "riseMetres": 0.30924683809280396,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.737503397298555,
+      "riseMetres": 0.27674139738082887,
+      "clear": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.507710820300974,
+      "riseMetres": 0.12439626455307007,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.223652291683836,
+      "riseMetres": 0.3470105767250061,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.71341934350441,
+      "riseMetres": 0.20936031341552735,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 8.725480123970735,
+      "riseMetres": 0.25229703187942504,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.531906206305583,
+      "riseMetres": 0.1821722149848938,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 5.984318659572207,
+      "riseMetres": 0.26005605459213255,
+      "clear": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.089003350198526,
+      "riseMetres": 0.2542026162147522,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.056924362156408,
+      "riseMetres": 0.2636447548866272,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.050148473218005,
+      "riseMetres": 0.46217185258865356,
+      "clear": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 8.752715901469195,
+      "riseMetres": 0.1305059552192688,
+      "clear": true
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 5.0855633107068865,
+      "riseMetres": 0.4923029184341431,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.264625101195852,
+      "riseMetres": 0.00307316780090332,
+      "clear": true
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.583631547469412,
+      "riseMetres": 0.35409932136535643,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.949481863137454,
+      "riseMetres": 0.48418081998825074,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.34770298282417,
+      "riseMetres": 0.1686292767524719,
+      "clear": true
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.436928443991031,
+      "riseMetres": 0.6244667291641235,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.067303113456276,
+      "riseMetres": 0.3843690037727356,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.8320262089755435,
+      "riseMetres": 0.13600671291351318,
+      "clear": true
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 9.350914576965698,
+      "riseMetres": 0.15317223072052003,
+      "clear": true
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 5.85326260415216,
+      "riseMetres": 0.2216366410255432,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.288535879259937,
+      "riseMetres": 0.24894707202911376,
+      "clear": true
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.797644856531488,
+      "riseMetres": 0.2522152304649353,
+      "clear": true
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.3710765152829705,
+      "riseMetres": 0.3868136167526245,
+      "clear": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 8.12951118065555,
+      "riseMetres": 0.0804589033126831,
+      "clear": true
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.667675036312392,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.047540517213509,
+      "riseMetres": 0.0011175155639648437,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 7.3508603658344045,
+      "riseMetres": 0.38697348833084105,
+      "clear": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 5.68141884482943,
+      "riseMetres": 0.23057289123535157,
+      "clear": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 6.7515842711905805,
+      "riseMetres": 0.16633507013320922,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.325944674631623,
+      "riseMetres": 0.6066086530685425,
+      "clear": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 6.7916783325326815,
+      "riseMetres": 0.21570276021957396,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 8.48592893028649,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.306704955311204,
+      "riseMetres": 0.005029487609863281,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 6.288295831727329,
+      "riseMetres": 0.3128608584403992,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": -3.1,
+      "advanceMetres": 6.200746337782498,
+      "riseMetres": 0.2630003929138184,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 7.3856615557947025,
+      "riseMetres": 0.3042887091636658,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 6.155250196073039,
+      "riseMetres": 0.4372817873954773,
+      "clear": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 7.683626874285006,
+      "riseMetres": 0,
+      "clear": true
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 8.466083511826366,
+      "riseMetres": 0.0005744397640228271,
+      "clear": true
+    }
+  ]
+}

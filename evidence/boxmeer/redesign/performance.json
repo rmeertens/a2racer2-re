@@ -1,0 +1,24 @@
+{
+  "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Pro, Unspecified Version)",
+  "frames": 179,
+  "averageFps": 119.99731851101942,
+  "p95FrameMilliseconds": 11.199999809265137,
+  "viewport": [
+    1440,
+    900
+  ],
+  "environment": {
+    "trees": 312,
+    "plants": 1859,
+    "architecturalDetails": 3022,
+    "roadMarkings": 1566,
+    "hedgeClumps": 5995,
+    "gardenPlots": 257,
+    "sideWindows": 1180,
+    "fieldClumps": 412,
+    "streetEnds": 8,
+    "landmarkWindows": 128,
+    "drawCalls": 30,
+    "triangles": 1446364
+  }
+}

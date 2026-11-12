@@ -1,0 +1,150 @@
+{
+  "probes": 24,
+  "blocked": 17,
+  "results": [
+    {
+      "chunk": 230,
+      "side": 1,
+      "advanceMetres": 27.058381063124592,
+      "clear": true
+    },
+    {
+      "chunk": 254,
+      "side": 1,
+      "advanceMetres": 21.721576464989433,
+      "clear": true
+    },
+    {
+      "chunk": 317,
+      "side": 1,
+      "advanceMetres": 24.86474597176703,
+      "clear": true
+    },
+    {
+      "chunk": 8,
+      "side": -1,
+      "advanceMetres": 6.836793730780812,
+      "clear": false
+    },
+    {
+      "chunk": 8,
+      "side": 1,
+      "advanceMetres": 25.215645842060972,
+      "clear": true
+    },
+    {
+      "chunk": 12,
+      "side": 1,
+      "advanceMetres": 4.089587164887795,
+      "clear": false
+    },
+    {
+      "chunk": 16,
+      "side": 1,
+      "advanceMetres": 4.130413689526262,
+      "clear": false
+    },
+    {
+      "chunk": 18,
+      "side": -1,
+      "advanceMetres": 5.229928749158124,
+      "clear": false
+    },
+    {
+      "chunk": 20,
+      "side": 1,
+      "advanceMetres": 3.1854813670552518,
+      "clear": false
+    },
+    {
+      "chunk": 24,
+      "side": 1,
+      "advanceMetres": 2.4049871931967965,
+      "clear": false
+    },
+    {
+      "chunk": 27,
+      "side": 1,
+      "advanceMetres": 15.480276108558195,
+      "clear": true
+    },
+    {
+      "chunk": 32,
+      "side": 1,
+      "advanceMetres": 23.671370787516498,
+      "clear": true
+    },
+    {
+      "chunk": 36,
+      "side": -1,
+      "advanceMetres": 33.36758289953902,
+      "clear": true
+    },
+    {
+      "chunk": 40,
+      "side": 1,
+      "advanceMetres": 4.115246619597892,
+      "clear": false
+    },
+    {
+      "chunk": 44,
+      "side": -1,
+      "advanceMetres": 3.4716933377835923,
+      "clear": false
+    },
+    {
+      "chunk": 44,
+      "side": 1,
+      "advanceMetres": 5.102816960468972,
+      "clear": false
+    },
+    {
+      "chunk": 48,
+      "side": 1,
+      "advanceMetres": 4.962162157638813,
+      "clear": false
+    },
+    {
+      "chunk": 52,
+      "side": -1,
+      "advanceMetres": 3.7675614924216765,
+      "clear": false
+    },
+    {
+      "chunk": 52,
+      "side": 1,
+      "advanceMetres": 5.008336826798169,
+      "clear": false
+    },
+    {
+      "chunk": 60,
+      "side": 1,
+      "advanceMetres": 5.113959167691968,
+      "clear": false
+    },
+    {
+      "chunk": 64,
+      "side": -1,
+      "advanceMetres": 3.816273864371041,
+      "clear": false
+    },
+    {
+      "chunk": 64,
+      "side": 1,
+      "advanceMetres": 5.071147162340465,
+      "clear": false
+    },
+    {
+      "chunk": 104,
+      "side": -1,
+      "advanceMetres": 3.5944230636581933,
+      "clear": false
+    },
+    {
+      "chunk": 234,
+      "side": -1,
+      "advanceMetres": 3.676757571343972,
+      "clear": false
+    }
+  ]
+}

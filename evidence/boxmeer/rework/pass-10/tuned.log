@@ -1,0 +1,62 @@
+booted. read: etappe11.ini bm_cone.d3d bm_bouw.tga bm_gate_floralaan.d3d bm_route.tga bm_gate_maasheggen.d3d bm_gate_centrum.d3d bm_gate_finish.d3d bm_sky.tga bm_weg.tga bm_land.tga bm_gevel.tga etappe11.cmp etappe11.dmp etappe11.pmp etappe11.rmp etappe11.omp etappe11.pth
+missing:
+chunks per lap 310 start chunk 10
+   0 chunk 6 driven 0 speed 0.0 pos -2338,5,-2092 finished 0
+   5 chunk 6 driven 0 speed 2.0 pos -2340,2,-2093 finished 0
+  10 chunk 13 driven 7 speed 23.1 pos -3231,2,-2139 finished 0
+  15 chunk 19 driven 13 speed 11.1 pos -3916,2,-1825 finished 0
+  20 chunk 24 driven 18 speed 15.0 pos -4275,2,-1237 finished 0
+  25 chunk 30 driven 24 speed 17.1 pos -4639,2,-551 finished 0
+  30 chunk 37 driven 31 speed 16.6 pos -5015,2,211 finished 0
+  35 chunk 42 driven 36 speed 16.1 pos -5246,2,778 finished 0
+  40 chunk 48 driven 42 speed 16.7 pos -5420,2,1544 finished 0
+  45 chunk 54 driven 48 speed 15.5 pos -5456,2,2330 finished 0
+  50 chunk 61 driven 55 speed 17.4 pos -5494,2,3151 finished 0
+  55 chunk 66 driven 60 speed 19.1 pos -5398,2,3856 finished 0
+  60 chunk 72 driven 66 speed 15.0 pos -5176,2,4527 finished 0
+  65 chunk 78 driven 72 speed 9.8 pos -4872,2,5258 finished 0
+  70 chunk 83 driven 77 speed 11.1 pos -4470,2,5812 finished 0
+  75 chunk 89 driven 83 speed 12.7 pos -3943,2,6175 finished 0
+  80 chunk 93 driven 87 speed 12.9 pos -3444,2,6245 finished 0
+  85 chunk 98 driven 92 speed 15.3 pos -3026,3,5891 finished 0
+  90 chunk 104 driven 98 speed 12.9 pos -2784,7,5172 finished 0
+  95 chunk 107 driven 101 speed 7.4 pos -2537,12,4753 finished 0
+ 100 chunk 111 driven 105 speed 10.4 pos -2076,18,4513 finished 0
+ 105 chunk 116 driven 110 speed 13.6 pos -1411,22,4539 finished 0
+ 110 chunk 122 driven 116 speed 15.2 pos -684,24,4715 finished 0
+ 115 chunk 129 driven 123 speed 20.9 pos 130,24,5147 finished 0
+ 120 chunk 137 driven 131 speed 19.5 pos 1002,24,5660 finished 0
+ 125 chunk 144 driven 138 speed 19.1 pos 1782,24,6073 finished 0
+ 130 chunk 151 driven 145 speed 17.0 pos 2543,24,6449 finished 0
+ 135 chunk 157 driven 151 speed 14.6 pos 3213,24,6688 finished 0
+ 140 chunk 160 driven 154 speed 7.8 pos 3690,24,6732 finished 0
+ 145 chunk 166 driven 160 speed 17.9 pos 4036,24,6263 finished 0
+ 150 chunk 172 driven 166 speed 17.7 pos 4164,24,5506 finished 0
+ 155 chunk 178 driven 172 speed 15.6 pos 4272,22,4722 finished 0
+ 160 chunk 185 driven 179 speed 20.0 pos 4298,15,3871 finished 0
+ 165 chunk 192 driven 186 speed 19.0 pos 4327,6,2939 finished 0
+ 170 chunk 199 driven 193 speed 20.0 pos 4374,3,2020 finished 0
+ 175 chunk 206 driven 200 speed 20.5 pos 4429,2,1132 finished 0
+ 180 chunk 213 driven 207 speed 16.6 pos 4528,2,197 finished 0
+ 185 chunk 220 driven 214 speed 16.6 pos 4679,2,-631 finished 0
+ 190 chunk 227 driven 221 speed 16.1 pos 4796,2,-1488 finished 0
+ 195 chunk 233 driven 227 speed 18.1 pos 5015,2,-2299 finished 0
+ 200 chunk 240 driven 234 speed 17.4 pos 5154,2,-3162 finished 0
+ 205 chunk 245 driven 239 speed 11.6 pos 5174,2,-3810 finished 0
+ 210 chunk 250 driven 244 speed 10.7 pos 4953,2,-4367 finished 0
+ 215 chunk 254 driven 248 speed 10.5 pos 4540,2,-4745 finished 0
+ 220 chunk 259 driven 253 speed 12.8 pos 4034,2,-4871 finished 0
+ 225 chunk 263 driven 257 speed 13.6 pos 3532,2,-4707 finished 0
+ 230 chunk 269 driven 263 speed 17.5 pos 2962,2,-4207 finished 0
+ 235 chunk 276 driven 270 speed 18.7 pos 2346,2,-3629 finished 0
+ 240 chunk 281 driven 275 speed 16.7 pos 1783,2,-3148 finished 0
+ 245 chunk 289 driven 283 speed 18.9 pos 984,2,-2677 finished 0
+ 250 chunk 295 driven 289 speed 17.2 pos 253,2,-2342 finished 0
+ 255 chunk 301 driven 295 speed 16.4 pos -486,2,-2126 finished 0
+ 260 chunk 307 driven 301 speed 14.2 pos -1272,2,-1994 finished 0
+ 265 chunk 3 driven 307 speed 16.4 pos -2066,2,-2066 finished 0
+ 270 chunk 9 driven 313 speed 12.8 pos -2802,2,-2158 finished 0
+ 275 chunk 10 driven 314 speed 0.3 pos -2966,5,-2166 finished 1
+ 280 chunk 10 driven 314 speed -0.0 pos -2965,4,-2170 finished 1
+race ended at 280.3
+{"finished":true,"requiredMissing":[],"finishSeconds":271.3666666666667,"peakKmh":95.41555252075196,"averageKmh":55.587693777338046,"slowSeconds":0.45,"recoveryAttempts":0,"snapshots":[{"tick":0,"chunk":6,"speed":0,"finished":0},{"tick":300,"chunk":6,"speed":1.9636086225509644,"finished":0},{"tick":600,"chunk":13,"speed":23.09278678894043,"finished":0},{"tick":900,"chunk":19,"speed":11.10822582244873,"finished":0},{"tick":1200,"chunk":24,"speed":14.965367317199707,"finished":0},{"tick":1500,"chunk":30,"speed":17.11574935913086,"finished":0},{"tick":1800,"chunk":37,"speed":16.593233108520508,"finished":0},{"tick":2100,"chunk":42,"speed":16.14550018310547,"finished":0},{"tick":2400,"chunk":48,"speed":16.695899963378906,"finished":0},{"tick":2700,"chunk":54,"speed":15.514556884765625,"finished":0},{"tick":3000,"chunk":61,"speed":17.363502502441406,"finished":0},{"tick":3300,"chunk":66,"speed":19.13015365600586,"finished":0},{"tick":3600,"chunk":72,"speed":14.962363243103027,"finished":0},{"tick":3900,"chunk":78,"speed":9.80612564086914,"finished":0},{"tick":4200,"chunk":83,"speed":11.12082290649414,"finished":0},{"tick":4500,"chunk":89,"speed":12.689741134643555,"finished":0},{"tick":4800,"chunk":93,"speed":12.889957427978516,"finished":0},{"tick":5100,"chunk":98,"speed":15.259363174438477,"finished":0},{"tick":5400,"chunk":104,"speed":12.876861572265625,"finished":0},{"tick":5700,"chunk":107,"speed":7.380498886108398,"finished":0},{"tick":6000,"chunk":111,"speed":10.420124053955078,"finished":0},{"tick":6300,"chunk":116,"speed":13.5779390335083,"finished":0},{"tick":6600,"chunk":122,"speed":15.211190223693848,"finished":0},{"tick":6900,"chunk":129,"speed":20.915454864501953,"finished":0},{"tick":7200,"chunk":137,"speed":19.493480682373047,"finished":0},{"tick":7500,"chunk":144,"speed":19.148099899291992,"finished":0},{"tick":7800,"chunk":151,"speed":17.037445068359375,"finished":0},{"tick":8100,"chunk":157,"speed":14.58199405670166,"finished":0},{"tick":8400,"chunk":160,"speed":7.812743186950684,"finished":0},{"tick":8700,"chunk":166,"speed":17.934253692626953,"finished":0},{"tick":9000,"chunk":172,"speed":17.733932495117188,"finished":0},{"tick":9300,"chunk":178,"speed":15.61691951751709,"finished":0},{"tick":9600,"chunk":185,"speed":19.967927932739258,"finished":0},{"tick":9900,"chunk":192,"speed":18.983461380004883,"finished":0},{"tick":10200,"chunk":199,"speed":20.03499984741211,"finished":0},{"tick":10500,"chunk":206,"speed":20.450206756591797,"finished":0},{"tick":10800,"chunk":213,"speed":16.606077194213867,"finished":0},{"tick":11100,"chunk":220,"speed":16.58913803100586,"finished":0},{"tick":11400,"chunk":227,"speed":16.10699462890625,"finished":0},{"tick":11700,"chunk":233,"speed":18.10001564025879,"finished":0},{"tick":12000,"chunk":240,"speed":17.366893768310547,"finished":0},{"tick":12300,"chunk":245,"speed":11.633496284484863,"finished":0},{"tick":12600,"chunk":250,"speed":10.681048393249512,"finished":0},{"tick":12900,"chunk":254,"speed":10.48835277557373,"finished":0},{"tick":13200,"chunk":259,"speed":12.756662368774414,"finished":0},{"tick":13500,"chunk":263,"speed":13.630328178405762,"finished":0},{"tick":13800,"chunk":269,"speed":17.499725341796875,"finished":0},{"tick":14100,"chunk":276,"speed":18.70233917236328,"finished":0},{"tick":14400,"chunk":281,"speed":16.714069366455078,"finished":0},{"tick":14700,"chunk":289,"speed":18.86033058166504,"finished":0},{"tick":15000,"chunk":295,"speed":17.21399688720703,"finished":0},{"tick":15300,"chunk":301,"speed":16.38975715637207,"finished":0},{"tick":15600,"chunk":307,"speed":14.239802360534668,"finished":0},{"tick":15900,"chunk":3,"speed":16.362911224365234,"finished":0},{"tick":16200,"chunk":9,"speed":12.781641006469727,"finished":0},{"tick":16500,"chunk":10,"speed":0.2724098563194275,"finished":1},{"tick":16800,"chunk":10,"speed":-0.015982147306203842,"finished":1}]}

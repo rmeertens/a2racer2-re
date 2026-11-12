@@ -1,0 +1,11 @@
+{
+  "live": {
+    "stats": {
+      "trees": 256,
+      "plants": 1859,
+      "architecturalDetails": 925
+    },
+    "ready": true
+  },
+  "errors": []
+}

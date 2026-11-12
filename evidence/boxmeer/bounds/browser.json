@@ -1,0 +1,13 @@
+{
+  "warning": {
+    "outsideSeconds": 0.016666666666666666,
+    "recoveries": 0
+  },
+  "recovery": {
+    "outsideSeconds": 0,
+    "recoveries": 1,
+    "excess": -239.99866192065838,
+    "up": 1
+  },
+  "errors": []
+}

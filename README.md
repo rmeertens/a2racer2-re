@@ -14,6 +14,16 @@ The game's content is in the port, with Davilex's two official updates, track 9 
 
 Up to eight players, each in their own browser: main menu, `Internet`. One player names and hosts a server, and the others join it. `npm start` also runs the lobby the browsers meet through; `npm start -- --lan` opens it to the local network. On a static site such as <https://a2racer.meertens.dev/> (GitHub Pages, `.github/workflows/pages.yml`) the browsers meet through the public PeerJS broker and connect over WebRTC; there the list shows the servers on the same network, and a server elsewhere is joined by typing its name. How it works, how to host the lobby next to a static site, and what was checked: [`docs/multiplayer.md`](docs/multiplayer.md).
 
+## Boxmeer
+
+A new 4.09 km circuit following the supplied route sketch: the western residential loop,
+Hoogendijk and the Maasheggen, Kasteel Boxmeer, the basilica and the shopping streets.
+Choose **Boxmeer** in Quick Race or multiplayer, or open `?race=1&etappe=boxmeer`.
+The silent viewer accepts `track-viewer.html?map=boxmeer`.
+Original AI-generated building and surface textures, including Floralaan and De Meidoorn.
+Research, rebuilding and validation: [Boxmeer](docs/boxmeer.md).
+[Fifty improvements in ten rounds](docs/boxmeer-rework.md).
+
 ## Vianen
 
 A new track of its own through the old town of Vianen, with the Lekpoort, the Stadhuis and the Grote Kerk, generated from OpenStreetMap and openly licensed photos. Choose it in the multiplayer screens, alone or with others, or open `?race=1&etappe=vianen`. How it is made: [`docs/vianen.md`](docs/vianen.md). For future custom tracks, read [Making a new map](docs/map-making.md).

@@ -1,0 +1,24 @@
+// Real native recovery probes plus coverage of every authored road vertex.
+import assert from'node:assert/strict';import{readFileSync,readdirSync,statSync,writeFileSync}from'node:fs';
+import{Vfs}from'../../source/host/vfs.js';import{Race}from'../../source/host/race.js';import{pinRace}from'../../source/host/race-setup.js';import{GameInput}from'../../source/input/keyboard.js';import{NetRace}from'../../source/net/puppets.js';import{Bot}from'../../source/dev/bot.js';import{installBoxmeer,boxmeerFiles}from'../../source/host/boxmeer.js';import{routeFrame}from'../../source/dev/track-model.js';
+const vfs=new Vfs();for(const name of readdirSync('public/assets/game')){const p='public/assets/game/'+name;if(statSync(p).isFile())vfs.addLazy(name,statSync(p).size,()=>readFileSync(p))}pinRace(vfs,{etappe:11,car:0,laps:1});vfs.iniSet('game.ini','OPTIONS','OPPONENTS','0');installBoxmeer(vfs,new Map(boxmeerFiles().map(n=>[n,new Uint8Array(readFileSync('public/assets/boxmeer/'+n))])));
+const dt=1/60,host={vfs,render:new Proxy({},{get:()=>()=>{}}),audio:null,screen:{width:640,height:480},tickSeconds:dt,clockStart:1,fixedDate:971434016000,onFlip(){},onMessageBox(c,t){throw new Error(t)},onStdout(){}};
+const race=new Race(JSON.parse(readFileSync('public/game/spel.meta.json')),host);await race.instantiate(new WebAssembly.Module(readFileSync('public/game/spel.wasm')));const input=new GameInput(race.m);host.input=input;race.boot();const tick=()=>{assert(race.tick(dt));input.endTick()};for(let n=0;n<420;n++)tick();const bounds=race.boxmeerBounds;assert(bounds);const m=race.m,net=Object.create(NetRace.prototype);net.race=race;net.scratch=m.lowAlloc(128);const player=new Bot(race,input).carState().index;
+const info=JSON.parse(readFileSync('public/assets/boxmeer/boxmeer.json'));let vertices=0;for(const p of bounds.points){assert(bounds.locate(p).excess<=0);vertices++}for(const s of[info.neighbourhood,...info.sideStreets])for(const road of s.roads)for(const p of road){assert(bounds.locate([p[0],0,p[1]]).excess<=0);vertices++}
+function anchor(chunk){const f=routeFrame(bounds.points,chunk+.4),p=f.center.map((x,k)=>x+(k===1?5:0)),rows=[...f.right,0,1,0,...f.forward];net.beam(player,p,rows,[0,0,0],[0,0,0]);const car=net.car(player);for(const off of[0x34,0x38])m.i32[(car+off)>>2]=chunk;m.i32[(car+0x3c)>>2]=chunk*2;m.i32[0x6fbab4>>2]=20;m.i32[0x6fb8f8>>2]=0;m.i32[0x6fba98>>2]=0;tick();return{f,rows,safe:structuredClone(bounds.lastSafe)}}
+const tests=[];
+for(const chunk of[18,42,67,120,145,170,195,220,250,280,307])for(const side of[-1,1]){
+ const a=anchor(chunk),candidate=a.f.center.map((x,k)=>x+a.f.right[k]*side*650+(k===1?5:0));if(bounds.locate(candidate).excess<=30)continue;
+ const before=bounds.recoveries,driven=bounds.lastSafe.driven;net.beam(player,candidate,a.rows,a.f.right.map(x=>x*side*20),[2,0,1]);tick();const restoredProgress=m.i32[0x6fbab4>>2];tick();const recovered=net.read(player);
+ assert.equal(bounds.recoveries,before+1);assert(bounds.locate(recovered.p).excess<=0);assert(Math.hypot(...recovered.p.map((x,k)=>x-a.safe.p[k]))<.15);assert.equal(restoredProgress,driven);assert(recovered.rows[4]>.99);tick();assert(bounds.locate(net.read(player).p).excess<=0);tests.push({chunk,side,kind:'hard limit',reset:true});
+}
+assert(tests.length>=10);
+// A short excursion gets a warning; lingering beyond the edge then returns to the road.
+let warning;
+for(let chunk=0;chunk<320&&!warning;chunk+=7)for(const side of[-1,1]){const f=routeFrame(bounds.points,chunk+.4),p=f.center.map((x,k)=>x+f.right[k]*side*255+(k===1?5:0)),near=bounds.locate(p);if(near.excess>5&&near.excess<25){warning={chunk,p};break}}
+assert(warning);const a=anchor(warning.chunk),count=bounds.recoveries;net.beam(player,warning.p,a.rows,[0,0,0],[0,0,0]);tick();assert(bounds.outsideSeconds>0);assert.equal(bounds.recoveries,count);for(let n=0;n<46;n++)bounds.update(dt);assert.equal(bounds.recoveries,count+1);tick();assert.equal(bounds.outsideSeconds,0);tests.push({kind:'warning then recovery',reset:true});
+// Falling below the scenery also recovers promptly.
+const b=anchor(160),before=bounds.recoveries;net.beam(player,b.safe.p.map((x,k)=>k===1?x-200:x),b.rows,[0,-20,0],[0,0,0]);tick();tick();assert.equal(bounds.recoveries,before+1);assert(bounds.locate(net.read(player).p).excess<=0);tests.push({kind:'fall through terrain',reset:true});
+// On-road driving and normal pauses/countdown do not activate the guard.
+anchor(35);const normal=bounds.recoveries;for(let n=0;n<120;n++)tick();assert.equal(bounds.recoveries,normal);
+const result={roadVerticesAllowed:vertices,mainCentreLimitMetres:24,sideStreetCentreLimitMetres:11,hardOverrunMetres:3,graceSeconds:.75,recoveryProbes:tests.length,tests};writeFileSync('evidence/boxmeer/bounds/physics.json',JSON.stringify(result,null,2));console.log(result);

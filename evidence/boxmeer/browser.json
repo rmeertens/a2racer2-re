@@ -1,0 +1,17 @@
+{
+  "live": {
+    "slot": "11",
+    "car": "3",
+    "laps": "1",
+    "upgrades": [
+      "1",
+      "1",
+      "1",
+      "1"
+    ],
+    "chunk": 22,
+    "geometryPools": 4,
+    "frames": 320
+  },
+  "errors": []
+}

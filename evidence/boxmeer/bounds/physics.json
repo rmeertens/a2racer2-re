@@ -1,0 +1,150 @@
+{
+  "roadVerticesAllowed": 387,
+  "mainCentreLimitMetres": 24,
+  "sideStreetCentreLimitMetres": 11,
+  "hardOverrunMetres": 3,
+  "graceSeconds": 0.75,
+  "recoveryProbes": 24,
+  "tests": [
+    {
+      "chunk": 18,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 18,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 42,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 42,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 67,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 67,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 120,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 120,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 145,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 145,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 170,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 170,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 195,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 195,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 220,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 220,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 250,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 250,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 280,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 280,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 307,
+      "side": -1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "chunk": 307,
+      "side": 1,
+      "kind": "hard limit",
+      "reset": true
+    },
+    {
+      "kind": "warning then recovery",
+      "reset": true
+    },
+    {
+      "kind": "fall through terrain",
+      "reset": true
+    }
+  ]
+}

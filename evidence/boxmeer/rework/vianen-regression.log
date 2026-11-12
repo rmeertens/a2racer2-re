@@ -1,0 +1,27 @@
+booted. read: etappe10.ini vn_paal.d3d vn_land.tga vn_lamp.d3d vn_fiets.d3d vn_doos.d3d vn_fun.tga vn_kist.d3d vn_kegel.d3d vn_bord.d3d vn_bank.d3d vn_put.d3d vn_detail.tga vn_deksel.d3d vn_kruin.d3d vn_markt.d3d vn_markt.tga vn_marktdak.d3d vn_marktpaal.d3d vn_luifel36.d3d vn_luifel48.d3d vn_luifel56.d3d vn_luifel64.d3d vn_weg.tga vn_bouw.tga vn_gevel.tga vn_card.wav vn_wood.wav vn_rubber.wav vn_metal.wav etappe10.cmp etappe10.dmp etappe10.pmp etappe10.rmp etappe10.omp etappe10.pth
+missing:
+chunks per lap 106 start chunk 10
+   0 chunk 10 driven 0 speed 0.0 pos 466,5,-338 finished 0
+   5 chunk 10 driven 0 speed 1.7 pos 465,1,-336 finished 0
+  10 chunk 15 driven 5 speed 25.0 pos 299,1,391 finished 0
+  15 chunk 26 driven 16 speed 27.6 pos -31,1,1725 finished 0
+  20 chunk 32 driven 22 speed 9.0 pos -170,29,2496 finished 0
+  25 chunk 37 driven 27 speed 16.3 pos 230,81,2853 finished 0
+  30 chunk 44 driven 34 speed 17.9 pos 1084,122,3047 finished 0
+  35 chunk 50 driven 40 speed 9.8 pos 1859,81,3149 finished 0
+  40 chunk 54 driven 44 speed 12.1 pos 2271,80,2980 finished 0
+  45 chunk 60 driven 50 speed 21.2 pos 2347,3,2312 finished 0
+  50 chunk 68 driven 58 speed 21.3 pos 2261,1,1290 finished 0
+  55 chunk 76 driven 66 speed 20.4 pos 2208,1,254 finished 0
+  60 chunk 84 driven 74 speed 21.4 pos 2226,1,-754 finished 0
+  65 chunk 90 driven 80 speed 8.9 pos 2186,1,-1599 finished 0
+  70 chunk 94 driven 84 speed 10.2 pos 1964,2,-1922 finished 0
+  75 chunk 99 driven 89 speed 16.3 pos 1384,13,-1942 finished 0
+  80 chunk 103 driven 93 speed 8.5 pos 897,1,-1825 finished 0
+  85 chunk 1 driven 97 speed 14.5 pos 653,1,-1402 finished 0
+  90 chunk 8 driven 104 speed 19.5 pos 503,1,-551 finished 0
+  95 chunk 14 driven 110 speed 7.7 pos 338,1,225 finished 1
+ 100 chunk 15 driven 111 speed 2.2 pos 289,1,408 finished 1
+ 105 chunk 16 driven 112 speed 0.9 pos 271,1,483 finished 1
+ 110 chunk 16 driven 112 speed -0.0 pos 271,1,492 finished 1
+race ended at 111.0

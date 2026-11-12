@@ -1,0 +1,16 @@
+{
+  probes: 1,
+  failures: [
+    {
+      chunk: 96,
+      direction: -1,
+      offsetMetres: 8.5,
+      advanceMetres: 7.9944494585420625,
+      riseMetres: 0.24782516956329345,
+      clear: false,
+      start: [Array],
+      initial: [Array],
+      samples: [Array]
+    }
+  ]
+}

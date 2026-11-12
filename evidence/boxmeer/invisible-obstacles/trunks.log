@@ -1,0 +1,28 @@
+{
+  trunkColliders: 216,
+  verticesCheckedInsideVisibleWood: 5184,
+  legacyTreeCards: 0,
+  automaticRecoveryEnabled: false,
+  results: [
+    {
+      chunk: 229,
+      beyondTrunkMetres: -2.534802280404256,
+      blocked: true
+    },
+    {
+      chunk: 77,
+      beyondTrunkMetres: -2.6831636973543027,
+      blocked: true
+    },
+    {
+      chunk: 126,
+      beyondTrunkMetres: -2.6481843959923936,
+      blocked: true
+    },
+    {
+      chunk: 147,
+      beyondTrunkMetres: -2.648166935217586,
+      blocked: true
+    }
+  ]
+}

@@ -94,20 +94,25 @@ export function vianenVisibleChunks(chunks) {
  * Makes etappe 10 Vianen. files: name to bytes. Can be called again: it changes nothing twice.
  * Returns restore(), for after the race: the view distance back, since game.ini is saved.
  */
-export function installVianen(vfs, files) {
-  const { slot, like } = VIANEN;
+export function installVianen(vfs, files, definition = VIANEN) {
+  const { slot, like, key } = definition;
+  const textures = definition.textures ?? TEXTURES;
+  const props = definition.props ?? PROPS;
+  const models = props.map(([model]) => model);
+  const sounds = definition.sounds ?? VIANEN_IMPACT_SOUNDS;
+  const prefix = definition.prefix ?? 'vn';
   const two = String(slot).padStart(2, '0');
   const write = vfs.onWrite;
   vfs.onWrite = null;
   try {
-    for (const ext of TRACK) vfs.add(`etappe${slot}.${ext}`, files.get(`vianen.${ext}`));
-    for (const name of TEXTURES) vfs.add(name, files.get(name));
-    for (const name of MODELS) vfs.add(name, files.get(name));
-    for (const { file } of VIANEN_IMPACT_SOUNDS) vfs.add(file, files.get(file));
+    for (const ext of TRACK) vfs.add(`etappe${slot}.${ext}`, files.get(`${key}.${ext}`));
+    for (const name of textures) vfs.add(name, files.get(name));
+    for (const name of models) vfs.add(name, files.get(name));
+    for (const { file } of sounds) vfs.add(file, files.get(file));
     // Append material samples to this race's in-memory registry; never persist them.
     const soundIni = new IniFile(latin1(vfs.read('sound.ini')));
     let soundCount = Number(soundIni.get('SndTypes','COUNT'));
-    for (const { name, file } of VIANEN_IMPACT_SOUNDS) {
+    for (const { name, file } of sounds) {
       if (soundIni.keys('SndTypes').some(k => soundIni.get('SndTypes',k).split(',')[0] === name)) continue;
       soundIni.set('SndTypes',String(soundCount++),`${name},${file},1,75,90,10,GENERAL`);
     }
@@ -133,14 +138,14 @@ export function installVianen(vfs, files) {
       .filter(name=>required.has(name.toLowerCase()));
     trackAnimations.forEach((name,i)=>animIni.set('config',String(i),name));
     const animations = trackAnimations.length;
-    PROPS.forEach(([model, animation, label, texture = 'vn_land.tga'], i) => {
+    props.forEach(([model, animation, label, texture = 'vn_land.tga'], i) => {
       etappeIni.set('objects', String(objects + i), `${model},${texture},${label},0,${animation},0,${900 + i},0,-1`);
       animIni.set('config', String(animations + i), animation);
       animIni.set(animation, '0', `${model},${texture}`);
       animIni.set(animation, 'count', '1');
     });
-    etappeIni.set('objects', 'count', String(objects + PROPS.length));
-    animIni.set('config', 'count', String(animations + PROPS.length));
+    etappeIni.set('objects', 'count', String(objects + props.length));
+    animIni.set('config', 'count', String(animations + props.length));
     vfs.add(`etappe${slot}.ini`, encodeLatin1(etappeIni.serialize()));
     vfs.add(`e${two}_anim.ini`, encodeLatin1(animIni.serialize()));
     // ai_racer.cpp reads a value per etappe from each racer's section: Amsterdam's for Vianen.
@@ -164,9 +169,9 @@ export function installVianen(vfs, files) {
     }
   }
   // raser.ini is saved with the player's data, and the race writes it: the row stays, unused elsewhere.
-  vfs.iniSet('raser.ini', 'MAPS', String(slot), `1,etappe${slot},vn_weg,vn_land,vn_gevel,vn_bouw,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
+  vfs.iniSet('raser.ini', 'MAPS', String(slot), `1,etappe${slot},${prefix}_weg,${prefix}_land,${prefix}_gevel,${prefix}_bouw,scrl_lo,scrl_hi,TRACK ${slot},0,10000,60,60,60,0`);
   const visible = vfs.iniGet('game.ini', 'OPTIONS', 'VISIBLECHUNKS');
-  const pmp = files.get('vianen.pmp');
+  const pmp = files.get(`${key}.pmp`);
   const most = vianenVisibleChunks(new DataView(pmp.buffer, pmp.byteOffset, 4).getInt32(0, true));
   if (!(Number(visible) > 0 && Number(visible) <= most)) {
     vfs.onWrite = null;

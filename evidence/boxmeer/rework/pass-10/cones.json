@@ -1,0 +1,10 @@
+{
+  "cones": 6,
+  "hit": 3,
+  "displacementMetres": 7.1919888029174786,
+  "carPastFormerBaseMetres": 27.49384970216578,
+  "nativeFramePool": {
+    "used": 449,
+    "capacity": 525
+  }
+}

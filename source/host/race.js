@@ -5,6 +5,8 @@ import { Machine, GameExit } from './machine.js';
 import { installWin32, VirtualClock } from './win32.js';
 import { installDirectX } from './directx.js';
 import { installCoreHooks } from './hooks.js';
+import { createBoxmeerBounds } from './boxmeer-bounds.js';
+import { installBoxmeerImpacts } from './boxmeer-impacts.js';
 import { installVianenImpacts } from './vianen-impacts.js';
 import { VianenMounts } from './vianen-market.js';
 
@@ -201,6 +203,8 @@ export class Race {
     m.call(FN.INIT_MAIN, this.winMain);
     m.call(FN.START_GAME);
     this.m.esp = m.layout.STACK_TOP - 0x100;
+    this.boxmeerBounds = createBoxmeerBounds(this);
+    this.boxmeerImpacts = installBoxmeerImpacts(m, this.host.vfs);
     this.vianenImpacts = installVianenImpacts(m, this.host.vfs);
     this.vianenMounts = new VianenMounts(m, this.vianenImpacts);
   }
@@ -221,6 +225,7 @@ export class Race {
       if (!m.u32[DATA.RUNNING >> 2]) return this.finish();
       m.call(FN.HANDLE_GAME);
       this.vianenMounts.update();
+      this.boxmeerBounds?.update(dt);
       m.call(FN.FOG_ZOOM);
       m.call(FN.COUNT_FRAME);
       if (m.call(FN.PUMP) !== 0) return this.finish();

@@ -1,0 +1,13 @@
+{
+  "live": {
+    "state": 0,
+    "hudHidden": false,
+    "skyIds": [
+      12288
+    ],
+    "chunk": 20,
+    "draws": 11,
+    "triangles": 3054
+  },
+  "errors": []
+}

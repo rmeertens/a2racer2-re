@@ -1,0 +1,16 @@
+{
+  "views": 38,
+  "errors": [],
+  "stats": {
+    "trees": 312,
+    "plants": 1859,
+    "architecturalDetails": 3022,
+    "roadMarkings": 1566,
+    "hedgeClumps": 5995,
+    "gardenPlots": 257,
+    "sideWindows": 1180,
+    "fieldClumps": 412,
+    "streetEnds": 8,
+    "landmarkWindows": 128
+  }
+}

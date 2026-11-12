@@ -1,0 +1,4354 @@
+{
+  "probes": 483,
+  "skippedVisibleScenery": 40,
+  "failures": [],
+  "results": [
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.016909210520193,
+      "riseMetres": 0.027662765979766846,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.011166017708444,
+      "riseMetres": 0.1551621675491333,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.084472390323995,
+      "riseMetres": 0.4509391784667969,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.079222984412386,
+      "riseMetres": 0.3654335618019104,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.164504325940374,
+      "riseMetres": 0.23915526866912842,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.036695042641176,
+      "riseMetres": 0.06792106628417968,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.030734453273087,
+      "riseMetres": 0.0630576491355896,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.044646829569036,
+      "riseMetres": 0.3636147499084473,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.08738888079618,
+      "riseMetres": 0.4551538586616516,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.157649595664779,
+      "riseMetres": 0.25195037126541137,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": -1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 10.054214839103363,
+      "riseMetres": 0.129998517036438,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.017246822954196,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.007253544683099,
+      "riseMetres": 0.3135004758834839,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.14630045029775,
+      "riseMetres": 0.26595731973648074,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.07414268770416,
+      "riseMetres": 0.15168206691741942,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.104444078543226,
+      "riseMetres": 0.30506962537765503,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.013841425918805,
+      "riseMetres": 0.16673003435134887,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.093637051376204,
+      "riseMetres": 0.31283864974975584,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.047174051109744,
+      "riseMetres": 0.36895453929901123,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.166330149809825,
+      "riseMetres": 0.09694943428039551,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.019368301887257,
+      "riseMetres": 0.08098515272140502,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.069533110626796,
+      "riseMetres": 0.03263425827026367,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 84,
+      "direction": 1,
+      "offsetMetres": 3.1,
+      "advanceMetres": 10.089858583140826,
+      "riseMetres": 0.3354807496070862,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.089388087368627,
+      "riseMetres": 0.04475523233413696,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.041634673123088,
+      "riseMetres": 0.2053876042366028,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.161983433144243,
+      "riseMetres": 0.18819303512573243,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.072280057989014,
+      "riseMetres": 0.4224660873413086,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.075809904955083,
+      "riseMetres": 0.23051116466522217,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.161125117917717,
+      "riseMetres": 0.07305394411087036,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.108412294586893,
+      "riseMetres": 0.135891854763031,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.003011984638794,
+      "riseMetres": 0.33358298540115355,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.156013914273881,
+      "riseMetres": 0.3135730504989624,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.021385147779348,
+      "riseMetres": 0.17461199760437013,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.018792007370187,
+      "riseMetres": 0.12264761924743653,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.163960263070333,
+      "riseMetres": 0.14580509662628174,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.104231957208825,
+      "riseMetres": 0.2608452558517456,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.165141872136285,
+      "riseMetres": 0.2703315019607544,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.187494630453555,
+      "riseMetres": 0.17558931112289428,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.062451737721437,
+      "riseMetres": 0.2652325749397278,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.046005242754177,
+      "riseMetres": 0.2730537414550781,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 85,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.03012100358869,
+      "riseMetres": 0.19185463190078736,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.145800226734066,
+      "riseMetres": 0.0658241868019104,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.02072620740205,
+      "riseMetres": 0.261921763420105,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.01294125898877,
+      "riseMetres": 0.16028568744659424,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.141544689360035,
+      "riseMetres": 0.40287835597991944,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.052664456399729,
+      "riseMetres": 0.21097397804260254,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.00816769857882,
+      "riseMetres": 0.06720876693725586,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.142797949387733,
+      "riseMetres": 0.10107319355010987,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.157320281059791,
+      "riseMetres": 0.17309896945953368,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.038932085818852,
+      "riseMetres": 0.34996179342269895,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.070070496283872,
+      "riseMetres": 0.27448793649673464,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.089354051811437,
+      "riseMetres": 0.19218541383743287,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.13836046014163,
+      "riseMetres": 0.14727977514266968,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.167998145432586,
+      "riseMetres": 0.14833165407180787,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.013240575333636,
+      "riseMetres": 0.1334893822669983,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.063157993696068,
+      "riseMetres": 0.3305698871612549,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.136087655392226,
+      "riseMetres": 0.33638002872467043,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.126994391900377,
+      "riseMetres": 0.27011297941207885,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 86,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.07405876826766,
+      "riseMetres": 0.3386593222618103,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.172465122335677,
+      "riseMetres": 0.06555452346801757,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.012319491482575,
+      "riseMetres": 0.2492275595664978,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.176037885355058,
+      "riseMetres": 0.1420957326889038,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.000398170503363,
+      "riseMetres": 0.39750651121139524,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.023652402118143,
+      "riseMetres": 0.2061861753463745,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.0161307518982,
+      "riseMetres": 0.06709078550338746,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.123934011592008,
+      "riseMetres": 0.10126398801803589,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.078594320093599,
+      "riseMetres": 0.18172918558120726,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.041716793188007,
+      "riseMetres": 0.35683493614196776,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.041828067633787,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.169576974446835,
+      "riseMetres": 0.15658310651779175,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.110944540118718,
+      "riseMetres": 0.18434334993362428,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.121615964697101,
+      "riseMetres": 0.14594764709472657,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.124055004913716,
+      "riseMetres": 0.18536717891693116,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.12060408320816,
+      "riseMetres": 0.1377468466758728,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.043947655779926,
+      "riseMetres": 0.2925325155258179,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.047637467872423,
+      "riseMetres": 0.3352762937545776,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.146654588024223,
+      "riseMetres": 0.2825163722038269,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.02644927030992,
+      "riseMetres": 0.3235732436180115,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 87,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.114470535543482,
+      "riseMetres": 0.10348595380783081,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.030987134663002,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.071029566484281,
+      "riseMetres": 0.019661533832550048,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.18179516229753,
+      "riseMetres": 0.2754062533378601,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.162652772229459,
+      "riseMetres": 0.121540105342865,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.043751596246487,
+      "riseMetres": 0.3011120676994324,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.131011819101982,
+      "riseMetres": 0.18738194704055786,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.050414895229792,
+      "riseMetres": 0.06751316785812378,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.150060953786177,
+      "riseMetres": 0.10477850437164307,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.12419817312802,
+      "riseMetres": 0.19457836151123048,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.15093636338672,
+      "riseMetres": 0.21633950471878052,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.018248540283734,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.111749454961382,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.143230166784686,
+      "riseMetres": 0.2509897708892822,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.04212976888667,
+      "riseMetres": 0.13005542755126953,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.028498607355798,
+      "riseMetres": 0.144842791557312,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.156529859124408,
+      "riseMetres": 0.19855815172195435,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.151859608095048,
+      "riseMetres": 0.13910932540893556,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.014884236094534,
+      "riseMetres": 0.28942341804504396,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.129777863304778,
+      "riseMetres": 0.32973634004592894,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.02218830861887,
+      "riseMetres": 0.2978639483451843,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.164492526995193,
+      "riseMetres": 0.37006752490997313,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 88,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.109422620846178,
+      "riseMetres": 0.098491632938385,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.065377731954149,
+      "riseMetres": 0.053794801235198975,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.076453648002524,
+      "riseMetres": 0.033572471141815184,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.105477839871124,
+      "riseMetres": 0.24473085403442382,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.062565503035453,
+      "riseMetres": 0.39031760692596434,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.02110658171757,
+      "riseMetres": 0.37820160388946533,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.032473481941382,
+      "riseMetres": 0.17633473873138428,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.091610086354338,
+      "riseMetres": 0.07624439001083375,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.081381623616764,
+      "riseMetres": 0.1522676944732666,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.103828959396555,
+      "riseMetres": 0.23295642137527467,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.022155320350437,
+      "riseMetres": 0.08676429986953735,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 8.218728043680127,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.046975961773924,
+      "riseMetres": 0.19029299020767212,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.098442240969936,
+      "riseMetres": 0.1462379813194275,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.040415989147743,
+      "riseMetres": 0.1559003233909607,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.027697560970193,
+      "riseMetres": 0.14641666412353516,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.103624934276423,
+      "riseMetres": 0.10157842636108398,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.099090159195546,
+      "riseMetres": 0.41177294254302976,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.14629237575894,
+      "riseMetres": 0.3448417067527771,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.050479834256727,
+      "riseMetres": 0.1774474263191223,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.021321174219954,
+      "riseMetres": 0.030248355865478516,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 89,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.1329742879587,
+      "riseMetres": 0.03194822072982788,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.195845171735924,
+      "riseMetres": 0.05050179958343506,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.042421598135883,
+      "riseMetres": 0.22432974576950074,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.0365293378619,
+      "riseMetres": 0.43271756172180176,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.150748792749365,
+      "riseMetres": 0.44853572845458983,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.116473809349696,
+      "riseMetres": 0.18766013383865357,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.000310605414764,
+      "riseMetres": 0.07163963317871094,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.062984153061077,
+      "riseMetres": 0.09346415996551513,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.085435403931116,
+      "riseMetres": 0.4749197006225586,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.056971164428708,
+      "riseMetres": 0.33193018436431887,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.127756001877827,
+      "riseMetres": 0.3184077501296997,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.068148865511564,
+      "riseMetres": 0.159493350982666,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.13215910206281,
+      "riseMetres": 0.18023282289505005,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.106047025072995,
+      "riseMetres": 0.31227564811706543,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.184946937175775,
+      "riseMetres": 0.15969383716583252,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.106173707468814,
+      "riseMetres": 0.35123602151870725,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.051606840374674,
+      "riseMetres": 0.4215266346931458,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.023687892223135,
+      "riseMetres": 0.12911535501480104,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 90,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.196695806417539,
+      "riseMetres": 0.0964887261390686,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.200699380362465,
+      "riseMetres": 0.029986977577209473,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.113849400965558,
+      "riseMetres": 0.22088208198547363,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.145189204467831,
+      "riseMetres": 0.4632976293563843,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.154806627835837,
+      "riseMetres": 0.45257322788238524,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.13763905689051,
+      "riseMetres": 0.2034981966018677,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.094986264706506,
+      "riseMetres": 0.08507201671600342,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.004208591414734,
+      "riseMetres": 0.06686919927597046,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.071774702564724,
+      "riseMetres": 0.3903264045715332,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.131853047412164,
+      "riseMetres": 0.3670598864555359,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.148727656334433,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.037103317339545,
+      "riseMetres": 0.38425796031951903,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.13970754187569,
+      "riseMetres": 0.21764786243438722,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.126585430590689,
+      "riseMetres": 0.0840606927871704,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.007660908921334,
+      "riseMetres": 0.3139321804046631,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.02188761923503,
+      "riseMetres": 0.15401911735534668,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.02425841098178,
+      "riseMetres": 0.25305203199386594,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.005592613397411,
+      "riseMetres": 0.3705053210258484,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.16729338832289,
+      "riseMetres": 0.09333605766296386,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.064746522135355,
+      "riseMetres": 0.06696556806564331,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 91,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.059822234852447,
+      "riseMetres": 0.08594611883163453,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.185470808112385,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.066770748952127,
+      "riseMetres": 0.013433432579040528,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.16880806970276,
+      "riseMetres": 0.28305041790008545,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.050695521474704,
+      "riseMetres": 0.4755062460899353,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.03651235895914,
+      "riseMetres": 0.3594749093055725,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.049717269367124,
+      "riseMetres": 0.17624002695083618,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.004418520386768,
+      "riseMetres": 0.09438005685806275,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.052634658844484,
+      "riseMetres": 0.03558217287063599,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.067470426277733,
+      "riseMetres": 0.37159990072250365,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.037851833057514,
+      "riseMetres": 0.3633729934692383,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.063450163367094,
+      "riseMetres": 0.3633737325668335,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.109502456894429,
+      "riseMetres": 0.23334671258926393,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.125821035515798,
+      "riseMetres": 0.14217625856399535,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.042877723373762,
+      "riseMetres": 0.3201223611831665,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.120481713446667,
+      "riseMetres": 0.18732924461364747,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.035510999758875,
+      "riseMetres": 0.32948254346847533,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.125463767265046,
+      "riseMetres": 0.403263258934021,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.008468846968507,
+      "riseMetres": 0.10815812349319458,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 92,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.011184044587331,
+      "riseMetres": 0.09619636535644531,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.056875507696777,
+      "riseMetres": 0.0435484528541565,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.112323709188905,
+      "riseMetres": 0.17907276153564453,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.047098403849034,
+      "riseMetres": 0.40103925466537477,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.06808133208673,
+      "riseMetres": 0.3682496786117554,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.078970478618896,
+      "riseMetres": 0.17864805459976196,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.11409892363788,
+      "riseMetres": 0.08786827325820923,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.015513146506548,
+      "riseMetres": 0.08697417974472046,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.027294437629516,
+      "riseMetres": 0.2717104196548462,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.12329047110127,
+      "riseMetres": 0.43685513734817505,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.105057704102617,
+      "riseMetres": 0.2838858485221863,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.054767927079094,
+      "riseMetres": 0.26361149549484253,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.141087889674647,
+      "riseMetres": 0.10774414539337158,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.03448297745533,
+      "riseMetres": 0.3042685747146606,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.122225005241955,
+      "riseMetres": 0.15909895896911622,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.07422751288148,
+      "riseMetres": 0.3239120006561279,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.138953574623963,
+      "riseMetres": 0.39003691673278806,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.062643415912683,
+      "riseMetres": 0.12284581661224366,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.011675928267573,
+      "riseMetres": 0.14932504892349244,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 93,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.041440727188252,
+      "riseMetres": 0.12467780113220214,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.093027423934618,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.128788315677184,
+      "riseMetres": 0.017466092109680177,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.177155868110308,
+      "riseMetres": 0.18548157215118408,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.12555813243262,
+      "riseMetres": 0.39765223264694216,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.045234232367878,
+      "riseMetres": 0.37082223892211913,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.038487644318126,
+      "riseMetres": 0.12065305709838867,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.021607343100468,
+      "riseMetres": 0.04353046417236328,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.177435043541212,
+      "riseMetres": 0.05458579063415527,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.04360715560582,
+      "riseMetres": 0.31920082569122316,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.162069333097397,
+      "riseMetres": 0.3579147458076477,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.005562362515677,
+      "riseMetres": 0.059060633182525635,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.095944885802147,
+      "riseMetres": 0.32179434299468995,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.167632308339183,
+      "riseMetres": 0.29333493709564207,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.049331340866654,
+      "riseMetres": 0.11164547204971313,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.029906719616509,
+      "riseMetres": 0.31842195987701416,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.124455889175051,
+      "riseMetres": 0.15234766006469727,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.118910621407133,
+      "riseMetres": 0.3400138974189758,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.120688195824266,
+      "riseMetres": 0.38237154483795166,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.138581442774761,
+      "riseMetres": 0.16589843034744262,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.207701385017817,
+      "riseMetres": 0.1585150957107544,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 94,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.040444220501652,
+      "riseMetres": 0.15938252210617065,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.076060898264128,
+      "riseMetres": 0.015458834171295167,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.020693650753595,
+      "riseMetres": 0.1917628526687622,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.006746287748463,
+      "riseMetres": 0.395739471912384,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.062174135412748,
+      "riseMetres": 0.37932310104370115,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.1641793172992,
+      "riseMetres": 0.13529591560363768,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.105235269958412,
+      "riseMetres": 0.03745424747467041,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.118160074207449,
+      "riseMetres": 0.03072704076766968,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.117333589447748,
+      "riseMetres": 0.4678560972213745,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.055434123587236,
+      "riseMetres": 0.2957345962524414,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.170822940489085,
+      "riseMetres": 0.03214462995529175,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.131908116589653,
+      "riseMetres": 0.3421809315681458,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.065305995095438,
+      "riseMetres": 0.20646846294403076,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.002067559717819,
+      "riseMetres": 0.10817195177078247,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.149780595783893,
+      "riseMetres": 0.0021599411964416506,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.032719044716268,
+      "riseMetres": 0.1403829574584961,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.072966487730989,
+      "riseMetres": 0.4037190914154053,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.128135000233964,
+      "riseMetres": 0.34380855560302737,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.173934782352891,
+      "riseMetres": 0.31167969703674314,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.075563248197685,
+      "riseMetres": 0.1439717173576355,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 95,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.053583905686306,
+      "riseMetres": 0.09879111051559449,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.14947502835217,
+      "riseMetres": 0.03751792907714844,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.105493019477079,
+      "riseMetres": 0.20659778118133545,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.127011903923478,
+      "riseMetres": 0.404718279838562,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.016046175948535,
+      "riseMetres": 0.3787501573562622,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.055666111166342,
+      "riseMetres": 0.161415696144104,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.11756282517397,
+      "riseMetres": 0.004012167453765869,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.105630677539768,
+      "riseMetres": 0.22657071352005004,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.057825464023972,
+      "riseMetres": 0.2771414518356323,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.031832770848448,
+      "riseMetres": 0.26828598976135254,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.389494750955929,
+      "riseMetres": 0.24468172788619996,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.0579784280335,
+      "riseMetres": 0.11868045330047608,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.018880151973176,
+      "riseMetres": 0.24736372232437134,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.11430132103354,
+      "riseMetres": 0.09726650714874267,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.140931609283319,
+      "riseMetres": 0.022455120086669923,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.143301004693324,
+      "riseMetres": 0.1629665732383728,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.151030411597052,
+      "riseMetres": 0.43336485624313353,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.076014735933986,
+      "riseMetres": 0.2913385033607483,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.146697331862322,
+      "riseMetres": 0.03063786029815674,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.055649999306382,
+      "riseMetres": 0.09500411748886109,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 96,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.439377951926156,
+      "riseMetres": 0.2257451295852661,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.083695381235131,
+      "riseMetres": 0.0007162809371948243,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.174716751598737,
+      "riseMetres": 0.11631056070327758,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.009927031035398,
+      "riseMetres": 0.08524748086929321,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.028825787361486,
+      "riseMetres": 0.19052730798721312,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.113621041586686,
+      "riseMetres": 0.384123706817627,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.080428125079514,
+      "riseMetres": 0.13513699769973755,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.171142684950272,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.080181770711397,
+      "riseMetres": 0.07756667137145996,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.00221847279672,
+      "riseMetres": 0.332029914855957,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.16592249902675,
+      "riseMetres": 0.15816638469696045,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 9.297387822267334,
+      "riseMetres": 0.18025084733963012,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.071124116681478,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.087113764125263,
+      "riseMetres": 0.3058825731277466,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.123211728529844,
+      "riseMetres": 0.19992703199386597,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.039025866704328,
+      "riseMetres": 0.06787335872650146,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.174226971593718,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.023514205464961,
+      "riseMetres": 0.15015579462051393,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.073483050866944,
+      "riseMetres": 0.3986372113227844,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.134492357321568,
+      "riseMetres": 0.33362900018692015,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.018352502846206,
+      "riseMetres": 0.24442086219787598,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.104388988730701,
+      "riseMetres": 0.09753941297531128,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 97,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.115779515408978,
+      "riseMetres": 0.061086833477020264,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.052616707265212,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.144348135773344,
+      "riseMetres": 0.023405015468597412,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.015209910932164,
+      "riseMetres": 0.19528247117996217,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.144608674731021,
+      "riseMetres": 0.4552909016609192,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.144254288214547,
+      "riseMetres": 0.3907855272293091,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.121572707396435,
+      "riseMetres": 0.1436581254005432,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.05246103672076,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.172157149479913,
+      "riseMetres": 0.07341983318328857,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.0882056558848,
+      "riseMetres": 0.3976312518119812,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.008373732777684,
+      "riseMetres": 0.08689978122711181,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.19749970201741,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.052691780713715,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.116756806961764,
+      "riseMetres": 0.3409215807914734,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.087263986606125,
+      "riseMetres": 0.28993462324142455,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.090930708195181,
+      "riseMetres": 0.08725863695144653,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.003032582200195,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.176725222582418,
+      "riseMetres": 0.14955226182937623,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.097225664860707,
+      "riseMetres": 0.38526688814163207,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.004129793418821,
+      "riseMetres": 0.38394315242767335,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.059674212821314,
+      "riseMetres": 0.21750961542129515,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.141826009324316,
+      "riseMetres": 0.15701851844787598,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 98,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.097112969101288,
+      "riseMetres": 0.26824774742126467,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.154485570737487,
+      "riseMetres": 0.006468653678894043,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.03886971575684,
+      "riseMetres": 0.019040417671203614,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.037183671534253,
+      "riseMetres": 0.1565551519393921,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.022560287267437,
+      "riseMetres": 0.18436676263809204,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.125952920457795,
+      "riseMetres": 0.11785533428192138,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.149915892198296,
+      "riseMetres": 0.050740396976470946,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.018740758822945,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.110536430602433,
+      "riseMetres": 0.08207989931106567,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.067229445508499,
+      "riseMetres": 0.26936725378036497,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.042313115568176,
+      "riseMetres": 0.36864423751831055,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.087499098178249,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.115505787241975,
+      "riseMetres": 0.39028817415237427,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.054501728037943,
+      "riseMetres": 0.4108789682388306,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.009393959631591,
+      "riseMetres": 0.07593764066696167,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.036383360093847,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.116560823213458,
+      "riseMetres": 0.16230247020721436,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.047749102197479,
+      "riseMetres": 0.14605845212936402,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.003959576457317,
+      "riseMetres": 0.3808241367340088,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.032212972702764,
+      "riseMetres": 0.1796108603477478,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 99,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.009974800207612,
+      "riseMetres": 0.13120380640029908,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.136733165196198,
+      "riseMetres": 0.09200186729431152,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.067226380142657,
+      "riseMetres": 0.20580095052719116,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.058299332880493,
+      "riseMetres": 0.4615698456764221,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.109281592173911,
+      "riseMetres": 0.3815229296684265,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.163798198440226,
+      "riseMetres": 0.18656080961227417,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.100825099501822,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.012267818348082,
+      "riseMetres": 0.07870298624038696,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.097560905064743,
+      "riseMetres": 0.27862528562545774,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.159797206806072,
+      "riseMetres": 0.5854124069213867,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.175529454722419,
+      "riseMetres": 0.012301766872406006,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.127950833913939,
+      "riseMetres": 0.27334133386611936,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.153360561133486,
+      "riseMetres": 0.26305264234542847,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.106597256075485,
+      "riseMetres": 0.07708128690719604,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.010263661398927,
+      "riseMetres": 0.0021083831787109377,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.013937447145668,
+      "riseMetres": 0.1915726661682129,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.091720153601731,
+      "riseMetres": 0.3960614323616028,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.01179687381932,
+      "riseMetres": 0.4409093141555786,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.143583685635846,
+      "riseMetres": 0.1810712456703186,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.171578045177277,
+      "riseMetres": 0.016743385791778566,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 100,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.178030901133031,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.000202683945126,
+      "riseMetres": 0.31178425550460814,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.17932785145613,
+      "riseMetres": 0.17574834823608398,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.131164156056794,
+      "riseMetres": 0.4655818581581116,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.128589441033737,
+      "riseMetres": 0.3808701515197754,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.108076093215965,
+      "riseMetres": 0.19379680156707763,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.080278498060629,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.122666106931828,
+      "riseMetres": 0.0773657202720642,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.098023895858777,
+      "riseMetres": 0.2850282430648804,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.149461523951597,
+      "riseMetres": 0.4136221170425415,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.064398787711847,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.006005746372855,
+      "riseMetres": 0.15263636112213136,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.076609427914391,
+      "riseMetres": 0.2504376292228699,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.013017498908365,
+      "riseMetres": 0.25159034729003904,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.044417559283598,
+      "riseMetres": 0.09992753267288208,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.08004036493639,
+      "riseMetres": 0.029533076286315917,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.102634169244167,
+      "riseMetres": 0.2042496919631958,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.004878025423427,
+      "riseMetres": 0.26064903736114503,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.084812468228293,
+      "riseMetres": 0.42174617052078245,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.081627902267527,
+      "riseMetres": 0.20301237106323242,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.059319209353088,
+      "riseMetres": 0.18211549520492554,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 101,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.116419992946689,
+      "riseMetres": 0.0003334999084472656,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.17789270037292,
+      "riseMetres": 0.024685776233673094,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.054156739121034,
+      "riseMetres": 0.03743611574172974,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.05543833751447,
+      "riseMetres": 0.16025338172912598,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.118274798447443,
+      "riseMetres": 0.5368446707725525,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.15334602481399,
+      "riseMetres": 0.4073958992958069,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.041440190969578,
+      "riseMetres": 0.18052386045455932,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.20054472090985,
+      "riseMetres": 0.002343559265136719,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.176806318102054,
+      "riseMetres": 0.08147670030593872,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.034227670389537,
+      "riseMetres": 0.4101321935653687,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.143147076256414,
+      "riseMetres": 0.40096179246902464,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.061704186999824,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.130374453278856,
+      "riseMetres": 0.07505046129226685,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.130321639050429,
+      "riseMetres": 0.3340630531311035,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.063897026407435,
+      "riseMetres": 0.2765408635139465,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.160112810403128,
+      "riseMetres": 0.07992771863937378,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.09141121532627,
+      "riseMetres": 0.0036938667297363283,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.05764111046971,
+      "riseMetres": 0.1560186505317688,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.033432918444419,
+      "riseMetres": 0.3695340394973755,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.056943647381605,
+      "riseMetres": 0.4436188578605652,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.14149965752404,
+      "riseMetres": 0.20192644596099854,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.189589583947132,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 102,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.190660831608815,
+      "riseMetres": 0.027562987804412842,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.046067110990895,
+      "riseMetres": 0.023434257507324217,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.018036364007756,
+      "riseMetres": 0.0881588339805603,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.096578188373538,
+      "riseMetres": 0.17401999235153198,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.100120004649186,
+      "riseMetres": 0.33722331523895266,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.070714481691471,
+      "riseMetres": 0.40660581588745115,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.180854385212308,
+      "riseMetres": 0.15292586088180543,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.050855769732982,
+      "riseMetres": 0.015345120429992675,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.151902734676394,
+      "riseMetres": 0.09670451879501343,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.05063583687515,
+      "riseMetres": 0.25936481952667234,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.155811465725451,
+      "riseMetres": 0.324015474319458,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.31927452385195,
+      "riseMetres": 0.033596348762512204,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.12561351755389,
+      "riseMetres": 0.02893449068069458,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.15532569418799,
+      "riseMetres": 0.4369649052619934,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.048371356179205,
+      "riseMetres": 0.35965479612350465,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.009105539450015,
+      "riseMetres": 0.08087985515594483,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.156815336688165,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.056100140439634,
+      "riseMetres": 0.14651272296905518,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.098791371332856,
+      "riseMetres": 0.3537692904472351,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.058376890018469,
+      "riseMetres": 0.41845734119415284,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.080014494688132,
+      "riseMetres": 0.18683032989501952,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.043705390668876,
+      "riseMetres": 0.012697267532348632,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 103,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 5.176573942438069,
+      "riseMetres": 0.04808739423751831,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.134924667545388,
+      "riseMetres": 0.16065317392349243,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.171193926638361,
+      "riseMetres": 0.16089035272598268,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.120206831589966,
+      "riseMetres": 0.3882825493812561,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.037913320028512,
+      "riseMetres": 0.39609197378158567,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.159100453953815,
+      "riseMetres": 0.1456685781478882,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.09281699081196,
+      "riseMetres": 0.3028067469596863,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.109223218429877,
+      "riseMetres": 0.11834020614624023,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.05778558759707,
+      "riseMetres": 0.18603003025054932,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.130749055713574,
+      "riseMetres": 0.08317815065383911,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": -1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 10.008853073613581,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.045367569805817,
+      "riseMetres": 0.3256138563156128,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.084596500986587,
+      "riseMetres": 0.3122952103614807,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.023834430511455,
+      "riseMetres": 0.035063982009887695,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.126107230167586,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.183958929817068,
+      "riseMetres": 0.13025068044662474,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.018958920514823,
+      "riseMetres": 0.37378153800964353,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.107485270817241,
+      "riseMetres": 0.3855735778808594,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.062183158548445,
+      "riseMetres": 0.18669114112854004,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.136290082942741,
+      "riseMetres": 0.01256263256072998,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 104,
+      "direction": 1,
+      "offsetMetres": 8.5,
+      "advanceMetres": 6.602941898047455,
+      "riseMetres": 0.1795371651649475,
+      "clear": true,
+      "leftCheckedVerge": true
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.077867982289918,
+      "riseMetres": 0.07967835664749146,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.027750149869174,
+      "riseMetres": 0.08446798324584961,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.109082993792516,
+      "riseMetres": 0.4272022247314453,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.077458091605974,
+      "riseMetres": 0.3279916286468506,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.038187442670537,
+      "riseMetres": 0.1744960904121399,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.136554134632979,
+      "riseMetres": 0.3261284470558167,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.087044097370102,
+      "riseMetres": 0.12858694791793823,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.10737751620236,
+      "riseMetres": 0.2189083456993103,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.11201247001701,
+      "riseMetres": 0.44028249979019163,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -8.5,
+      "advanceMetres": 10.074956053013171,
+      "riseMetres": 0.10063484907150269,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.066922060772175,
+      "riseMetres": 0.35266445875167846,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.024069806260888,
+      "riseMetres": 0.3275632858276367,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.020145859188279,
+      "riseMetres": 0.10173579454421997,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.026202991721368,
+      "riseMetres": 0.06664341688156128,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.163112936783882,
+      "riseMetres": 0.1698385238647461,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.141334443244586,
+      "riseMetres": 0.364440393447876,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.143448104334752,
+      "riseMetres": 0.5041068911552429,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.151404350213879,
+      "riseMetres": 0.10034122467041015,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 105,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.190354578253686,
+      "riseMetres": 0.03848763704299927,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.095058797817355,
+      "riseMetres": 0.4444368600845337,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.082493590404543,
+      "riseMetres": 0.1578774094581604,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.135926664014871,
+      "riseMetres": 0.4202571749687195,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.15541856921332,
+      "riseMetres": 0.30964787006378175,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.186114075400036,
+      "riseMetres": 0.09683270454406738,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.057894181371093,
+      "riseMetres": 0.2388632893562317,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.064716431113668,
+      "riseMetres": 0.18091926574707032,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.070135152260125,
+      "riseMetres": 0.2084413766860962,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.093815937242812,
+      "riseMetres": 0.28034803867340086,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.04111448752738,
+      "riseMetres": 0.43534810543060304,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.070006679997798,
+      "riseMetres": 0.491986083984375,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.172788496407685,
+      "riseMetres": 0.08691627979278564,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.133161092443803,
+      "riseMetres": 0.0996895670890808,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.057398182566976,
+      "riseMetres": 0.2144049048423767,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.097131826146917,
+      "riseMetres": 0.444950008392334,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.03506752147056,
+      "riseMetres": 0.4414785623550415,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.0298233030048,
+      "riseMetres": 0.2034912586212158,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 106,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.173909287084864,
+      "riseMetres": 0.018660080432891846,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.01856247540695,
+      "riseMetres": 0.30823756456375123,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.06359903231442,
+      "riseMetres": 0.24747912883758544,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.128073613700835,
+      "riseMetres": 0.31167893409729003,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.121427659658755,
+      "riseMetres": 0.32007967233657836,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.049224673595424,
+      "riseMetres": 0.13076443672180177,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.014061894721289,
+      "riseMetres": 0.1494896173477173,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.109896200648988,
+      "riseMetres": 0.14814214706420897,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.107187616074418,
+      "riseMetres": 0.15435450077056884,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": -1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.00936389587655,
+      "riseMetres": 0.28171037435531615,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": -5.5,
+      "advanceMetres": 10.104521056186424,
+      "riseMetres": 0.33343844413757323,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": -4.2,
+      "advanceMetres": 10.046096976897598,
+      "riseMetres": 0.26083557605743407,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": -2.8,
+      "advanceMetres": 10.093568121384775,
+      "riseMetres": 0.16608383655548095,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": -1.4,
+      "advanceMetres": 10.13760847709853,
+      "riseMetres": 0.07700806856155396,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 0,
+      "advanceMetres": 10.054099326222701,
+      "riseMetres": 0.1801585555076599,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 1.4,
+      "advanceMetres": 10.147400976039895,
+      "riseMetres": 0.40815956592559816,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 2.8,
+      "advanceMetres": 10.131760214575191,
+      "riseMetres": 0.4137037992477417,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 4.2,
+      "advanceMetres": 10.072822762224153,
+      "riseMetres": 0.20434725284576416,
+      "clear": true,
+      "leftCheckedVerge": false
+    },
+    {
+      "chunk": 107,
+      "direction": 1,
+      "offsetMetres": 5.5,
+      "advanceMetres": 10.1103104800984,
+      "riseMetres": 0,
+      "clear": true,
+      "leftCheckedVerge": false
+    }
+  ]
+}

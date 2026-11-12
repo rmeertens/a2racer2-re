@@ -1,0 +1,13 @@
+{
+  probes: 1,
+  failures: [
+    {
+      chunk: 103,
+      direction: 1,
+      offsetMetres: 8.5,
+      advanceMetres: 0.7471541319382508,
+      riseMetres: 0.3737541913986206,
+      clear: false
+    }
+  ]
+}

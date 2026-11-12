@@ -12,6 +12,7 @@
 import * as THREE from 'three';
 import { modeGrid } from '../settings.js';
 import { VianenGeometry } from './vianen-geometry.js';
+import { BoxmeerWorld } from './boxmeer-world.js';
 
 const DYNAMIC_VERTS = 120000;
 const STATIC_VERTS = 240000;
@@ -68,6 +69,8 @@ uniform mat4 uScreenMap;
 out vec4 vColor;
 out float vFog;
 out vec2 vUV;
+out vec3 vBoxmeerPosition;
+out float vBoxmeerWorld;
 flat out uint vTex;
 flat out uint vLayer;
 const float BYTE = 1.0 / 255.0;
@@ -79,6 +82,7 @@ void main() {
   vLayer = tex & 0xFFFu;
   vec4 p = vec4(uintBitsToFloat(aPos.x), uintBitsToFloat(aPos.y), uintBitsToFloat(aPos.z), 1.0);
   if (screen) {
+    vBoxmeerWorld=0.;vBoxmeerPosition=vec3(0.);
     // D3DTLVERTEX: x and y in pixels of the game's 640x480 mode.
     gl_Position = uScreenMap * p;
   } else {
@@ -87,6 +91,7 @@ void main() {
       texelFetch(uMatrices, ivec2(0, row), 0), texelFetch(uMatrices, ivec2(1, row), 0),
       texelFetch(uMatrices, ivec2(2, row), 0), texelFetch(uMatrices, ivec2(3, row), 0));
     gl_Position = uClipMap * uViewProj * world * p;
+    vBoxmeerWorld=1.;vBoxmeerPosition=(world*p).xyz;
   }
   uint c = aColor.x;
   vColor = vec4(float((c >> 16) & 255u), float((c >> 8) & 255u), float(c & 255u), float(c >> 24)) * BYTE;
@@ -108,9 +113,13 @@ uniform int uMapBlend;
 uniform int uFog;
 uniform int uNearest;
 uniform vec3 uFogColor;
+uniform int uBoxmeer;
+uniform vec3 uBoxmeerCamera;
 in vec4 vColor;
 in float vFog;
 in vec2 vUV;
+in vec3 vBoxmeerPosition;
+in float vBoxmeerWorld;
 flat in uint vTex;
 flat in uint vLayer;
 out vec4 outColor;
@@ -140,6 +149,14 @@ void main() {
     else c = vec4(t.rgb, 1.0);
   }
   if (uFog != 0) c.rgb = mix(uFogColor, c.rgb, vFog);
+  if(uBoxmeer!=0&&vBoxmeerWorld>.5){
+    vec3 n=normalize(cross(dFdx(vBoxmeerPosition),dFdy(vBoxmeerPosition)));
+    float light=.88+.2*max(dot(n,normalize(vec3(1.4,1.9,.9))),0.);
+    c.rgb=mix(vec3(dot(c.rgb,vec3(.2126,.7152,.0722))),c.rgb,.93)*light;
+    float distanceToEye=length(vBoxmeerPosition-uBoxmeerCamera);
+    float haze=1.-exp(-pow(distanceToEye*.000038,2.));
+    c.rgb=mix(c.rgb,vec3(.80,.84,.78),min(haze,.7));
+  }
   outColor = c;
 }`;
 
@@ -288,6 +305,7 @@ class Frame {
     this.hasView = false;
     this.full = false;
     this.sky = null;
+    this.boxmeerTrackSeen = false;
   }
 }
 
@@ -309,6 +327,7 @@ export class D3DRenderer {
     this.three.outputColorSpace = THREE.LinearSRGBColorSpace;
     this.three.toneMapping = THREE.NoToneMapping;
     this.camera = new THREE.Camera();
+    this.boxmeerCamera={value:new THREE.Vector3()};this.boxmeerSkyTextures=new Set();
     this.sceneWorld = new THREE.Scene();
     this.sceneWorld.matrixWorldAutoUpdate = false;
     this.sceneHud = new THREE.Scene();
@@ -383,6 +402,11 @@ export class D3DRenderer {
 
   /** A new race process: nothing carries over except GPU objects that get reused. */
   resetForRace() {
+    this.boxmeerWorld?.dispose();this.boxmeerWorld=null;
+    this.boxmeerSkyTextures=new Set();
+    this.boxmeerCamera={value:new THREE.Vector3()};
+    this.three.shadowMap.enabled=false;this.three.shadowMap.autoUpdate=true;
+    this.three.outputColorSpace=THREE.LinearSRGBColorSpace;this.three.toneMapping=THREE.NoToneMapping;
     this.frameA.reset();
     this.frameB.reset();
     this.capturing.reset();
@@ -419,8 +443,15 @@ export class D3DRenderer {
     this.host = host;
     // Vianen's new, densely detailed atlases need minification filtering. The original tracks
     // retain their draw-state sampling; switching races also restores the array parameters.
-    this.smoothVianen = Number(host.vfs.iniGet('game.ini', 'ETAPPE', 'ETAPPE')) === 10;
-    this.vianenGeometry = this.smoothVianen ? new VianenGeometry(host.vfs.read('etappe10.rmp')) : null;
+    const authoredSlot = Number(host.vfs.iniGet('game.ini', 'ETAPPE', 'ETAPPE'));
+    this.smoothVianen = authoredSlot === 10 || authoredSlot === 11;
+    this.vianenGeometry = this.smoothVianen ? new VianenGeometry(host.vfs.read(`etappe${authoredSlot}.rmp`)) : null;
+    const boxmeerResolution=Number(host.vfs.iniGet('raser.ini','PROGRAM','RESOLUTION'));
+    if(authoredSlot===11 && boxmeerResolution>=2 && !new URLSearchParams(location.search).has('classicboxmeer')){
+      this.three.outputColorSpace=THREE.SRGBColorSpace;this.three.toneMapping=THREE.ACESFilmicToneMapping;this.three.toneMappingExposure=1.05;
+      this.three.shadowMap.enabled=true;this.three.shadowMap.type=THREE.PCFSoftShadowMap;this.three.shadowMap.autoUpdate=false;
+      this.boxmeerWorld=new BoxmeerWorld(name=>host.vfs.read(name.replace(/^boxmeer\.(rmp|pmp)$/,'etappe11.$1')),this.three);
+    }
     for (const a of this.arrays) this.filterTrackArray(a);
     this.u32 = m.u32;
     this.u16 = m.u16;
@@ -594,6 +625,15 @@ export class D3DRenderer {
     }
     a.tex.addLayerUpdate(layer);
     a.tex.needsUpdate = true;
+    const sky=this.boxmeerWorld?.skyTexture?.image;
+    if(sky&&src.width===sky.width&&src.height===sky.height){
+      let difference=0;
+      for(const [x,y]of [[8,8],[sky.width-9,8],[8,sky.height-9],[sky.width-9,sky.height-9],[sky.width>>1,sky.height>>1]]){
+        const p=(y*sky.width+x)*4,q=base+(y*a.w+x)*4;
+        for(let k=0;k<3;k++)difference+=Math.abs(out[q+k]-sky.data[p+k]);
+      }
+      if(difference/15<9)this.boxmeerSkyTextures.add((a.index<<12)|layer);
+    }
   }
 
   // --- state ------------------------------------------------------------------------------
@@ -782,6 +822,7 @@ export class D3DRenderer {
     const f = this.capturing;
     const world = vtype === 3 ? 0 : this.worldIndex(verts);
     this.noteView();
+    if(this.boxmeerWorld && !this.hud && (!f.boxmeerTrackSeen||this.boxmeerSkyTextures.has(this.texInfo(this.host.renderState.texture))))return;
     if (vtype !== 3 && this.blends(verts)) {
       if (this.inPlayerShadow) this.noteShadow(verts, count);
       else this.noteMoving(verts, count);
@@ -839,6 +880,13 @@ export class D3DRenderer {
     if (this.captureLevel === 0) return;
     const world = this.worldIndex(verts);
     this.noteView();
+    if(this.boxmeerWorld && !this.hud){
+      if(complete){this.capturing.boxmeerTrackSeen=true;return;}
+      if(!this.capturing.boxmeerTrackSeen||this.boxmeerSkyTextures.has(this.texInfo(this.host.renderState.texture)))return;
+      // Keep the native start handler, but omit the overhead start-airship artwork.
+      // This flat start area has no other elevated models; particles use TL vertices.
+      if(vtype===2&&this.m.i32[0x6fbab4>>2]<7&&this.f32[(this.worldPtr>>2)+13]>65)return;
+    }
     // Blob shadows: one 4-vertex mesh rewritten per car, drawn with ZBIAS 1 (FUN_00443ef0).
     if (nverts === 4 && this.state[RS.ZBIAS] && this.blends(verts)) this.noteMoving(verts, 4);
     if (this.captureLevel === 1) return;
@@ -1028,6 +1076,7 @@ export class D3DRenderer {
         uClipMap: { value: hud ? this.hudClipMap : this.clipMap },
         uScreenMap: { value: hud ? this.hudScreenMap : this.screenMap },
         uFogColor: { value: new THREE.Color() },
+        uBoxmeer:{value:0},uBoxmeerCamera:this.boxmeerCamera,
         uFog: { value: (key >> 13) & 1 },
         uMapBlend: { value: (key >> 14) & 7 },
         uNearest: { value: (key >> 18) & 1 },
@@ -1609,6 +1658,7 @@ export class D3DRenderer {
       this.tmpV.fromArray(b.view);
     }
     this.tmpP.fromArray(b.proj);
+    if(this.boxmeerWorld){const factor=1+Math.min(1,Math.max(0,this.m.i32[0x6fba64>>2])/150)*.07;this.tmpP.elements[0]/=factor;this.tmpP.elements[5]/=factor;}
     this.sceneVP.multiplyMatrices(this.tmpP, this.tmpV);
   }
 
@@ -1654,6 +1704,7 @@ export class D3DRenderer {
       const fc = b.fogColor;
       mat.uniforms.uFogColor.value.setRGB(((fc >> 16) & 255) / 255, ((fc >> 8) & 255) / 255, (fc & 255) / 255, THREE.LinearSRGBColorSpace);
       mesh.material = mat;
+      if(mat.uniforms.uBoxmeer){mat.uniforms.uBoxmeer.value=this.boxmeerWorld&&!b.hud?1:0;mat.uniforms.uBoxmeerCamera=this.boxmeerCamera;}
       mesh.geometry.setDrawRange(b.start, b.count);
     }
   }
@@ -1715,6 +1766,8 @@ export class D3DRenderer {
     if (this.renderTarget) {
       three.setRenderTarget(this.renderTarget);
       three.clear(true, true, false);
+      if(this.boxmeerWorld)this.boxmeerWorld.render(this.tmpV,this.tmpP,this.clipMap);
+      if(this.boxmeerWorld){const p=this.boxmeerWorld.camera.position;this.boxmeerCamera.value.set(-p.x,p.y,p.z);}
       three.render(this.sceneWorld, this.camera);
       three.setRenderTarget(null);
       three.setViewport(0, 0, this.viewW, this.viewH);
@@ -1727,6 +1780,8 @@ export class D3DRenderer {
       three.setScissorTest(false);
       three.clear(true, true, false);
       three.setViewport(area.x, this.viewH - area.y - area.h, area.w, area.h);
+      if(this.boxmeerWorld)this.boxmeerWorld.render(this.tmpV,this.tmpP,this.clipMap);
+      if(this.boxmeerWorld){const p=this.boxmeerWorld.camera.position;this.boxmeerCamera.value.set(-p.x,p.y,p.z);}
       three.render(this.sceneWorld, this.camera);
     }
     three.setViewport(area.x, this.viewH - area.y - area.h, area.w, area.h);

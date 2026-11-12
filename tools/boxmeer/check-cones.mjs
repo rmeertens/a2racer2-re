@@ -1,0 +1,17 @@
+import assert from'node:assert/strict';import{readFileSync,readdirSync,statSync,writeFileSync}from'node:fs';
+import{Vfs}from'../../source/host/vfs.js';import{Race}from'../../source/host/race.js';import{pinRace}from'../../source/host/race-setup.js';import{GameInput}from'../../source/input/keyboard.js';import{NetRace}from'../../source/net/puppets.js';import{Bot}from'../../source/dev/bot.js';import{installBoxmeer,boxmeerFiles}from'../../source/host/boxmeer.js';import{readObjects,readPositions,routeFrame}from'../../source/dev/track-model.js';
+const read=name=>{let b=readFileSync('public/assets/boxmeer/'+name);return b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength)};
+const objects=readObjects(read('boxmeer.omp')).filter(o=>o.name==='BM_CONE_ANIM');assert.equal(objects.length,6);
+const vfs=new Vfs();for(const name of readdirSync('public/assets/game')){let p='public/assets/game/'+name;if(statSync(p).isFile())vfs.addLazy(name,statSync(p).size,()=>readFileSync(p))}
+pinRace(vfs,{etappe:11,car:0,laps:1});vfs.iniSet('game.ini','OPTIONS','OPPONENTS','0');installBoxmeer(vfs,new Map(boxmeerFiles().map(n=>[n,new Uint8Array(readFileSync('public/assets/boxmeer/'+n))])));
+const meta=JSON.parse(readFileSync('public/game/spel.meta.json')),wasm=new WebAssembly.Module(readFileSync('public/game/spel.wasm')),dt=1/60;
+const host={vfs,render:new Proxy({},{get:()=>()=>{}}),audio:null,screen:{width:640,height:480},tickSeconds:dt,clockStart:1,fixedDate:971434016000,onFlip(){},onMessageBox(c,t){throw new Error(t)},onStdout(){}};
+const race=new Race(meta,host);await race.instantiate(wasm);const input=new GameInput(race.m);host.input=input;race.boot();const tick=()=>{assert(race.tick(dt));input.endTick()};for(let n=0;n<420;n++)tick();
+const net=Object.create(NetRace.prototype);net.race=race;net.scratch=race.m.lowAlloc(128);const bot=new Bot(race,input),player=bot.carState().index;
+const target=objects[0],props=[];for(let i=0;i<512;i++)if(race.m.u32[(net.car(i)+0x6c)>>2]===0x454990 && objects.some(o=>Math.hypot(...net.read(i).p.map((v,k)=>v-o.position[k]))<1))props.push(i);
+assert.equal(props.length,6);const prop=props.find(i=>Math.hypot(...net.read(i).p.map((v,k)=>v-target.position[k]))<1);assert.notEqual(prop,undefined);
+const before=net.read(prop),frame=routeFrame(readPositions(read('boxmeer.pmp')),target.chunk),forward=frame.forward,rows=[...frame.right,0,1,0,...forward];
+const start=target.position.map((v,k)=>v-forward[k]*65+(k===1?5:0));net.beam(player,start,rows,[0,0,0],[0,0,0]);for(const o of[0x34,0x38])race.m.i32[(net.car(player)+o)>>2]=target.chunk;for(let n=0;n<90;n++)tick();net.beam(player,bot.carState().pos,rows,forward.map(v=>v*10),[0,0,0]);let displacement=0,hit=0;
+for(let n=0;n<180;n++){input.dik[0xc8]=0x80;tick();displacement=Math.max(displacement,Math.hypot(...net.read(prop).p.map((v,k)=>v-before.p[k])));hit=Math.max(hit,race.m.i32[(net.car(prop)+0x2c)>>2])}
+const travel=bot.carState().pos.reduce((s,v,k)=>s+(v-target.position[k])*forward[k],0),capacity=race.m.u32[0x73b124>>2],flags=race.m.u32[0x73b130>>2],used=race.m.u8.subarray(flags,flags+capacity).filter(x=>x!==0).length;
+const result={cones:props.length,hit,displacementMetres:displacement/10,carPastFormerBaseMetres:travel/10,nativeFramePool:{used,capacity}};console.log(result);writeFileSync('evidence/boxmeer/rework/pass-10/cones.json',JSON.stringify(result,null,2));assert(hit>0);assert(displacement>5);assert(travel>20);assert(used<capacity);

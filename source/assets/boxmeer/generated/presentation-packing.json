@@ -1,0 +1,10 @@
+{
+  "source": "generated/garden-plants.png",
+  "sha256": "54e6bdc28bb0952160b2abd34bcd82d2c5f3d4dfa728cb48dc3f4e12feccfabd",
+  "outputs": [
+    "bm_plants.tga",
+    "bm_leaves.tga",
+    "facade-windows.json"
+  ],
+  "facadeTrim": "White-frame bounds detected from the generated facade atlas; original images retained."
+}

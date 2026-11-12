@@ -1,0 +1,57 @@
+booted { capacity: 525, used: 449 }
+{
+  name: 'BM_CHAIR_ANIM',
+  bodies: 12,
+  hit: 2,
+  displacementMetres: 1.2788284400768208,
+  minUp: 0.8596251010894775,
+  effects: [ { paperEmitters: 0 } ]
+}
+{
+  name: 'BM_TABLE_ANIM',
+  bodies: 6,
+  hit: 2,
+  displacementMetres: 1.6984731408489488,
+  minUp: -0.006331638433039188,
+  effects: [ { paperEmitters: 0 } ]
+}
+{
+  name: 'BM_BIN_ANIM',
+  bodies: 8,
+  hit: 2,
+  displacementMetres: 43.15977994444108,
+  minUp: -0.965419352054596,
+  effects: [ { paperEmitters: 0 } ]
+}
+{
+  name: 'BM_BOARD_ANIM',
+  bodies: 8,
+  hit: 3,
+  displacementMetres: 1.143582805380443,
+  minUp: -0.23417069017887115,
+  effects: [ { paperEmitters: 0 } ]
+}
+{
+  name: 'BM_CRATE_ANIM',
+  bodies: 8,
+  hit: 2,
+  displacementMetres: 0.7281171139665824,
+  minUp: 0.9705682396888733,
+  effects: [ { paperEmitters: 0 } ]
+}
+{
+  name: 'BM_FLOWERPOT_ANIM',
+  bodies: 8,
+  hit: 2,
+  displacementMetres: 2.027979572680799,
+  minUp: 0.9861685633659363,
+  effects: [ { paperEmitters: 0 } ]
+}
+{
+  name: 'BM_CARTON_ANIM',
+  bodies: 6,
+  hit: 2,
+  displacementMetres: 0.9761198457115933,
+  minUp: 0.9674232602119446,
+  effects: [ { paperEmitters: 1 } ]
+}

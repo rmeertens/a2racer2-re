@@ -1,0 +1,18 @@
+raised embankment faces 0
+connected terrain {'ground': 1259, 'banks': 517, 'water': 142}
+{
+  "name": "Boxmeer",
+  "slot": 11,
+  "chunks": 334,
+  "start": 10,
+  "lengthMetres": 4269,
+  "planes": 9648,
+  "minimumRadiusMetres": 24.3,
+  "buildings": 617,
+  "backdropBuildings": 180,
+  "terrain": {
+    "ground": 1259,
+    "banks": 517,
+    "water": 142
+  }
+}

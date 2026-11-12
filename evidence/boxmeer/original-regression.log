@@ -1,0 +1,20 @@
+
+> a2racer4-port@1.1.7 test:headless
+> node tools/run-headless.mjs --ticks 300
+
+viewport {"x":0,"y":0,"width":640,"height":480,"clipX":-1,"clipY":0.75,"clipW":2,"clipH":1.5,"minZ":0,"maxZ":1}
+boot ms 1027 heap 22.1 MB {"draws":0,"indexed":73,"verts":995,"tris":727,"states":91,"flips":11,"textures":20,"clears":1,"blits":10}
+tick 0 ms/tick 16.96 {"draws":3,"indexed":269,"verts":35296,"tris":7669,"states":224,"flips":1,"textures":1,"clears":1,"blits":0}
+tick 30 ms/tick 4.36 {"draws":1159,"indexed":8503,"verts":1106620,"tris":246739,"states":7567,"flips":31,"textures":1,"clears":31,"blits":0}
+tick 60 ms/tick 3.52 {"draws":1834,"indexed":16753,"verts":2176656,"tris":486317,"states":14977,"flips":61,"textures":1,"clears":61,"blits":0}
+tick 90 ms/tick 3.04 {"draws":1940,"indexed":25003,"verts":3244052,"tris":725713,"states":22363,"flips":91,"textures":1,"clears":91,"blits":0}
+tick 120 ms/tick 2.78 {"draws":2030,"indexed":33255,"verts":4311872,"tris":965449,"states":29743,"flips":121,"textures":1,"clears":121,"blits":0}
+tick 150 ms/tick 2.56 {"draws":2120,"indexed":41535,"verts":5380984,"tris":1207175,"states":37123,"flips":151,"textures":1,"clears":151,"blits":0}
+tick 180 ms/tick 2.39 {"draws":2210,"indexed":49815,"verts":6449720,"tris":1448601,"states":44503,"flips":181,"textures":1,"clears":181,"blits":0}
+tick 210 ms/tick 2.23 {"draws":2300,"indexed":58095,"verts":7518412,"tris":1689637,"states":51883,"flips":211,"textures":1,"clears":211,"blits":0}
+tick 240 ms/tick 2.11 {"draws":2390,"indexed":66317,"verts":8586264,"tris":1929897,"states":59089,"flips":241,"textures":1,"clears":241,"blits":0}
+tick 270 ms/tick 2.03 {"draws":2480,"indexed":74537,"verts":9653940,"tris":2169705,"states":66289,"flips":271,"textures":1,"clears":271,"blits":0}
+ran 300 ticks, avg ms 1.99 {"draws":2567,"indexed":82451,"verts":10687814,"tris":2404205,"states":73153,"flips":300,"textures":1,"clears":300,"blits":0}
+textures {"128x128":2,"64x64":3,"256x256":11,"512x512":4,"256x256k":1}
+states {"4:1":1,"41:1":1,"7:1":1,"21:1":1,"28:0":1,"34:16777215":1,"21:2":1,"17:2":621,"18:2":621,"27:1":2405,"19:5":6300,"20:6":6003,"1:tex":20756,"27:0":2404,"47:1":1500,"47:0":1500,"14:0":12374,"19:2":8778,"20:4":8778,"14:1":300,"19:6":300,"20:5":300,"20:2":297}
+prims {"dip4/2":82524,"dp6/2":900,"dp5/2":1667}

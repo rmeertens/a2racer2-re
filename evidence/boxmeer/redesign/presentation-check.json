@@ -1,0 +1,99 @@
+[
+  {
+    "name": "Boxmeer",
+    "live": {
+      "boundsActive": true,
+      "stats": {
+        "trees": 304,
+        "plants": 1857,
+        "architecturalDetails": 3039,
+        "roadMarkings": 1566,
+        "hedgeClumps": 5991,
+        "gardenPlots": 257,
+        "sideWindows": 1180,
+        "fieldClumps": 412,
+        "streetEnds": 8,
+        "landmarkWindows": 128,
+        "drawCalls": 30,
+        "triangles": 1436646
+      },
+      "pools": 4,
+      "nativeHudMeshes": 1,
+      "customHud": false,
+      "theme": false,
+      "nativeSpeed": 98,
+      "skyTextures": 1
+    },
+    "errors": [],
+    "finished": {
+      "finished": true,
+      "nativeHudMeshes": 1
+    },
+    "reset": {
+      "world": null,
+      "shadow": false,
+      "toneMapping": 0,
+      "colorSpace": "srgb-linear",
+      "root": false,
+      "theme": false
+    }
+  },
+  {
+    "name": "Vianen",
+    "live": {
+      "bounds": false,
+      "modern": false,
+      "hud": false,
+      "shadow": false,
+      "toneMapping": 0,
+      "colorSpace": "srgb-linear",
+      "indexed": false,
+      "theme": false
+    },
+    "errors": []
+  },
+  {
+    "name": "Amsterdam",
+    "live": {
+      "bounds": false,
+      "modern": false,
+      "hud": false,
+      "shadow": false,
+      "toneMapping": 0,
+      "colorSpace": "srgb-linear",
+      "indexed": false,
+      "theme": false
+    },
+    "errors": []
+  },
+  {
+    "name": "Amsterdam 8-bit",
+    "live": {
+      "bounds": false,
+      "modern": false,
+      "hud": false,
+      "shadow": false,
+      "toneMapping": 0,
+      "colorSpace": "srgb-linear",
+      "indexed": true,
+      "theme": false
+    },
+    "errors": []
+  },
+  {
+    "name": "Boxmeer viewer",
+    "stats": {
+      "trees": 304,
+      "plants": 1857,
+      "architecturalDetails": 3039,
+      "roadMarkings": 1566,
+      "hedgeClumps": 5991,
+      "gardenPlots": 257,
+      "sideWindows": 1180,
+      "fieldClumps": 412,
+      "streetEnds": 8,
+      "landmarkWindows": 128
+    },
+    "errors": []
+  }
+]

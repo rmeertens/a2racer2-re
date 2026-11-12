@@ -1,0 +1,18 @@
+{
+  "sourceAtlases": [
+    "bm_land.tga",
+    "bm_bouw.tga"
+  ],
+  "flowerSource": "generated/garden-plants.png",
+  "lettering": "Code-authored functional shop lettering",
+  "photographs": false,
+  "nativeObjects": {
+    "chair": 12,
+    "table": 6,
+    "bin": 8,
+    "board": 8,
+    "crate": 8,
+    "flowerpot": 8,
+    "carton": 6
+  }
+}

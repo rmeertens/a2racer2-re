@@ -1,0 +1,335 @@
+{
+  "finished": true,
+  "requiredMissing": [],
+  "finishSeconds": 260.1166666666667,
+  "peakKmh": 111.0692024230957,
+  "averageKmh": 57.74708403665417,
+  "slowSeconds": 9.4,
+  "recoveryAttempts": 3,
+  "snapshots": [
+    {
+      "tick": 0,
+      "chunk": 6,
+      "speed": 0,
+      "finished": 0
+    },
+    {
+      "tick": 300,
+      "chunk": 6,
+      "speed": 1.6833122968673706,
+      "finished": 0
+    },
+    {
+      "tick": 600,
+      "chunk": 11,
+      "speed": 19.94774627685547,
+      "finished": 0
+    },
+    {
+      "tick": 900,
+      "chunk": 19,
+      "speed": 17.963741302490234,
+      "finished": 0
+    },
+    {
+      "tick": 1200,
+      "chunk": 25,
+      "speed": 17.029462814331055,
+      "finished": 0
+    },
+    {
+      "tick": 1500,
+      "chunk": 31,
+      "speed": 17.808555603027344,
+      "finished": 0
+    },
+    {
+      "tick": 1800,
+      "chunk": 38,
+      "speed": 17.327518463134766,
+      "finished": 0
+    },
+    {
+      "tick": 2100,
+      "chunk": 45,
+      "speed": 17.26950454711914,
+      "finished": 0
+    },
+    {
+      "tick": 2400,
+      "chunk": 52,
+      "speed": 17.51773452758789,
+      "finished": 0
+    },
+    {
+      "tick": 2700,
+      "chunk": 59,
+      "speed": 17.582027435302734,
+      "finished": 0
+    },
+    {
+      "tick": 3000,
+      "chunk": 65,
+      "speed": 17.471967697143555,
+      "finished": 0
+    },
+    {
+      "tick": 3300,
+      "chunk": 72,
+      "speed": 17.3662109375,
+      "finished": 0
+    },
+    {
+      "tick": 3600,
+      "chunk": 77,
+      "speed": 14.336990356445312,
+      "finished": 0
+    },
+    {
+      "tick": 3900,
+      "chunk": 84,
+      "speed": 14.45883846282959,
+      "finished": 0
+    },
+    {
+      "tick": 4200,
+      "chunk": 88,
+      "speed": 9.863399505615234,
+      "finished": 0
+    },
+    {
+      "tick": 4500,
+      "chunk": 92,
+      "speed": 9.330621719360352,
+      "finished": 0
+    },
+    {
+      "tick": 4800,
+      "chunk": 96,
+      "speed": 9.93070125579834,
+      "finished": 0
+    },
+    {
+      "tick": 5100,
+      "chunk": 101,
+      "speed": 17.63720703125,
+      "finished": 0
+    },
+    {
+      "tick": 5400,
+      "chunk": 108,
+      "speed": 19.697736740112305,
+      "finished": 0
+    },
+    {
+      "tick": 5700,
+      "chunk": 117,
+      "speed": 24.990232467651367,
+      "finished": 0
+    },
+    {
+      "tick": 6000,
+      "chunk": 127,
+      "speed": 26.566383361816406,
+      "finished": 0
+    },
+    {
+      "tick": 6300,
+      "chunk": 138,
+      "speed": 17.2015323638916,
+      "finished": 0
+    },
+    {
+      "tick": 6600,
+      "chunk": 139,
+      "speed": -0.04124952852725983,
+      "finished": 0
+    },
+    {
+      "tick": 6900,
+      "chunk": 140,
+      "speed": 0.00037110369885340333,
+      "finished": 0
+    },
+    {
+      "tick": 7200,
+      "chunk": 140,
+      "speed": 11.29653549194336,
+      "finished": 0
+    },
+    {
+      "tick": 7500,
+      "chunk": 146,
+      "speed": 16.709434509277344,
+      "finished": 0
+    },
+    {
+      "tick": 7800,
+      "chunk": 153,
+      "speed": 18.04602813720703,
+      "finished": 0
+    },
+    {
+      "tick": 8100,
+      "chunk": 158,
+      "speed": 9.178680419921875,
+      "finished": 0
+    },
+    {
+      "tick": 8400,
+      "chunk": 162,
+      "speed": 11.678488731384277,
+      "finished": 0
+    },
+    {
+      "tick": 8700,
+      "chunk": 168,
+      "speed": 16.69979476928711,
+      "finished": 0
+    },
+    {
+      "tick": 9000,
+      "chunk": 175,
+      "speed": 18.09537124633789,
+      "finished": 0
+    },
+    {
+      "tick": 9300,
+      "chunk": 182,
+      "speed": 18.010461807250977,
+      "finished": 0
+    },
+    {
+      "tick": 9600,
+      "chunk": 189,
+      "speed": 17.787891387939453,
+      "finished": 0
+    },
+    {
+      "tick": 9900,
+      "chunk": 196,
+      "speed": 17.91827964782715,
+      "finished": 0
+    },
+    {
+      "tick": 10200,
+      "chunk": 203,
+      "speed": 18.13100814819336,
+      "finished": 0
+    },
+    {
+      "tick": 10500,
+      "chunk": 210,
+      "speed": 18.66910743713379,
+      "finished": 0
+    },
+    {
+      "tick": 10800,
+      "chunk": 217,
+      "speed": 18.619253158569336,
+      "finished": 0
+    },
+    {
+      "tick": 11100,
+      "chunk": 224,
+      "speed": 17.841798782348633,
+      "finished": 0
+    },
+    {
+      "tick": 11400,
+      "chunk": 231,
+      "speed": 18.28099822998047,
+      "finished": 0
+    },
+    {
+      "tick": 11700,
+      "chunk": 238,
+      "speed": 18.051902770996094,
+      "finished": 0
+    },
+    {
+      "tick": 12000,
+      "chunk": 244,
+      "speed": 13.241429328918457,
+      "finished": 0
+    },
+    {
+      "tick": 12300,
+      "chunk": 250,
+      "speed": 13.614938735961914,
+      "finished": 0
+    },
+    {
+      "tick": 12600,
+      "chunk": 255,
+      "speed": 14.685712814331055,
+      "finished": 0
+    },
+    {
+      "tick": 12900,
+      "chunk": 260,
+      "speed": 10.562531471252441,
+      "finished": 0
+    },
+    {
+      "tick": 13200,
+      "chunk": 265,
+      "speed": 15.21936321258545,
+      "finished": 0
+    },
+    {
+      "tick": 13500,
+      "chunk": 272,
+      "speed": 18.052980422973633,
+      "finished": 0
+    },
+    {
+      "tick": 13800,
+      "chunk": 279,
+      "speed": 18.381561279296875,
+      "finished": 0
+    },
+    {
+      "tick": 14100,
+      "chunk": 286,
+      "speed": 17.909931182861328,
+      "finished": 0
+    },
+    {
+      "tick": 14400,
+      "chunk": 293,
+      "speed": 18.173852920532227,
+      "finished": 0
+    },
+    {
+      "tick": 14700,
+      "chunk": 300,
+      "speed": 18.232362747192383,
+      "finished": 0
+    },
+    {
+      "tick": 15000,
+      "chunk": 306,
+      "speed": 18.57781982421875,
+      "finished": 0
+    },
+    {
+      "tick": 15300,
+      "chunk": 3,
+      "speed": 17.95034408569336,
+      "finished": 0
+    },
+    {
+      "tick": 15600,
+      "chunk": 10,
+      "speed": 17.121349334716797,
+      "finished": 0
+    },
+    {
+      "tick": 15900,
+      "chunk": 11,
+      "speed": -0.6843913197517395,
+      "finished": 1
+    }
+  ]
+}

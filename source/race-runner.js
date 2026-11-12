@@ -186,7 +186,7 @@ export class RaceRunner {
     this.showBar(0);
     await this.loadCode();
     // Vianen, etappe 10, places Amsterdam's objects: it reads what a race there reads.
-    const lists = etappe === VIANEN.slot ? VIANEN.like : etappe;
+    const lists = etappe === VIANEN.slot || etappe === 11 ? VIANEN.like : etappe;
     await app.files.prepareRace(lists, car, (a, b) => this.showBar((a / b) * 90));
     // A network race also draws the other humans' cars.
     for (const other of this.mp ? this.mp.cars : []) if (other !== car) await app.files.prepareRace(lists, other);

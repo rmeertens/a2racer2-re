@@ -1,0 +1,112 @@
+[
+  {
+    "pass": 1,
+    "name": "Driving space and route flow",
+    "changes": [
+      "Widened the racing surface from 10 to 13 metres.",
+      "Completed corner smoothing to a minimum radius of about 45 metres.",
+      "Moved the driving waypoints out to suit the wider road.",
+      "Increased clearance between the racing line and street buildings.",
+      "Changed Boxmeer's default race from two laps to one."
+    ]
+  },
+  {
+    "pass": 2,
+    "name": "Road edges and surface continuity",
+    "changes": [
+      "Lowered curbs to 5 cm and lengthened their bevels.",
+      "Widened and cut open the De Meidoorn entrance apron.",
+      "Aligned ground texture coordinates across terrain triangles.",
+      "Inset road texture sampling to reduce atlas-edge bleed.",
+      "Moved rural hedges back to provide a grass recovery margin."
+    ]
+  },
+  {
+    "pass": 3,
+    "name": "Streets and housing",
+    "changes": [
+      "Separated shopping streets from residential facade types.",
+      "Varied terrace frontage widths and introduced deliberate gaps.",
+      "Added detached-house setbacks, gardens and drives.",
+      "Added lower-pitched hipped roofs and terracotta roof variations.",
+      "Added window bays to exposed residential end walls."
+    ]
+  },
+  {
+    "pass": 4,
+    "name": "Maasheggen landscape",
+    "changes": [
+      "Replaced the old tree cutouts with original AI-generated summer foliage.",
+      "Rebuilt roadside hedges as continuous curved volumes.",
+      "Added more distant tree clumps to give the landscape depth.",
+      "Introduced coherent field-sized colour variation.",
+      "Replaced rural paved shoulders with grassy verges."
+    ]
+  },
+  {
+    "pass": 5,
+    "name": "Recognizable landmarks",
+    "changes": [
+      "Added belfry clocks, stringcourses and buttresses to the basilica.",
+      "Reworked the castle roofs, seated its roof cupola correctly, and added entrance pillars and a forecourt.",
+      "Gave De Weijer a park setting with a pond and trees.",
+      "Rebuilt Rochuskapel as a six-sided chapel with a cross.",
+      "Added a sheltered monastery entrance and paved forecourt."
+    ]
+  },
+  {
+    "pass": 6,
+    "name": "Floralaan and De Meidoorn",
+    "changes": [
+      "Refined the low-house wall, roof and solar-panel proportions.",
+      "Replaced heavy carport beams and brick posts with slender steel structures.",
+      "Painted parking bays into the driveway material.",
+      "Mounted readable street-name plates with separate front and rear faces.",
+      "Connected a De Meidoorn arm back to Floralaan as an optional drive-through route."
+    ]
+  },
+  {
+    "pass": 7,
+    "name": "Street life and interaction",
+    "changes": [
+      "Replaced flat lantern sprites with solid street lamps.",
+      "Added complete benches at public-space locations.",
+      "Added planted tubs around public forecourts.",
+      "Built a sheltered bus stop on Floralaan.",
+      "Added six movable cones using the native collision system."
+    ]
+  },
+  {
+    "pass": 8,
+    "name": "Rendering and materials",
+    "changes": [
+      "Subdivided road panels to remove the large blank near-camera texture patches.",
+      "Added transparent gutters around foliage cells to prevent edge streaks.",
+      "Adjusted brick and roof material repetition to a more believable scale.",
+      "Added cornice and gutter trim to selected building fronts.",
+      "Replaced the yellow dawn sky with an original AI-generated daylight sky."
+    ]
+  },
+  {
+    "pass": 9,
+    "name": "Racing feedback and choices",
+    "changes": [
+      "Placed warning chevrons ahead of the sharper bends.",
+      "Added Floralaan, Maasheggen and Centrum sector gates.",
+      "Varied turbo, repair and points pickups across the two driving lines.",
+      "Added a visible start/finish gate and non-colliding chequered paint.",
+      "Added low recovery rails outside selected bends."
+    ]
+  },
+  {
+    "pass": 10,
+    "name": "Presentation and final driving feel",
+    "changes": [
+      "Replaced atlas-crop menu pictures with actual rendered views of the map.",
+      "Replaced the loading image with an actual rendered Boxmeer view.",
+      "Added the side-street connection, clearer labels and sector shortcuts to the viewer map.",
+      "Made the direct preview a responsive, fully upgraded Kat car; stock preview remains available.",
+      "Added a gentle elevated dike with connected grass embankments."
+    ]
+  }
+]
